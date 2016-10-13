@@ -1,0 +1,213 @@
+{
+    "dataRoles": [{
+            "name": "Fields",
+            "kind": "Grouping",
+            "displayName": "Fields"
+        },
+        {
+            "name": "Values",
+            "kind": "Measure",
+            "displayName": "Values"
+        }
+    ],
+    "dataViewMappings": [{
+        "conditions": [{
+            "Values": { "min": 0, "max": 1 }
+        }],
+        "table": {
+            "rows": {
+                "select": 
+                [
+                    {"for": { "in": "Fields" } },
+                    {"for": { "in": "Values" } }
+                ], "dataReductionAlgorithm": { "bottom": { "count": 4000 } }
+            }
+        }
+    }],
+    "objects": {
+        "general": {
+            "displayName": "General",
+            "properties": {
+                "selection": {
+                    "displayName": "Selection",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "filterValues": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "expanded": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "hidden": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                "formatString": {
+                    "type": {
+                        "formatting": {
+                            "labelDisplayUnits": false
+                        }
+                    }
+                },
+                "selfFilterEnabled": {
+                    "type": {
+                        "operations": {
+                            "searchEnabled": true
+                        }
+                    }
+                },
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                }
+            }
+        },
+        "selection": {
+            "displayName": "Selection",
+            "properties": {
+                "selectAll": {
+                    "displayName": "Select All",
+                    "description": "Show the 'Select All' options",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "singleSelect": {
+                    "displayName": "Single Select",
+                    "description": "Set single item select",
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "header": {
+            "displayName": "Header",
+            "properties": {
+                "show": {
+                    "displayName": "Show",
+                    "description": "Show header",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "title": {
+                    "displayName": "Title",
+                    "description": "Custom hierarchy title",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "fontColor": {
+                    "displayName": "Font color",
+                    "description": "Font color of the title",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "background": {
+                    "displayName": "Background",
+                    "description": "Backgroung color of the title",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "textSize": {
+                    "displayName": "Text Size",
+                    "description": "Text size of the title",
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                }
+            }
+        },
+        "items": {
+            "displayName": "Items",
+            "properties": {
+                "emptyLeafs": {
+                    "displayName": "Empty leafs",
+                    "description": "Show empty leafs as <blank>",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
+                    "displayName": "Font color",
+                    "description": "Font color of the cells",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "background": {
+                    "displayName": "Background",
+                    "description": "Background color of the cells",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "selectedColor": {
+                    "displayName": "Selected",
+                    "description": "Color of the cells when is selected",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "hoverColor": {
+                    "displayName": "Hover",
+                    "description": "Color of the cells when the mouse if hovered over",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "textSize": {
+                    "displayName": "Text Size",
+                    "description": "Text size of the item text",
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "supportsHighlight": false,
+    "suppressDefaultTitle": true,
+    "sorting": {
+        "default": {}
+    }
+}

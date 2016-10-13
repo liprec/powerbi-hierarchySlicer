@@ -1,0 +1,11 @@
+{
+     "target": {
+        "table": "table",
+        "column": "column"
+     },
+     "logicalOperator": "Is",
+     "conditions": [{
+        "value": "value",
+        "operator": "operator"
+     }]
+}

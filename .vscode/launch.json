@@ -1,0 +1,20 @@
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "Attach with sourcemaps",
+            "type": "edge",
+            "request": "attach",
+            "url": "https://app.powerbi.com/groups/5e8b7ab3-1b9a-4eeb-8229-0867e67b8bf9/reports/8d0f0b52-159d-483a-a0ea-b21a4c717fe3/ReportSection", 
+            "port": 9222,
+            "sourceMaps": true
+        },
+        {
+            "name": "Attach to url with files served from ./out",
+            "type": "edge",
+            "request": "attach",
+            "port": 9222,
+            "webRoot": "${workspaceRoot}/.tmp/drop"
+        }
+    ]
+}

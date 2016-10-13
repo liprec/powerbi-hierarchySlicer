@@ -46,6 +46,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# npm packages
+node_modules
+
 # Power BI custom visuals
 .tmp
 
