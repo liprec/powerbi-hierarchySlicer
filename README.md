@@ -1,12 +1,5 @@
-# PowerBI-custom-visuals README
+# Power BI HierachySlicer 
 
-Repository of my Power BI custom visuals
+[![Build Status](https://travis-ci.org/liprec/powerbi-hierarchySlicer.svg?branch=master)](https://travis-ci.org/liprec/powerbi-hierarchySlicer)
 
-## Visuals
-
-- TimeAxis: Single play axis for animated Power BI reports ()
-
-## Known issues
-
-- Box and Whisker chart is not converted yet to the new Power BI API
-- HierachySlicer is not converted yet to the new Power BI API
+Home for my Power BI Custom Visual: HierarchySlicer
