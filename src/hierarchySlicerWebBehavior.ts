@@ -1,21 +1,21 @@
 /*
- * 
+ *
  * Copyright (c) 2016 Jan Pieter Posthuma
- * 
+ *
  * All rights reserved.
- * 
+ *
  * MIT License.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,7 +39,34 @@ module powerbi.extensibility.visual {
     // powerbi.data
     import ISemanticFilter = powerbi.data.ISemanticFilter;
 
-
+    let hierarchySlicerProperties = {
+        selection: {
+            selectAll: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "selectAll" },
+            singleselect: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "singleSelect" },
+        },
+        header: {
+            show: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "show" },
+            title: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "title" },
+            fontColor: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "fontColor" },
+            background: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "background" },
+            textSize: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "textSize" },
+        },
+        items: {
+            emptyLeafs: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "emptyLeafs" },
+            fontColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "fontColor" },
+            background: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "background" },
+            selectedColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "selectedColor" },
+            hoverColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "hoverColor" },
+            textSize: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "textSize" },
+        },
+        selectedPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selected" },
+        expandedValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "expanded" },
+        selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
+        filterPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filter" },
+        filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" },
+        defaultValue: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "defaultValue" },
+        selfFilterEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selfFilterEnabled" },
+    };
     export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         private hostServices: IVisualHost;
         private expanders: Selection<any>;
@@ -88,7 +115,7 @@ module powerbi.extensibility.visual {
                 this.persistExpand(false);
             });
 
-            expanders.on("mouseover", (d: HierarchySlicerDataPoint, i:number) => {
+            expanders.on("mouseover", (d: HierarchySlicerDataPoint, i: number) => {
                 if (d.selectable) {
                     d.mouseOver = true;
                     d.mouseOut = false;
@@ -140,13 +167,14 @@ module powerbi.extensibility.visual {
             });
 
             slicers.on("click", (d: HierarchySlicerDataPoint, index) => {
+                debugger;
                 if (!d.selectable) {
                     return;
                 }
                 this.addSpinner();
                 let settings: HierarchySlicerSettings = this.settings;
                 (d3.event as MouseEvent).preventDefault();
-                if (!settings.general.singleselect) { // multi select value
+                if (!settings.selection.singleSelect) { // multi select value
                     let selected = d.selected;
                     d.selected = !selected; // Toggle selection
                     if (!selected || !d.isLeaf) {
@@ -175,7 +203,7 @@ module powerbi.extensibility.visual {
                     let selected = d.selected;
                     this.dataPoints.map((d) => d.selected = false); // Clear selection
                     if (!selected) {
-                        let selectDataPoints = [d]; //Self
+                        let selectDataPoints = [d]; // Self
                         selectDataPoints = selectDataPoints.concat(this.dataPoints.filter((dp) => dp.parentId.indexOf(d.ownId) >= 0)); // Children
                         selectDataPoints = selectDataPoints.concat(this.getParentDataPoints(this.dataPoints, d.parentId)); // Parents
                         if (selectDataPoints) {
@@ -197,7 +225,7 @@ module powerbi.extensibility.visual {
 
         private addSpinner() {
             this.slicerBodySpinner
-                .style({"visibility":"visible"})
+                .style({ "visibility": "visible" });
             let spinner = this.slicerBodySpinner
                 .append("div")
                 .classed("xlarge", true)
@@ -212,7 +240,7 @@ module powerbi.extensibility.visual {
                 })
                 .attr("ng-if", "viewModel.showProgressBar")
                 .append("div")
-                .classed("spinner", true)           
+                .classed("spinner", true);
             for (let i = 0; i < 5; i++) {
                 spinner.append("div")
                     .classed("circle", true);
@@ -231,7 +259,7 @@ module powerbi.extensibility.visual {
                             return this.settings.slicerText.fontColor;
                     }
                     else
-                        return this.settings.slicerText.fontColor; //fallback
+                        return this.settings.slicerText.fontColor; // fallback
                 }
             });
             this.expanders.style({
@@ -245,7 +273,7 @@ module powerbi.extensibility.visual {
                             return this.settings.slicerText.fontColor;
                     }
                     else
-                        return this.settings.slicerText.fontColor; //fallback
+                        return this.settings.slicerText.fontColor; // fallback
                 }
             });
         }
@@ -290,54 +318,54 @@ module powerbi.extensibility.visual {
         }
 
         public applyFilter() {
-           /* if (this.dataPoints.length === 0) { // Called without data
-                return;
-            }
-            let selectNrValues: number = 0
-            let filter: ISemanticFilter;
-            let rootLevels = this.dataPoints.filter((d) => d.level === 0 && d.selected);
-            
-            if (!rootLevels || (rootLevels.length === 0)) {
-                this.selectionHandler.handleClearSelection();
-                this.persistFilter(null);
-            }
-            else {
-                selectNrValues++;
-                let children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
-                let rootFilters = [];
-                if (children) {
-                    // rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
-                    selectNrValues += children.memberCount;
-                } else {
-                    rootFilters.push(rootLevels[0].id);
-                }
-                
-                if (rootLevels.length > 1) {
-                    for (let i = 1; i < rootLevels.length; i++) {
-                        selectNrValues++;
-                        children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
-                        if (children) {
-                            // rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
-                            selectNrValues += children.memberCount;
-                        } else {
-                            rootFilters.push(rootLevels[i].id);
-                        }
-                    }
-                }
-                
-                // let rootFilter: SQExpr = rootFilters[0];
-                for (let i = 1; i < rootFilters.length; i++) {
-                    // rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
-                }
+            /* if (this.dataPoints.length === 0) { // Called without data
+                 return;
+             }
+             let selectNrValues: number = 0
+             let filter: ISemanticFilter;
+             let rootLevels = this.dataPoints.filter((d) => d.level === 0 && d.selected);
 
-                if (selectNrValues > 120) {
+             if (!rootLevels || (rootLevels.length === 0)) {
+                 this.selectionHandler.handleClearSelection();
+                 this.persistFilter(null);
+             }
+             else {
+                 selectNrValues++;
+                 let children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
+                 let rootFilters = [];
+                 if (children) {
+                     // rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
+                     selectNrValues += children.memberCount;
+                 } else {
+                     rootFilters.push(rootLevels[0].id);
+                 }
 
-                }
-                
-                // filter = SemanticFilter_ext.fromSQExpr(rootFilter);
-                // let f = SemanticFilter_ext.fromSQExpr(rootFilter);
-                // this.persistFilter(f);
-            }*/
+                 if (rootLevels.length > 1) {
+                     for (let i = 1; i < rootLevels.length; i++) {
+                         selectNrValues++;
+                         children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
+                         if (children) {
+                             // rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
+                             selectNrValues += children.memberCount;
+                         } else {
+                             rootFilters.push(rootLevels[i].id);
+                         }
+                     }
+                 }
+
+                 // let rootFilter: SQExpr = rootFilters[0];
+                 for (let i = 1; i < rootFilters.length; i++) {
+                     // rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
+                 }
+
+                 if (selectNrValues > 120) {
+
+                 }
+
+                 // filter = SemanticFilter_ext.fromSQExpr(rootFilter);
+                 // let f = SemanticFilter_ext.fromSQExpr(rootFilter);
+                 // this.persistFilter(f);
+             }*/
         }
 
         private getParentDataPoints(dataPoints: HierarchySlicerDataPoint[], parentId: string): HierarchySlicerDataPoint[] {
@@ -355,58 +383,58 @@ module powerbi.extensibility.visual {
             }
         }
 
-        private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): void {//{ filters: SQExpr; memberCount: number; } {
-        /*    let memberCount: number = 0;
-            let childFilters = dataPoints.filter((d) => d.level === level && d.parentId === parentId && d.selected);
-            let totalChildren = dataPoints.filter((d) => d.level === level && d.parentId === parentId).length;
-            if (!childFilters || (childFilters.length === 0)) {
-                return;
-            }
-            else if (childFilters[0].isLeaf) { // Leaf level
-                if ((totalChildren !== childFilters.length) || this.options.slicerSettings.general.selfFilterEnabled) { // Needs extra check for empty search string
-                    let returnFilter = childFilters[0].id;
+        private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): void {// { filters: SQExpr; memberCount: number; } {
+            /*    let memberCount: number = 0;
+                let childFilters = dataPoints.filter((d) => d.level === level && d.parentId === parentId && d.selected);
+                let totalChildren = dataPoints.filter((d) => d.level === level && d.parentId === parentId).length;
+                if (!childFilters || (childFilters.length === 0)) {
+                    return;
+                }
+                else if (childFilters[0].isLeaf) { // Leaf level
+                    if ((totalChildren !== childFilters.length) || this.options.slicerSettings.general.selfFilterEnabled) { // Needs extra check for empty search string
+                        let returnFilter = childFilters[0].id;
+                        memberCount += childFilters.length;
+                        if (childFilters.length > 1) {
+                            for (let i = 1; i < childFilters.length; i++) {
+                                returnFilter = SQExprBuilder.or(returnFilter, childFilters[i].id);
+                            }
+                        }
+                        return {
+                            filters: returnFilter,
+                            memberCount: memberCount,
+                        };
+                    } else {
+                        return;
+                    }
+                } else {
+                    let returnFilter: SQExpr;
+                    let allSelected = (totalChildren === childFilters.length);
                     memberCount += childFilters.length;
-                    if (childFilters.length > 1) {
-                        for (let i = 1; i < childFilters.length; i++) {
-                            returnFilter = SQExprBuilder.or(returnFilter, childFilters[i].id);
+                    for (let i = 0; i < childFilters.length; i++) {
+                        let childChildFilter = this.getChildFilters(dataPoints, childFilters[i].ownId, level + 1);
+                        if ((childChildFilter) || this.options.slicerSettings.general.selfFilterEnabled) { // Needs extra check for empty search string
+                            allSelected = false;
+                            memberCount += childChildFilter.memberCount;
+                            if (returnFilter) {
+                                returnFilter = SQExprBuilder.or(returnFilter,
+                                    SQExprBuilder.and(childFilters[i].id,
+                                        childChildFilter.filters));
+                            } else {
+                                returnFilter = SQExprBuilder.and(childFilters[i].id, childChildFilter.filters);
+                            }
+                        } else {
+                            if (returnFilter) {
+                                returnFilter = SQExprBuilder.or(returnFilter, childFilters[i].id);
+                            } else {
+                                returnFilter = childFilters[i].id;
+                            }
                         }
                     }
-                    return {
+                    return allSelected ? undefined : {
                         filters: returnFilter,
                         memberCount: memberCount,
                     };
-                } else {
-                    return;
-                }
-            } else {
-                let returnFilter: SQExpr;
-                let allSelected = (totalChildren === childFilters.length);
-                memberCount += childFilters.length;
-                for (let i = 0; i < childFilters.length; i++) {
-                    let childChildFilter = this.getChildFilters(dataPoints, childFilters[i].ownId, level + 1);
-                    if ((childChildFilter) || this.options.slicerSettings.general.selfFilterEnabled) { // Needs extra check for empty search string
-                        allSelected = false;
-                        memberCount += childChildFilter.memberCount;
-                        if (returnFilter) {
-                            returnFilter = SQExprBuilder.or(returnFilter,
-                                SQExprBuilder.and(childFilters[i].id,
-                                    childChildFilter.filters));
-                        } else {
-                            returnFilter = SQExprBuilder.and(childFilters[i].id, childChildFilter.filters);
-                        }
-                    } else {
-                        if (returnFilter) {
-                            returnFilter = SQExprBuilder.or(returnFilter, childFilters[i].id);
-                        } else {
-                            returnFilter = childFilters[i].id;
-                        }
-                    }
-                }
-                return allSelected ? undefined : {
-                    filters: returnFilter,
-                    memberCount: memberCount,
-                };
-            }*/
+                }*/
         }
 
         private persistFilter(filter: ISemanticFilter) {
@@ -432,27 +460,27 @@ module powerbi.extensibility.visual {
             let objects: VisualObjectInstancesToPersist = {
                 merge: [
                     <VisualObjectInstance>{
-                        objectName: "general",//hierarchySlicerProperties.filterPropertyIdentifier.objectName,
+                        objectName: "general", // hierarchySlicerProperties.filterPropertyIdentifier.objectName,
                         properties: properties,
                         selector: undefined
                     }]
             };
 
             this.hostServices.persistProperties(objects);
-            //let json = //JSON.stringify(filter);
+            // let json = //JSON.stringify(filter);
             let json = {
-                    "target": {
-                        "table": "Orders",
-                        "column": "Customer Segment"
-                    },
-                    "logicalOperator": "And",
-                    "conditions": [{
-                        "value": "Small Business",
-                        "operator": "Is"
-                    }]
-                };
-            //this.hostServices.applyJsonFilter(json, "general", "filter");
-            //this.hostServices.persistProperties(objects)
+                "target": {
+                    "table": "Orders",
+                    "column": "Customer Segment"
+                },
+                "logicalOperator": "And",
+                "conditions": [{
+                    "value": "Small Business",
+                    "operator": "Is"
+                }]
+            };
+            // this.hostServices.applyJsonFilter(json, "general", "filter");
+            // this.hostServices.persistProperties(objects)
             (<any>this.selectionHandler).sendSelectionToHost(null);
         }
 

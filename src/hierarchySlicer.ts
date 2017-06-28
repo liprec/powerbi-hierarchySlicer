@@ -1,21 +1,21 @@
 /*
- * 
+ *
  * Copyright (c) 2016 Jan Pieter Posthuma
- * 
+ *
  * All rights reserved.
- * 
+ *
  * MIT License.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,9 +27,9 @@
 
 module powerbi.extensibility.visual {
     import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
-    import ClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.ClassAndSelector;;
+    import ClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.ClassAndSelector;
     import createClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.createClassAndSelector;
-    
+
     import IInteractivityService = powerbi.extensibility.utils.interactivity.IInteractivityService;
     import SelectableDataPoint = powerbi.extensibility.utils.interactivity.SelectableDataPoint;
     import createInteractivityService = powerbi.extensibility.utils.interactivity.createInteractivityService;
@@ -37,7 +37,7 @@ module powerbi.extensibility.visual {
     import Selection = d3.Selection;
     import UpdateSelection = d3.selection.Update;
     import IMargin = powerbi.extensibility.utils.svg.IMargin;
-    
+
     import valueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
@@ -50,7 +50,7 @@ module powerbi.extensibility.visual {
     import DataViewObjects = powerbi.DataViewObjects;
     import DataViewObjectsModule = powerbi.extensibility.utils.dataview.DataViewObjects;
 
-    export let hierarchySlicerProperties = {
+    /*export let hierarchySlicerProperties = {
         selection: {
             selectAll: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "selectAll" },
             singleselect: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "singleSelect" },
@@ -77,9 +77,9 @@ module powerbi.extensibility.visual {
         filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" },
         defaultValue: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "defaultValue" },
         selfFilterEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selfFilterEnabled" },
-    };
+    };*/
 
-    export interface HierarchySlicerSettings {
+    /*export interface HierarchySlicerSettings {
         general: {
             rows: number;
             selectAll: boolean,
@@ -128,7 +128,7 @@ module powerbi.extensibility.visual {
             marginTop: number;
             marginLeft: number;
         };
-    }
+    }*/
 
     export interface HierarchySlicerDataPoint extends SelectableDataPoint {
         value: string;
@@ -139,7 +139,7 @@ module powerbi.extensibility.visual {
         isSelectAllDataPoint?: boolean;
         selectable?: boolean;
         partialSelected: boolean;
-        id: {},//SQExpr;
+        id: {}; // SQExpr;
         isLeaf: boolean;
         isExpand: boolean;
         isHidden: boolean;
@@ -179,7 +179,7 @@ module powerbi.extensibility.visual {
         private searchHeader: JQuery;
         private searchInput: JQuery;
         private behavior: HierarchySlicerWebBehavior;
-        //private selectionManager: SelectionManager;
+        // private selectionManager: SelectionManager;
         private viewport: IViewport;
         private hostServices: IVisualHost;
         private interactivityService: IInteractivityService;
@@ -216,7 +216,7 @@ module powerbi.extensibility.visual {
         private static HeaderSpinner: ClassAndSelector = createClassAndSelector("headerSpinner");
         private static Input: ClassAndSelector = createClassAndSelector("slicerCheckbox");
 
-        public DefaultSlicerSettings(): HierarchySlicerSettings {
+        /*public DefaultSlicerSettings(): HierarchySlicerSettings {
             return {
                 general: {
                     rows: 0,
@@ -273,7 +273,7 @@ module powerbi.extensibility.visual {
                     marginLeft: 0,
                 },
             };
-        }
+        }*/
 
         public converter(dataView: DataView, searchText: string): HierarchySlicerData {
             if (!dataView ||
@@ -293,7 +293,7 @@ module powerbi.extensibility.visual {
             let columns = dataView.table.columns;
             let levels = rows[0].length - 1;
             let dataPoints = [];
-            let defaultSettings: HierarchySlicerSettings = this.DefaultSlicerSettings();
+            // let defaultSettings: HierarchySlicerSettings = this.DefaultSlicerSettings();
             let identityValues = [];
             let selectedIds = [];
             let expandedIds = [];
@@ -302,32 +302,36 @@ module powerbi.extensibility.visual {
             let isRagged: boolean = false;
             let raggedParents = [];
 
-            let objects = dataView.metadata.objects;
-
-            defaultSettings.slicerText.emptyLeafs = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.items.emptyLeafs, defaultSettings.slicerText.emptyLeafs);
+            /*let objects = dataView.metadata.objects;
+            efaultSettings.slicerText.emptyLeafs = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.items.emptyLeafs, defaultSettings.slicerText.emptyLeafs);
             defaultSettings.general.singleselect = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.selection.singleselect, defaultSettings.general.singleselect);
             defaultSettings.header.title = DataViewObjectsModule.getValue<string>(objects, hierarchySlicerProperties.header.title, dataView.metadata.columns[0].displayName);
             selectedIds = DataViewObjectsModule.getValue<string>(objects, hierarchySlicerProperties.filterValuePropertyIdentifier, "").split(",");
             expandedIds = DataViewObjectsModule.getValue<string>(objects, hierarchySlicerProperties.expandedValuePropertyIdentifier, "").split(",");
             defaultSettings.general.selfFilterEnabled = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.selfFilterEnabled, defaultSettings.general.selfFilterEnabled);
-            //defaultSettings.slicerText.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.background, defaultSettings.slicerText.background);
-            //defaultSettings.slicerText.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.fontColor, defaultSettings.slicerText.fontColor);
-            //defaultSettings.slicerText.hoverColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.hoverColor, defaultSettings.slicerText.hoverColor);
-            //defaultSettings.slicerText.selectedColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.selectedColor, defaultSettings.slicerText.selectedColor);
+            defaultSettings.slicerText.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.background, defaultSettings.slicerText.background);
+            defaultSettings.slicerText.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.fontColor, defaultSettings.slicerText.fontColor);
+            defaultSettings.slicerText.hoverColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.hoverColor, defaultSettings.slicerText.hoverColor);
+            defaultSettings.slicerText.selectedColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.selectedColor, defaultSettings.slicerText.selectedColor);
+            defaultSettings.slicerText.emptyLeafs = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.items.emptyLeafs, defaultSettings.slicerText.emptyLeafs);
+            defaultSettings.general.singleselect = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.selection.singleselect, defaultSettings.general.singleselect);
+            defaultSettings.header.title = DataViewObjectsModule.getValue<string>(objects, hierarchySlicerProperties.header.title, dataView.metadata.columns[0].displayName);*/
+            selectedIds = this.settings.general.filterValues.split(",");
+            expandedIds = this.settings.general.selection.split(",");
 
             for (let r = 0; r < rows.length; r++) {
                 let parentExpr = null;
                 let parentId: string = "";
 
                 for (let c = 0; c < rows[r].length; c++) {
-                    if ((rows[r][c] === null) && (!defaultSettings.slicerText.emptyLeafs)) {
+                    if ((rows[r][c] === null) && (!this.settings.slicerText.emptyLeafs)) {
                         isRagged = true;
                         raggedParents.push(parentId);
                         break;
                     }
 
                     let format = dataView.table.columns[c].format;
-                    let dataType: ValueTypeDescriptor = dataView.table.columns[c].type
+                    let dataType: ValueTypeDescriptor = dataView.table.columns[c].type;
                     let labelValue: string = valueFormatter.format(rows[r][c], format);
                     labelValue = labelValue === null ? "(blank)" : labelValue;
 
@@ -363,11 +367,15 @@ module powerbi.extensibility.visual {
                         parentId = "";
                         parentExpr = filterExpr;
                     }*/
+                    if (c < 0 ) {
+                        parentId = "";
+                        // parentExpr = filterExpr;
+                    }
                     let ownId = parentId + (parentId === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + c;
                     let isLeaf = c === rows[r].length - 1;
 
                     let dataPoint: HierarchySlicerDataPoint = {
-                        identity: null, //identity,
+                        identity: null, // identity,
                         selected: selectedIds.filter((d) => d === ownId).length > 0,
                         value: labelValue,
                         tooltip: labelValue,
@@ -377,7 +385,7 @@ module powerbi.extensibility.visual {
                         isLeaf: isLeaf,
                         isExpand: expandedIds === [] ? false : expandedIds.filter((d) => d === ownId).length > 0 || false,
                         isHidden: c === 0 ? false : true, // Default true. Real status based on the expanded properties of parent(s)
-                        id: null, //filterExpr,
+                        id: null, // filterExpr,
                         ownId: ownId,
                         parentId: parentId,
                         order: order++,
@@ -392,12 +400,12 @@ module powerbi.extensibility.visual {
                 }
             }
 
-            // Redefine isLeaf for Ragged hierarchies 
+            // Redefine isLeaf for Ragged hierarchies
             if (isRagged) {
                 dataPoints.filter((d) => raggedParents.filter((d1) => d1 === d.ownId).length > 0).forEach((d) => d.isLeaf = true);
             }
 
-            if (defaultSettings.general.selfFilterEnabled && searchText && searchText.length > 2) { // Threasholt value toevoegen
+            if (this.settings.general.selfFilterEnabled && searchText && searchText.length > 2) { // Threasholt value toevoegen
                 searchText = searchText.toLowerCase();
                 let filteredDataPoints = dataPoints.filter((d) => d.value.toLowerCase().indexOf(searchText) >= 0);
                 for (let l = 1; l <= levels; l++) {
@@ -417,7 +425,7 @@ module powerbi.extensibility.visual {
                 let expandedRootNodes = dataPoints.filter((d) => d.isExpand && d.level === l);
                 if (expandedRootNodes.length > 0) {
                     for (let n = 0; n < expandedRootNodes.length; n++) {
-                        parentRootNodesTemp = parentRootNodes.filter((p) => expandedRootNodes[n].parentId === p.ownId); //Is parent expanded?                        
+                        parentRootNodesTemp = parentRootNodes.filter((p) => expandedRootNodes[n].parentId === p.ownId); // Is parent expanded?
                         if (l === 0 || (parentRootNodesTemp.length > 0)) {
                             parentRootNodesTotal = parentRootNodesTotal.concat(expandedRootNodes[n]);
                             dataPoints.filter((d) => d.parentId === expandedRootNodes[n].ownId && d.level === l + 1).forEach((d) => d.isHidden = false);
@@ -432,17 +440,16 @@ module powerbi.extensibility.visual {
                 let selectedRootNodes = dataPoints.filter((d) => d.selected && d.level === l);
                 if (selectedRootNodes.length > 0) {
                     for (let n = 0; n < selectedRootNodes.length; n++) {
-                        let children = dataPoints.filter((d) => d.parentId === selectedRootNodes[n].ownId)
+                        let children = dataPoints.filter((d) => d.parentId === selectedRootNodes[n].ownId);
                         if (children.length > children.filter((d) => d.selected).length) {
                             selectedRootNodes[n].partialSelected = true;
                         }
                     }
                 }
             }
-        
             return {
                 dataPoints: dataPoints,
-                settings: defaultSettings,
+                settings: this.settings,
                 levels: levels,
                 hasSelectionOverride: true,
             };
@@ -450,10 +457,7 @@ module powerbi.extensibility.visual {
 
         constructor(options: VisualConstructorOptions) {
             this.element = $(options.element);
-            
             this.hostServices = options.host;
-            
-            this.settings = this.DefaultSlicerSettings();
 
             this.behavior = new HierarchySlicerWebBehavior();
             this.interactivityService = createInteractivityService(options.host);
@@ -536,7 +540,7 @@ module powerbi.extensibility.visual {
 
             this.slicerBody = this.slicerContainer
                 .append("div")
-                .classed(HierarchySlicer.Body.className, true)
+                .classed(HierarchySlicer.Body.className, true);
 
             this.slicerBodySpinner = this.slicerBody
                 .append("div")
@@ -559,7 +563,7 @@ module powerbi.extensibility.visual {
                 enter: rowEnter,
                 exit: rowExit,
                 update: rowUpdate,
-                //loadMoreData: () => this.onLoadMoreData(),
+                // loadMoreData: () => this.onLoadMoreData(),
                 scrollEnabled: true,
                 viewport: this.getBodyViewport(this.viewport),
                 baseContainer: this.slicerBody,
@@ -578,31 +582,33 @@ module powerbi.extensibility.visual {
                 !options.viewport) {
                 return;
             }
-            
-            if (!this.viewport) {
-                this.viewport = options.viewport;
-                this.init(options);
-            }
-            
+
             this.dataView = options.dataViews ? options.dataViews[0] : undefined;
             if (!this.dataView) {
                 return;
             }
-            
+
+            this.settings = HierarchySlicer.parseSettings(this.dataView);
+
+            if (!this.viewport) {
+                this.viewport = options.viewport;
+                this.init(options);
+            }
+
             if (options.viewport.height === this.viewport.height
                 && options.viewport.width === this.viewport.width) {
                 this.waitingForData = false;
             } else {
                 this.viewport = options.viewport;
             }
-            
+
             let resetScrollbarPosition: boolean = true;
             const existingDataView = this.dataView;
 
             if (existingDataView) {
                 resetScrollbarPosition = !HierarchySlicer.hasSameCategoryIdentity(existingDataView, this.dataView);
             }
-            
+
             this.updateInternal(resetScrollbarPosition);
         }
 
@@ -641,9 +647,8 @@ module powerbi.extensibility.visual {
             this.updateSlicerBodyDimensions();
 
             let dataView = this.dataView,
-                data = this.data = this.converter(dataView, this.searchInput.val())
+                data = this.data = this.converter(dataView, this.searchInput.val());
 
-            
             this.maxLevels = this.data.levels + 1;
 
             if (data.dataPoints.length === 0) {
@@ -651,16 +656,15 @@ module powerbi.extensibility.visual {
                 return;
             }
 
-            this.settings = this.data.settings;
             this.updateSettings();
 
             this.treeView
                 .viewport(this.getBodyViewport(this.viewport))
                 .rowHeight(PixelConverter.fromPointToPixel(this.settings.slicerText.textSize))
                 .data(
-                    data.dataPoints.filter((d) => !d.isHidden), // Expand/Collapse
-                    (d: HierarchySlicerDataPoint) => $.inArray(d, data.dataPoints),
-                    resetScrollbar
+                data.dataPoints.filter((d) => !d.isHidden), // Expand/Collapse
+                (d: HierarchySlicerDataPoint) => $.inArray(d, data.dataPoints),
+                resetScrollbar
                 )
                 .render();
 
@@ -670,38 +674,34 @@ module powerbi.extensibility.visual {
 
         private updateSettings(): void {
             this.updateSelectionStyle();
-            this.updateFontStyle();
-            this.updateHeaderStyle();
-            
+            // this.updateFontStyle();
+            // this.updateHeaderStyle();
         }
-        
+
         private updateSelectionStyle(): void {
-            let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
-            if (objects) {
-                this.slicerContainer.classed("isMultiSelectEnabled", !DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.selection.singleselect, this.settings.general.singleselect));
-            }
+            this.slicerContainer.classed("isMultiSelectEnabled", !this.settings.selection.singleSelect);
         }
 
-        private updateFontStyle(): void {
-            let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
-            if (objects) {
-                this.settings.slicerText.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.fontColor, this.settings.slicerText.fontColor);
-                this.settings.slicerText.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.background, this.settings.slicerText.background);
-                this.settings.slicerText.selectedColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.selectedColor, this.settings.slicerText.selectedColor);
-                this.settings.slicerText.hoverColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.hoverColor, this.settings.slicerText.hoverColor);
-                this.settings.slicerText.textSize = DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.items.textSize, this.settings.slicerText.textSize);
-            }
-        }
+        // private updateFontStyle(): void {
+        //     let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
+        //     if (objects) {
+        //         this.settings.slicerText.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.fontColor, this.settings.slicerText.fontColor);
+        //         this.settings.slicerText.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.background, this.settings.slicerText.background);
+        //         this.settings.slicerText.selectedColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.selectedColor, this.settings.slicerText.selectedColor);
+        //         this.settings.slicerText.hoverColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.hoverColor, this.settings.slicerText.hoverColor);
+        //         this.settings.slicerText.textSize = DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.items.textSize, this.settings.slicerText.textSize);
+        //     }
+        // }
 
-        private updateHeaderStyle(): void {
-            let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
-            if (objects) {
-                this.settings.header.show = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.header.show, this.settings.header.show);
-                this.settings.header.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.fontColor, this.settings.header.fontColor);
-                this.settings.header.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.background, this.settings.header.background);
-                this.settings.header.textSize = DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.header.textSize, this.settings.header.textSize);
-            }
-        }
+        // private updateHeaderStyle(): void {
+        //     let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
+        //     if (objects) {
+        //         this.settings.header.show = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.header.show, this.settings.header.show);
+        //         this.settings.header.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.fontColor, this.settings.header.fontColor);
+        //         this.settings.header.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.background, this.settings.header.background);
+        //         this.settings.header.textSize = DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.header.textSize, this.settings.header.textSize);
+        //     }
+        // }
 
         private updateSlicerBodyDimensions(): void {
             let slicerViewport: IViewport = this.getBodyViewport(this.viewport);
@@ -719,7 +719,7 @@ module powerbi.extensibility.visual {
                     "width": "100%",
                     "height": "100%",
                     "visibility": "hidden"
-                })
+                });
 
             let spinner = this.slicerBodySpinner.selectAll("div")
                 .remove();
@@ -737,7 +737,7 @@ module powerbi.extensibility.visual {
                 .enter()
                 .append("il")
                 .classed(HierarchySlicer.ItemContainer.className, true);
-            
+
             treeItemElementParent
                 .style({
                     "background-color": settings.slicerText.background,
@@ -783,7 +783,7 @@ module powerbi.extensibility.visual {
                 expandCollapseIcon
                     .enter()
                     .append("i");
-                
+
                 expandCollapseIcon.each(function (d: HierarchySlicerDataPoint, i: number) {
                     let item = d3.select(this);
                     item
@@ -794,7 +794,7 @@ module powerbi.extensibility.visual {
                             "font-size": PixelConverter.fromPointToPixel(settings.slicerText.textSize) + "px",
                             "width": PixelConverter.fromPointToPixel(settings.slicerText.textSize) + "px",
                             "height": PixelConverter.fromPointToPixel(settings.slicerText.textSize) + "px",
-                        })
+                        });
                 });
 
                 expandCollapse.exit().remove();
@@ -838,7 +838,7 @@ module powerbi.extensibility.visual {
                 .append("input")
                 .attr("type", "checkbox");
 
-            let alignCorrection = Math.ceil(.1 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))
+            let alignCorrection = Math.ceil(.1 * PixelConverter.fromPointToPixel(settings.slicerText.textSize));
             if (alignCorrection <= 2) {
                 alignCorrection = 0;
             }
@@ -909,17 +909,17 @@ module powerbi.extensibility.visual {
                     .style({
                         "color": settings.header.fontColor,
                         "background-color": settings.header.background,
-                        "font-size": PixelConverter.fromPoint(settings.header.textSize),
+                        "font-size": PixelConverter.fromPoint(+settings.header.textSize),
                     });
 
                 // Header icons
                 this.slicerHeader.selectAll("span")
                     .style({
-                        "width": PixelConverter.fromPointToPixel(settings.header.textSize) + "px",
-                        "height": PixelConverter.fromPointToPixel(settings.header.textSize) + "px",
-                        "font-size": Math.ceil(.75 * PixelConverter.fromPointToPixel(settings.header.textSize)) + "px",
+                        "width": PixelConverter.fromPointToPixel(+settings.header.textSize) + "px",
+                        "height": PixelConverter.fromPointToPixel(+settings.header.textSize) + "px",
+                        "font-size": Math.ceil(.75 * PixelConverter.fromPointToPixel(+settings.header.textSize)) + "px",
                         "color": settings.slicerText.fontColor,
-                    })
+                    });
 
                 this.slicerBody
                     .classed("slicerBody", true);
@@ -943,9 +943,9 @@ module powerbi.extensibility.visual {
 
                     // Remove header spinner
                     try {
-                        $(headerSpinner)[0][0].children[0].remove()
+                        $(headerSpinner)[0][0].children[0].remove();
                         headerSpinner.style("float", "none");
-                    } catch (e) {}
+                    } catch (e) { }
 
                     let behaviorOptions: HierarchySlicerBehaviorOptions = {
                         hostServices: this.hostServices,
@@ -992,7 +992,7 @@ module powerbi.extensibility.visual {
 
         private onLoadMoreData(): void {
             if (!this.waitingForData && this.dataView.metadata && this.dataView.metadata.segment) {
-                //this.hostServices.loadMoreData();
+                // this.hostServices.loadMoreData();
                 this.waitingForData = true;
             }
         }
@@ -1006,7 +1006,7 @@ module powerbi.extensibility.visual {
 
         private getHeaderHeight(): number {
             return TextMeasurementService.estimateSvgTextHeight(
-                HierarchySlicer.getTextProperties(this.settings.header.textSize));
+                HierarchySlicer.getTextProperties(+this.settings.header.textSize));
         }
 
         private getRowHeight(): number {
@@ -1031,24 +1031,24 @@ module powerbi.extensibility.visual {
             };
         }
 
-        private getBorderWidth(outlineElement: string, outlineWeight: number): string {
-            switch (outlineElement) {
-                case "None":
-                    return "0px";
-                case "BottomOnly":
-                    return "0px 0px " + outlineWeight + "px 0px";
-                case "TopOnly":
-                    return outlineWeight + "px 0px 0px 0px";
-                case "TopBottom":
-                    return outlineWeight + "px 0px " + outlineWeight + "px 0px";
-                case "LeftRight":
-                    return "0px " + outlineWeight + "px 0px " + outlineWeight + "px";
-                case "Frame":
-                    return outlineWeight + "px";
-                default:
-                    return outlineElement.replace("1", outlineWeight.toString());
-            }
-        }
+        // private getBorderWidth(outlineElement: string, outlineWeight: number): string {
+        //     switch (outlineElement) {
+        //         case "None":
+        //             return "0px";
+        //         case "BottomOnly":
+        //             return "0px 0px " + outlineWeight + "px 0px";
+        //         case "TopOnly":
+        //             return outlineWeight + "px 0px 0px 0px";
+        //         case "TopBottom":
+        //             return outlineWeight + "px 0px " + outlineWeight + "px 0px";
+        //         case "LeftRight":
+        //             return "0px " + outlineWeight + "px 0px " + outlineWeight + "px";
+        //         case "Frame":
+        //             return outlineWeight + "px";
+        //         default:
+        //             return outlineElement.replace("1", outlineWeight.toString());
+        //     }
+        // }
 
         private createSearchHeader(container: JQuery): void {
             this.searchHeader = $("<div>")
@@ -1108,61 +1108,23 @@ module powerbi.extensibility.visual {
             this.searchHeader.toggleClass("collapsed", !this.settings.general.selfFilterEnabled);
         }
 
-        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] {
-            let instances: VisualObjectInstance[] = [];
-            let objects = this.dataView.metadata.objects;
-
-            switch (options.objectName) {
-                case "selection":
-                    let selectionOptions: VisualObjectInstance = {
-                        objectName: "selection",
-                        displayName: "Selection",
-                        selector: null,
-                        properties: {
-                            selectAll: DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.selection.selectAll, this.settings.general.selectAll),
-                            singleSelect: DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.selection.singleselect, this.settings.general.singleselect),
-                        }
-                    };
-                    instances.push(selectionOptions);
-                    break;
-                case "header":
-                    let headerOptions: VisualObjectInstance = {
-                        objectName: "header",
-                        displayName: "Header",
-                        selector: null,
-                        properties: {
-                            show: DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.header.show, this.settings.header.show),
-                            title: DataViewObjectsModule.getValue<string>(objects, hierarchySlicerProperties.header.title, this.settings.header.title),
-                            fontColor: DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.fontColor, this.settings.header.fontColor),
-                            background: DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.background, this.settings.header.background),
-                            textSize: DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.header.textSize, this.settings.header.textSize),
-                        }
-                    };
-                    instances.push(headerOptions);
-                    break;
-                case "items":
-                    let items: VisualObjectInstance = {
-                        objectName: "items",
-                        displayName: "Items",
-                        selector: null,
-                        properties: {
-                            emptyLeafs: DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.items.emptyLeafs, this.settings.slicerText.emptyLeafs),
-                            fontColor: DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.fontColor, this.settings.slicerText.fontColor),
-                            background: DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.background, this.settings.slicerText.background),
-                            selectedColor: DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.selectedColor, this.settings.slicerText.selectedColor),
-                            hoverColor: DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.hoverColor, this.settings.slicerText.hoverColor),
-                            textSize: DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.items.textSize, this.settings.slicerText.textSize),
-                        }
-                    }
-                    instances.push(items);
-                    break;
+        public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstanceEnumeration {
+            const instanceEnumeration: VisualObjectInstanceEnumeration = HierarchySlicerSettings.enumerateObjectInstances(
+                this.settings || HierarchySlicerSettings.getDefault(),
+                options);
+            if (options.objectName === "general") {
+                 return;
             }
-
-           return instances;
+            return instanceEnumeration;
         }
-        
+
         public destroy(): void {
-            //TODO: Perform any cleanup tasks here
+            // TODO: Perform any cleanup tasks here
+        }
+
+        private static parseSettings(dataView: DataView): HierarchySlicerSettings {
+            const settings: HierarchySlicerSettings = HierarchySlicerSettings.parse<HierarchySlicerSettings>(dataView);
+            return settings;
         }
     }
 }

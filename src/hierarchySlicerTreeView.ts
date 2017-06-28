@@ -1,21 +1,21 @@
 /*
- * 
+ *
  * Copyright (c) 2016 Jan Pieter Posthuma
- * 
+ *
  * All rights reserved.
- * 
+ *
  * MIT License.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,12 +37,12 @@ module powerbi.extensibility.visual {
         enter: (selection: Selection<any>) => void;
         exit: (selection: Selection<any>) => void;
         update: (selection: Selection<any>) => void;
-        //loadMoreData: () => void;
+        // loadMoreData: () => void;
         baseContainer: Selection<any>;
         rowHeight: number;
         viewport: IViewport;
         scrollEnabled: boolean;
-        //isReadMode: () => boolean;
+        // isReadMode: () => boolean;
     }
 
     export interface IHierarchySlicerTreeView {
@@ -86,12 +86,12 @@ module powerbi.extensibility.visual {
             this.options = $.extend(true, {}, options);
 
             this.options.baseContainer
-                //.style("overflow-y", "auto")
+                // .style("overflow-y", "auto")
                 .attr("drag-resize-disabled", true);
 
             this.scrollbarInner = options.baseContainer
                 .append("div")
-                .classed("scrollbar-inner", true)
+                .classed("scrollbar-inner", true);
 
             this.scrollContainer = this.scrollbarInner
                 .append("div")
@@ -109,7 +109,7 @@ module powerbi.extensibility.visual {
         }
 
         public rowHeight(rowHeight: number): HierarchySlicerTreeView {
-            this.options.rowHeight = Math.ceil(rowHeight);// + 2; // Margin top/bottom
+            this.options.rowHeight = Math.ceil(rowHeight); // + 2; // Margin top/bottom
 
             return this;
         }
@@ -142,8 +142,8 @@ module powerbi.extensibility.visual {
             let visibleGroupContainer = this.visibleGroupContainer;
             let totalRows = this._totalRows;
             let rowHeight = options.rowHeight || HierarchySlicerTreeView.defaultRowHeight;
-            let visibleRows = this._totalRows; //this.getVisibleRows() || 1;
-            let scrollTop: number = 0; //this.scrollbarInner.node().scrollTop;
+            let visibleRows = this._totalRows; // this.getVisibleRows() || 1;
+            let scrollTop: number = 0; // this.scrollbarInner.node().scrollTop;
             let scrollPosition = (scrollTop === 0) ? 0 : Math.floor(scrollTop / rowHeight);
             let transformAttr = SVGUtil.translateWithPixels(0, scrollPosition * rowHeight);
 
@@ -154,7 +154,7 @@ module powerbi.extensibility.visual {
             rowSelection
                 .enter()
                 .append("div")
-                .classed("row", true)
+                .classed("row", true);
 
             rowSelection
                 .style({
