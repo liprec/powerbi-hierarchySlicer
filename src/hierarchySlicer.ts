@@ -174,8 +174,14 @@ module powerbi.extensibility.visual {
     }
 
     export class HierarchySlicer implements IVisual {
-
-        private element: JQuery;
+        // MDL icons
+        private IconSet = {
+            expandAll: `<svg  width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/><path d="M0 0h24v24H0z" fill="none"/></svg>`,
+            collapseAll: `<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/><path d="M0 0h24v24H0z" fill="none"/></svg>`,
+            clearAll: `<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M5 13h14v-2H5v2zm-2 4h14v-2H3v2zM7 7v2h14V7H7z"/><path d="M0 0h24v24H0z" fill="none"/></svg>`,
+            expandOpen: `<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>`
+        };
+        private root: HTMLElement;
         private searchHeader: JQuery;
         private searchInput: JQuery;
         private behavior: HierarchySlicerWebBehavior;
@@ -367,7 +373,7 @@ module powerbi.extensibility.visual {
                         parentId = "";
                         parentExpr = filterExpr;
                     }*/
-                    if (c < 0 ) {
+                    if (c < 0) {
                         parentId = "";
                         // parentExpr = filterExpr;
                     }
@@ -456,7 +462,7 @@ module powerbi.extensibility.visual {
         }
 
         constructor(options: VisualConstructorOptions) {
-            this.element = $(options.element);
+            this.root = options.element;
             this.hostServices = options.host;
 
             this.behavior = new HierarchySlicerWebBehavior();
@@ -466,85 +472,12 @@ module powerbi.extensibility.visual {
         private init(options: VisualUpdateOptions): void {
             this.viewport = options.viewport;
 
-            this.slicerContainer = d3.select(this.element.get(0))
+            this.slicerContainer = d3.select(this.root)
                 .append("div")
                 .classed(HierarchySlicer.Container.className, true);
 
-            this.slicerHeader = this.slicerContainer
-                .append("div")
-                .classed(HierarchySlicer.Header.className, true);
-
-            this.slicerHeader
-                .append("span")
-                .classed(HierarchySlicer.Icon.className, true)
-                .classed(HierarchySlicer.Clear.className, true)
-                .attr("title", "Clear")
-                .on("mouseover", () => {
-                    this.slicerHeader.select(HierarchySlicer.Clear.selectorName)
-                        .style({
-                            "color": this.settings.slicerText.hoverColor
-                        });
-                })
-                .on("mouseout", () => {
-                    this.slicerHeader.select(HierarchySlicer.Clear.selectorName)
-                        .style({
-                            "color": this.settings.slicerText.fontColor
-                        });
-                });
-
-            this.slicerHeader
-                .append("span")
-                .classed(HierarchySlicer.Icon.className, true)
-                .classed(HierarchySlicer.Expand.className, true)
-                .attr("title", "Expand all")
-                .on("mouseover", () => {
-                    this.slicerHeader.select(HierarchySlicer.Expand.selectorName)
-                        .style({
-                            "color": this.settings.slicerText.hoverColor
-                        });
-                })
-                .on("mouseout", () => {
-                    this.slicerHeader.select(HierarchySlicer.Expand.selectorName)
-                        .style({
-                            "color": this.settings.slicerText.fontColor
-                        });
-                });
-
-            this.slicerHeader
-                .append("span")
-                .classed(HierarchySlicer.Icon.className, true)
-                .classed(HierarchySlicer.Collapse.className, true)
-                .attr("title", "Collapse all")
-                .on("mouseover", () => {
-                    this.slicerHeader.select(HierarchySlicer.Collapse.selectorName)
-                        .style({
-                            "color": this.settings.slicerText.hoverColor
-                        });
-                })
-                .on("mouseout", () => {
-                    this.slicerHeader.select(HierarchySlicer.Collapse.selectorName)
-                        .style({
-                            "color": this.settings.slicerText.fontColor
-                        });
-                });
-
-            this.slicerHeader
-                .append("span")
-                .classed(HierarchySlicer.HeaderSpinner.className, true);
-
-            this.slicerHeader
-                .append("div")
-                .classed(HierarchySlicer.HeaderText.className, true);
-
-            this.createSearchHeader($(this.slicerHeader.node()));
-
-            this.slicerBody = this.slicerContainer
-                .append("div")
-                .classed(HierarchySlicer.Body.className, true);
-
-            this.slicerBodySpinner = this.slicerBody
-                .append("div")
-                .classed(HierarchySlicer.BodySpinner.className, true);
+            this.renderHeader(this.slicerContainer);
+            this.renderBody(this.slicerContainer);
 
             let rowEnter = (rowSelection: Selection<any>) => {
                 this.onEnterSelection(rowSelection);
@@ -573,6 +506,48 @@ module powerbi.extensibility.visual {
             };
 
             this.treeView = HierarchySlicerTreeViewFactory.createListView(treeViewOptions);
+        }
+
+        private renderHeader(rootContainer: Selection<any>): void {
+            const self: HierarchySlicer = this;
+            this.slicerHeader = rootContainer
+                .append("header")
+                .classed(HierarchySlicer.Header.className, true);
+            const headerButtonData = [
+                { title: "Clear", class: HierarchySlicer.Clear.className, icon: this.IconSet.clearAll },
+                { title: "Expand all", class: HierarchySlicer.Expand.className, icon: this.IconSet.expandAll },
+                { title: "Collapse all", class: HierarchySlicer.Collapse.className, icon: this.IconSet.collapseAll }
+            ];
+            this.slicerHeader
+                .selectAll(HierarchySlicer.Icon.className)
+                .data(headerButtonData)
+                .enter()
+                .append("button")
+                .classed(HierarchySlicer.Icon.className, true)
+                .attr("title", (d) => d.title)
+                .each(function(d) { this.classList.add(d.class); })
+                .on("mouseover", function (d) { d3.select(this).style("color", self.settings.slicerText.hoverColor); })
+                .on("mouseout", function (d) { d3.select(this).style("color", self.settings.slicerText.fontColor); })
+                .html((d) => d.icon);
+
+            this.slicerHeader
+                .append("span")
+                .classed(HierarchySlicer.HeaderSpinner.className, true);
+            this.slicerHeader
+                .append("div")
+                .classed(HierarchySlicer.HeaderText.className, true);
+
+            this.createSearchHeader($(this.slicerHeader.node()));
+        }
+
+        private renderBody(rootContainer: Selection<any>): void {
+            this.slicerBody = rootContainer
+                .append("div")
+                .classed(HierarchySlicer.Body.className, true);
+
+            this.slicerBodySpinner = this.slicerBody
+                .append("div")
+                .classed(HierarchySlicer.BodySpinner.className, true);
         }
 
         public update(options: VisualUpdateOptions) {
@@ -1113,7 +1088,7 @@ module powerbi.extensibility.visual {
                 this.settings || HierarchySlicerSettings.getDefault(),
                 options);
             if (options.objectName === "general") {
-                 return;
+                return;
             }
             return instanceEnumeration;
         }
