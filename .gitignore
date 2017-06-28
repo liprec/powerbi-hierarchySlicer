@@ -51,6 +51,7 @@ node_modules
 
 # Power BI custom visuals
 .tmp
+.api
 
 # Not finished visuals
 boxWhiskerChart

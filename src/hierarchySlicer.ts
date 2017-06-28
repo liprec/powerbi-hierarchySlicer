@@ -42,10 +42,10 @@ module powerbi.extensibility.visual {
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
 
-    import SQExpr = powerbi.extensibility.utils.sq.SQExpr;
-    import SQExprBuilder = powerbi.extensibility.utils.sq.SQExprBuilder;
-    import SQConstantExpr = powerbi.extensibility.utils.sq.SQConstantExpr;
-    import QueryComparisonKind = powerbi.extensibility.utils.sq.QueryComparisonKind;
+    // import SQExpr = powerbi.extensibility.utils.sq.SQExpr;
+    // import SQExprBuilder = powerbi.extensibility.utils.sq.SQExprBuilder;
+    // import SQConstantExpr = powerbi.extensibility.utils.sq.SQConstantExpr;
+    // import QueryComparisonKind = powerbi.extensibility.utils.sq.QueryComparisonKind;
 
     import DataViewObjects = powerbi.DataViewObjects;
     import DataViewObjectsModule = powerbi.extensibility.utils.dataview.DataViewObjects;
@@ -139,7 +139,7 @@ module powerbi.extensibility.visual {
         isSelectAllDataPoint?: boolean;
         selectable?: boolean;
         partialSelected: boolean;
-        id: SQExpr;
+        id: {},//SQExpr;
         isLeaf: boolean;
         isExpand: boolean;
         isHidden: boolean;
@@ -331,7 +331,7 @@ module powerbi.extensibility.visual {
                     let labelValue: string = valueFormatter.format(rows[r][c], format);
                     labelValue = labelValue === null ? "(blank)" : labelValue;
 
-                    let value: SQConstantExpr;
+                    /*let value: SQConstantExpr;
                     if (rows[r][c] === null) {
                         value = SQExprBuilder.nullConstant();
                     } else {
@@ -362,7 +362,7 @@ module powerbi.extensibility.visual {
                     else {
                         parentId = "";
                         parentExpr = filterExpr;
-                    }
+                    }*/
                     let ownId = parentId + (parentId === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + c;
                     let isLeaf = c === rows[r].length - 1;
 
@@ -377,7 +377,7 @@ module powerbi.extensibility.visual {
                         isLeaf: isLeaf,
                         isExpand: expandedIds === [] ? false : expandedIds.filter((d) => d === ownId).length > 0 || false,
                         isHidden: c === 0 ? false : true, // Default true. Real status based on the expanded properties of parent(s)
-                        id: filterExpr,
+                        id: null, //filterExpr,
                         ownId: ownId,
                         parentId: parentId,
                         order: order++,
@@ -464,25 +464,25 @@ module powerbi.extensibility.visual {
 
             this.slicerContainer = d3.select(this.element.get(0))
                 .append("div")
-                .classed(HierarchySlicer.Container.class, true);
+                .classed(HierarchySlicer.Container.className, true);
 
             this.slicerHeader = this.slicerContainer
                 .append("div")
-                .classed(HierarchySlicer.Header.class, true);
+                .classed(HierarchySlicer.Header.className, true);
 
             this.slicerHeader
                 .append("span")
-                .classed(HierarchySlicer.Icon.class, true)
-                .classed(HierarchySlicer.Clear.class, true)
+                .classed(HierarchySlicer.Icon.className, true)
+                .classed(HierarchySlicer.Clear.className, true)
                 .attr("title", "Clear")
                 .on("mouseover", () => {
-                    this.slicerHeader.select(HierarchySlicer.Clear.selector)
+                    this.slicerHeader.select(HierarchySlicer.Clear.selectorName)
                         .style({
                             "color": this.settings.slicerText.hoverColor
                         });
                 })
                 .on("mouseout", () => {
-                    this.slicerHeader.select(HierarchySlicer.Clear.selector)
+                    this.slicerHeader.select(HierarchySlicer.Clear.selectorName)
                         .style({
                             "color": this.settings.slicerText.fontColor
                         });
@@ -490,17 +490,17 @@ module powerbi.extensibility.visual {
 
             this.slicerHeader
                 .append("span")
-                .classed(HierarchySlicer.Icon.class, true)
-                .classed(HierarchySlicer.Expand.class, true)
+                .classed(HierarchySlicer.Icon.className, true)
+                .classed(HierarchySlicer.Expand.className, true)
                 .attr("title", "Expand all")
                 .on("mouseover", () => {
-                    this.slicerHeader.select(HierarchySlicer.Expand.selector)
+                    this.slicerHeader.select(HierarchySlicer.Expand.selectorName)
                         .style({
                             "color": this.settings.slicerText.hoverColor
                         });
                 })
                 .on("mouseout", () => {
-                    this.slicerHeader.select(HierarchySlicer.Expand.selector)
+                    this.slicerHeader.select(HierarchySlicer.Expand.selectorName)
                         .style({
                             "color": this.settings.slicerText.fontColor
                         });
@@ -508,17 +508,17 @@ module powerbi.extensibility.visual {
 
             this.slicerHeader
                 .append("span")
-                .classed(HierarchySlicer.Icon.class, true)
-                .classed(HierarchySlicer.Collapse.class, true)
+                .classed(HierarchySlicer.Icon.className, true)
+                .classed(HierarchySlicer.Collapse.className, true)
                 .attr("title", "Collapse all")
                 .on("mouseover", () => {
-                    this.slicerHeader.select(HierarchySlicer.Collapse.selector)
+                    this.slicerHeader.select(HierarchySlicer.Collapse.selectorName)
                         .style({
                             "color": this.settings.slicerText.hoverColor
                         });
                 })
                 .on("mouseout", () => {
-                    this.slicerHeader.select(HierarchySlicer.Collapse.selector)
+                    this.slicerHeader.select(HierarchySlicer.Collapse.selectorName)
                         .style({
                             "color": this.settings.slicerText.fontColor
                         });
@@ -526,21 +526,21 @@ module powerbi.extensibility.visual {
 
             this.slicerHeader
                 .append("span")
-                .classed(HierarchySlicer.HeaderSpinner.class, true);
+                .classed(HierarchySlicer.HeaderSpinner.className, true);
 
             this.slicerHeader
                 .append("div")
-                .classed(HierarchySlicer.HeaderText.class, true);
+                .classed(HierarchySlicer.HeaderText.className, true);
 
             this.createSearchHeader($(this.slicerHeader.node()));
 
             this.slicerBody = this.slicerContainer
                 .append("div")
-                .classed(HierarchySlicer.Body.class, true)
+                .classed(HierarchySlicer.Body.className, true)
 
             this.slicerBodySpinner = this.slicerBody
                 .append("div")
-                .classed(HierarchySlicer.BodySpinner.class, true);
+                .classed(HierarchySlicer.BodySpinner.className, true);
 
             let rowEnter = (rowSelection: Selection<any>) => {
                 this.onEnterSelection(rowSelection);
@@ -736,7 +736,7 @@ module powerbi.extensibility.visual {
             treeItemElementParent
                 .enter()
                 .append("il")
-                .classed(HierarchySlicer.ItemContainer.class, true);
+                .classed(HierarchySlicer.ItemContainer.className, true);
             
             treeItemElementParent
                 .style({
@@ -751,7 +751,7 @@ module powerbi.extensibility.visual {
             // Expand/collapse
             if (this.maxLevels > 1) {
                 let expandCollapse: UpdateSelection<any> = treeItemElementParent
-                    .selectAll(HierarchySlicer.ItemContainerExpander.selector)
+                    .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
                     .data((d: HierarchySlicerDataPoint) => {
                         return [d];
                     });
@@ -759,7 +759,7 @@ module powerbi.extensibility.visual {
                 expandCollapse
                     .enter()
                     .insert("div", ":first-child")
-                    .classed(HierarchySlicer.ItemContainerExpander.class, true);
+                    .classed(HierarchySlicer.ItemContainerExpander.className, true);
 
                 expandCollapse
                     .style({
@@ -801,12 +801,12 @@ module powerbi.extensibility.visual {
                 expandCollapseIcon.exit().remove();
             } else { // No expand/collapse
                 treeItemElementParent
-                    .selectAll(HierarchySlicer.ItemContainerExpander.selector)
+                    .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
                     .remove();
             }
 
             let treeItemElement: UpdateSelection<any> = treeItemElementParent
-                .selectAll(HierarchySlicer.ItemContainerChild.selector)
+                .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
                 .data((d: HierarchySlicerDataPoint) => {
                     return [d];
                 });
@@ -814,10 +814,10 @@ module powerbi.extensibility.visual {
             treeItemElement
                 .enter()
                 .append("div")
-                .classed(HierarchySlicer.ItemContainerChild.class, true);
+                .classed(HierarchySlicer.ItemContainerChild.className, true);
 
             let checkBoxParent: UpdateSelection<any> = treeItemElement
-                .selectAll(HierarchySlicer.Input.selector)
+                .selectAll(HierarchySlicer.Input.selectorName)
                 .data((d: HierarchySlicerDataPoint) => {
                     return [d];
                 });
@@ -825,7 +825,7 @@ module powerbi.extensibility.visual {
             checkBoxParent
                 .enter()
                 .append("div")
-                .classed(HierarchySlicer.Input.class, true);
+                .classed(HierarchySlicer.Input.className, true);
 
             let checkBoxInput: UpdateSelection<any> = checkBoxParent
                 .selectAll("input")
@@ -844,7 +844,7 @@ module powerbi.extensibility.visual {
             }
 
             let checkBoxSpan: UpdateSelection<any> = checkBoxParent
-                .selectAll(HierarchySlicer.Checkbox.selector)
+                .selectAll(HierarchySlicer.Checkbox.selectorName)
                 .data((d: HierarchySlicerDataPoint) => {
                     return [d];
                 });
@@ -852,7 +852,7 @@ module powerbi.extensibility.visual {
             checkBoxSpan
                 .enter()
                 .append("span")
-                .classed(HierarchySlicer.Checkbox.class, true);;
+                .classed(HierarchySlicer.Checkbox.className, true);
 
             checkBoxSpan
                 .style({
@@ -863,7 +863,7 @@ module powerbi.extensibility.visual {
                 });
 
             let labelElement: UpdateSelection<any> = treeItemElement
-                .selectAll(HierarchySlicer.LabelText.selector)
+                .selectAll(HierarchySlicer.LabelText.selectorName)
                 .data((d: HierarchySlicerDataPoint) => {
                     return [d];
                 });
@@ -871,7 +871,7 @@ module powerbi.extensibility.visual {
             labelElement
                 .enter()
                 .append("span")
-                .classed(HierarchySlicer.LabelText.class, true);
+                .classed(HierarchySlicer.LabelText.className, true);
 
             labelElement
                 .style({
@@ -904,7 +904,7 @@ module powerbi.extensibility.visual {
                 } else {
                     this.slicerHeader.style("display", "none");
                 }
-                this.slicerHeader.select(HierarchySlicer.HeaderText.selector)
+                this.slicerHeader.select(HierarchySlicer.HeaderText.selectorName)
                     .text(settings.header.title.trim())
                     .style({
                         "color": settings.header.fontColor,
@@ -924,7 +924,7 @@ module powerbi.extensibility.visual {
                 this.slicerBody
                     .classed("slicerBody", true);
 
-                let slicerText = rowSelection.selectAll(HierarchySlicer.LabelText.selector);
+                let slicerText = rowSelection.selectAll(HierarchySlicer.LabelText.selectorName);
 
                 slicerText.text((d: HierarchySlicerDataPoint) => {
                     return d.value;
@@ -932,14 +932,14 @@ module powerbi.extensibility.visual {
 
                 if (interactivityService && this.slicerBody) {
                     let body = this.slicerBody.attr("width", this.viewport.width);
-                    let expanders = body.selectAll(HierarchySlicer.ItemContainerExpander.selector);
-                    let slicerItemContainers = body.selectAll(HierarchySlicer.ItemContainerChild.selector);
-                    let slicerItemLabels = body.selectAll(HierarchySlicer.LabelText.selector);
-                    let slicerItemInputs = body.selectAll(HierarchySlicer.Input.selector);
-                    let slicerClear = this.slicerHeader.select(HierarchySlicer.Clear.selector);
-                    let slicerExpand = this.slicerHeader.select(HierarchySlicer.Expand.selector);
-                    let slicerCollapse = this.slicerHeader.select(HierarchySlicer.Collapse.selector);
-                    let headerSpinner = this.slicerHeader.select(HierarchySlicer.HeaderSpinner.selector);
+                    let expanders = body.selectAll(HierarchySlicer.ItemContainerExpander.selectorName);
+                    let slicerItemContainers = body.selectAll(HierarchySlicer.ItemContainerChild.selectorName);
+                    let slicerItemLabels = body.selectAll(HierarchySlicer.LabelText.selectorName);
+                    let slicerItemInputs = body.selectAll(HierarchySlicer.Input.selectorName);
+                    let slicerClear = this.slicerHeader.select(HierarchySlicer.Clear.selectorName);
+                    let slicerExpand = this.slicerHeader.select(HierarchySlicer.Expand.selectorName);
+                    let slicerCollapse = this.slicerHeader.select(HierarchySlicer.Collapse.selectorName);
+                    let headerSpinner = this.slicerHeader.select(HierarchySlicer.HeaderSpinner.selectorName);
 
                     // Remove header spinner
                     try {
@@ -978,12 +978,12 @@ module powerbi.extensibility.visual {
                     }
 
                     this.behavior.styleSlicerInputs(
-                        rowSelection.select(HierarchySlicer.ItemContainerChild.selector),
+                        rowSelection.select(HierarchySlicer.ItemContainerChild.selectorName),
                         this.interactivityService.hasSelection());
                 }
                 else {
                     this.behavior.styleSlicerInputs(
-                        rowSelection.select(HierarchySlicer.ItemContainerChild.selector),
+                        rowSelection.select(HierarchySlicer.ItemContainerChild.selectorName),
                         false);
                 }
 
@@ -1099,7 +1099,7 @@ module powerbi.extensibility.visual {
                                 counter: counter++
                             }
                         }]
-                    })
+                    });
                 });
         }
 

@@ -31,9 +31,9 @@ module powerbi.extensibility.visual {
     import IInteractivityService = powerbi.extensibility.utils.interactivity.IInteractivityService;
     import ISelectionHandler = powerbi.extensibility.utils.interactivity.ISelectionHandler;
     // powerbi.extensibility.utils.sq
-    import SQExpr = powerbi.extensibility.utils.sq.SQExpr;
-    import SQExprBuilder = powerbi.extensibility.utils.sq.SQExprBuilder;
-    import SemanticFilter_ext = powerbi.extensibility.utils.sq.SemanticFilter;
+    // import SQExpr = powerbi.extensibility.utils.sq.SQExpr;
+    // import SQExprBuilder = powerbi.extensibility.utils.sq.SQExprBuilder;
+    // import SemanticFilter_ext = powerbi.extensibility.utils.sq.SemanticFilter;
     // d3
     import Selection = d3.Selection;
     // powerbi.data
@@ -290,7 +290,7 @@ module powerbi.extensibility.visual {
         }
 
         public applyFilter() {
-            if (this.dataPoints.length === 0) { // Called without data
+           /* if (this.dataPoints.length === 0) { // Called without data
                 return;
             }
             let selectNrValues: number = 0
@@ -306,7 +306,7 @@ module powerbi.extensibility.visual {
                 let children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
                 let rootFilters = [];
                 if (children) {
-                    rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
+                    // rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
                     selectNrValues += children.memberCount;
                 } else {
                     rootFilters.push(rootLevels[0].id);
@@ -317,7 +317,7 @@ module powerbi.extensibility.visual {
                         selectNrValues++;
                         children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
                         if (children) {
-                            rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
+                            // rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
                             selectNrValues += children.memberCount;
                         } else {
                             rootFilters.push(rootLevels[i].id);
@@ -325,19 +325,19 @@ module powerbi.extensibility.visual {
                     }
                 }
                 
-                let rootFilter: SQExpr = rootFilters[0];
+                // let rootFilter: SQExpr = rootFilters[0];
                 for (let i = 1; i < rootFilters.length; i++) {
-                    rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
+                    // rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
                 }
 
                 if (selectNrValues > 120) {
 
                 }
                 
-                filter = SemanticFilter_ext.fromSQExpr(rootFilter);
-                let f = SemanticFilter_ext.fromSQExpr(rootFilter);
-                this.persistFilter(f);
-            }
+                // filter = SemanticFilter_ext.fromSQExpr(rootFilter);
+                // let f = SemanticFilter_ext.fromSQExpr(rootFilter);
+                // this.persistFilter(f);
+            }*/
         }
 
         private getParentDataPoints(dataPoints: HierarchySlicerDataPoint[], parentId: string): HierarchySlicerDataPoint[] {
@@ -355,8 +355,8 @@ module powerbi.extensibility.visual {
             }
         }
 
-        private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): { filters: SQExpr; memberCount: number; } {
-            let memberCount: number = 0;
+        private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): void {//{ filters: SQExpr; memberCount: number; } {
+        /*    let memberCount: number = 0;
             let childFilters = dataPoints.filter((d) => d.level === level && d.parentId === parentId && d.selected);
             let totalChildren = dataPoints.filter((d) => d.level === level && d.parentId === parentId).length;
             if (!childFilters || (childFilters.length === 0)) {
@@ -406,7 +406,7 @@ module powerbi.extensibility.visual {
                     filters: returnFilter,
                     memberCount: memberCount,
                 };
-            }
+            }*/
         }
 
         private persistFilter(filter: ISemanticFilter) {
