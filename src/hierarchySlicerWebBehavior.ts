@@ -318,54 +318,61 @@ module powerbi.extensibility.visual {
         }
 
         public applyFilter() {
-            /* if (this.dataPoints.length === 0) { // Called without data
-                 return;
-             }
-             let selectNrValues: number = 0
-             let filter: ISemanticFilter;
-             let rootLevels = this.dataPoints.filter((d) => d.level === 0 && d.selected);
+            if (this.dataPoints.length === 0) { // Called without data
+                return;
+            }
+            // simple filter
+            const target: IFilterTarget = null;
+            const values: string[] = this.dataPoints.filter((point) => point.isLeaf && point.selected).map((x) => x.value);
+            const filter: IBasicFilter = new window["powerbi-models"].BasicFilter(
+                target,
+                "In",
+                values);
+            /*let selectNrValues: number = 0;
+            //  let filter: ISemanticFilter;
+            let rootLevels = this.dataPoints.filter((d) => d.level === 0 && d.selected);
 
-             if (!rootLevels || (rootLevels.length === 0)) {
-                 this.selectionHandler.handleClearSelection();
-                 this.persistFilter(null);
-             }
-             else {
-                 selectNrValues++;
-                 let children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
-                 let rootFilters = [];
-                 if (children) {
-                     // rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
-                     selectNrValues += children.memberCount;
-                 } else {
-                     rootFilters.push(rootLevels[0].id);
-                 }
+            if (!rootLevels || (rootLevels.length === 0)) {
+                this.selectionHandler.handleClearSelection();
+                this.persistFilter(null);
+            }
+            else {
+                selectNrValues++;
+                let children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
+                let rootFilters = [];
+                if (children) {
+                    // rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
+                    selectNrValues += children.memberCount;
+                } else {
+                    rootFilters.push(rootLevels[0].id);
+                }
 
-                 if (rootLevels.length > 1) {
-                     for (let i = 1; i < rootLevels.length; i++) {
-                         selectNrValues++;
-                         children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
-                         if (children) {
-                             // rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
-                             selectNrValues += children.memberCount;
-                         } else {
-                             rootFilters.push(rootLevels[i].id);
-                         }
-                     }
-                 }
+                if (rootLevels.length > 1) {
+                    for (let i = 1; i < rootLevels.length; i++) {
+                        selectNrValues++;
+                        children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
+                        if (children) {
+                            // rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
+                            selectNrValues += children.memberCount;
+                        } else {
+                            rootFilters.push(rootLevels[i].id);
+                        }
+                    }
+                }
 
-                 // let rootFilter: SQExpr = rootFilters[0];
-                 for (let i = 1; i < rootFilters.length; i++) {
-                     // rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
-                 }
+                // let rootFilter: SQExpr = rootFilters[0];
+                for (let i = 1; i < rootFilters.length; i++) {
+                    // rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
+                }
 
-                 if (selectNrValues > 120) {
+                if (selectNrValues > 120) {
 
-                 }
+                }
 
-                 // filter = SemanticFilter_ext.fromSQExpr(rootFilter);
-                 // let f = SemanticFilter_ext.fromSQExpr(rootFilter);
-                 // this.persistFilter(f);
-             }*/
+                // filter = SemanticFilter_ext.fromSQExpr(rootFilter);
+                // let f = SemanticFilter_ext.fromSQExpr(rootFilter);
+                // this.persistFilter(f);
+            }*/
         }
 
         private getParentDataPoints(dataPoints: HierarchySlicerDataPoint[], parentId: string): HierarchySlicerDataPoint[] {

@@ -130,48 +130,7 @@ module powerbi.extensibility.visual {
         };
     }*/
 
-    export interface HierarchySlicerDataPoint extends SelectableDataPoint {
-        value: string;
-        tooltip: string;
-        level: number;
-        mouseOver?: boolean;
-        mouseOut?: boolean;
-        isSelectAllDataPoint?: boolean;
-        selectable?: boolean;
-        partialSelected: boolean;
-        id: {}; // SQExpr;
-        isLeaf: boolean;
-        isExpand: boolean;
-        isHidden: boolean;
-        ownId: string;
-        parentId: string;
-        order: number;
-    }
 
-    export interface HierarchySlicerData {
-        dataPoints: HierarchySlicerDataPoint[];
-        hasSelectionOverride?: boolean;
-        settings: HierarchySlicerSettings;
-        levels: number;
-    }
-
-    export interface HierarchySlicerBehaviorOptions {
-        hostServices: IVisualHost;
-        expanders: Selection<any>;
-        slicerBodySpinner: Selection<any>;
-        slicerContainer: Selection<any>;
-        slicerItemContainers: Selection<any>;
-        slicerItemLabels: Selection<any>;
-        slicerItemInputs: Selection<any>;
-        slicerClear: Selection<any>;
-        slicerExpand: Selection<any>;
-        slicerCollapse: Selection<any>;
-        headerSpinner: Selection<any>;
-        dataPoints: HierarchySlicerDataPoint[];
-        interactivityService: IInteractivityService;
-        slicerSettings: HierarchySlicerSettings;
-        levels: number;
-    }
 
     export class HierarchySlicer implements IVisual {
         // MDL icons
@@ -341,42 +300,41 @@ module powerbi.extensibility.visual {
                     let labelValue: string = valueFormatter.format(rows[r][c], format);
                     labelValue = labelValue === null ? "(blank)" : labelValue;
 
-                    /*let value: SQConstantExpr;
-                    if (rows[r][c] === null) {
-                        value = SQExprBuilder.nullConstant();
-                    } else {
-                        if (dataType.text) {
-                            value = SQExprBuilder.text(<string>rows[r][c]);
-                        } else if (dataType.integer) {
-                            value = SQExprBuilder.integer(<number>rows[r][c]);
-                        } else if (dataType.numeric) {
-                            value = SQExprBuilder.double(<number>rows[r][c]);
-                        } else if (dataType.bool) {
-                            value = SQExprBuilder.boolean(<boolean>rows[r][c]);
-                        } else if (dataType.dateTime) {
-                            value = SQExprBuilder.dateTime(<Date>rows[r][c]);
-                        } else {
-                            value = SQExprBuilder.text(<string>rows[r][c]);
-                        }
-                    }
-                    let filterExpr = SQExprBuilder.compare(
-                        QueryComparisonKind.Equal,
-                        dataView.table.columns[c].expr ?
-                            <SQExpr>dataView.table.columns[c].expr :
-                            <SQExpr>dataView.categorical.categories[0].identityFields[c], // Needed for PBI May 2016
-                        value);
+                    // let value: IBasicFilter;
+                    // if (rows[r][c] === null) {
+                    // } else {
+                    //     if (dataType.text) {
+                    //         value = SQExprBuilder.text(<string>rows[r][c]);
+                    //     } else if (dataType.integer) {
+                    //         value = SQExprBuilder.integer(<number>rows[r][c]);
+                    //     } else if (dataType.numeric) {
+                    //         value = SQExprBuilder.double(<number>rows[r][c]);
+                    //     } else if (dataType.bool) {
+                    //         value = SQExprBuilder.boolean(<boolean>rows[r][c]);
+                    //     } else if (dataType.dateTime) {
+                    //         value = SQExprBuilder.dateTime(<Date>rows[r][c]);
+                    //     } else {
+                    //         value = SQExprBuilder.text(<string>rows[r][c]);
+                    //     }
+                    // }
+                    // let filterExpr = SQExprBuilder.compare(
+                    //     QueryComparisonKind.Equal,
+                    //     dataView.table.columns[c].expr ?
+                    //         <SQExpr>dataView.table.columns[c].expr :
+                    //         <SQExpr>dataView.categorical.categories[0].identityFields[c], // Needed for PBI May 2016
+                    //     value);
 
-                    if (c > 0) {
-                        parentExpr = SQExprBuilder.and(parentExpr, filterExpr);
-                    }
-                    else {
-                        parentId = "";
-                        parentExpr = filterExpr;
-                    }*/
-                    if (c < 0) {
-                        parentId = "";
-                        // parentExpr = filterExpr;
-                    }
+                    // if (c > 0) {
+                    //     parentExpr = SQExprBuilder.and(parentExpr, filterExpr);
+                    // }
+                    // else {
+                    //     parentId = "";
+                    //     parentExpr = filterExpr;
+                    // }
+                    // if (c < 0) {
+                    //     parentId = "";
+                    //     // parentExpr = filterExpr;
+                    // }
                     let ownId = parentId + (parentId === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + c;
                     let isLeaf = c === rows[r].length - 1;
 
@@ -888,11 +846,11 @@ module powerbi.extensibility.visual {
                     });
 
                 // Header icons
-                this.slicerHeader.selectAll("span")
+                this.slicerHeader.selectAll("button")
                     .style({
-                        "width": PixelConverter.fromPointToPixel(+settings.header.textSize) + "px",
-                        "height": PixelConverter.fromPointToPixel(+settings.header.textSize) + "px",
-                        "font-size": Math.ceil(.75 * PixelConverter.fromPointToPixel(+settings.header.textSize)) + "px",
+                        "width": PixelConverter.toString(PixelConverter.fromPointToPixel(+settings.header.textSize)),
+                        "height": PixelConverter.toString(PixelConverter.fromPointToPixel(+settings.header.textSize)),
+                        "font-size": PixelConverter.toString(Math.ceil(.75 * PixelConverter.fromPointToPixel(+settings.header.textSize))),
                         "color": settings.slicerText.fontColor,
                     });
 
@@ -1006,25 +964,6 @@ module powerbi.extensibility.visual {
             };
         }
 
-        // private getBorderWidth(outlineElement: string, outlineWeight: number): string {
-        //     switch (outlineElement) {
-        //         case "None":
-        //             return "0px";
-        //         case "BottomOnly":
-        //             return "0px 0px " + outlineWeight + "px 0px";
-        //         case "TopOnly":
-        //             return outlineWeight + "px 0px 0px 0px";
-        //         case "TopBottom":
-        //             return outlineWeight + "px 0px " + outlineWeight + "px 0px";
-        //         case "LeftRight":
-        //             return "0px " + outlineWeight + "px 0px " + outlineWeight + "px";
-        //         case "Frame":
-        //             return outlineWeight + "px";
-        //         default:
-        //             return outlineElement.replace("1", outlineWeight.toString());
-        //     }
-        // }
-
         private createSearchHeader(container: JQuery): void {
             this.searchHeader = $("<div>")
                 .appendTo(container)
@@ -1087,6 +1026,7 @@ module powerbi.extensibility.visual {
             const instanceEnumeration: VisualObjectInstanceEnumeration = HierarchySlicerSettings.enumerateObjectInstances(
                 this.settings || HierarchySlicerSettings.getDefault(),
                 options);
+            // ignore rendering general settings ( it include only hidden properties )
             if (options.objectName === "general") {
                 return;
             }

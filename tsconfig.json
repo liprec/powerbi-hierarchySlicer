@@ -16,6 +16,7 @@
     "node_modules/powerbi-visuals-utils-svgutils/lib/index.d.ts",
     "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.d.ts",
     "src/settings.ts",
+    "src/dataInterfaces.ts",
     "src/hierarchySlicerTreeView.ts",
     "src/hierarchySlicerWebBehavior.ts",
     "src/hierarchySlicer.ts"
