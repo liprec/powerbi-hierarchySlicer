@@ -44,4 +44,24 @@ module powerbi.extensibility.visual {
         slicerSettings: HierarchySlicerSettings;
         levels: number;
     }
+
+    export interface HierarchySlicerTreeViewOptions {
+        enter: (selection: d3.Selection<any>) => void;
+        exit: (selection: d3.Selection<any>) => void;
+        update: (selection: d3.Selection<any>) => void;
+        // loadMoreData: () => void;
+        baseContainer: d3.Selection<any>;
+        rowHeight: number;
+        viewport: IViewport;
+        scrollEnabled: boolean;
+        // isReadMode: () => boolean;
+    }
+
+    export interface IHierarchySlicerTreeView {
+        data(data: any[], dataIdFunction: (d) => {}, dataAppended: boolean): IHierarchySlicerTreeView;
+        rowHeight(rowHeight: number): IHierarchySlicerTreeView;
+        viewport(viewport: IViewport): IHierarchySlicerTreeView;
+        render(): void;
+        empty(): void;
+    }
 }

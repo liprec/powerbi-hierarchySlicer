@@ -1304,11 +1304,17 @@ li, ol, ul {
     display: none;
 }
 
-.slicerContainer .slicerItemContainer:hover .slicerItemContainerChild .slicerCheckbox span.checkbox {
-    border-color: #666;
+.slicerContainer .slicerItemContainer span.checkbox {
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: #666;
 }
-.slicerContainer .slicerItemContainer:hover .slicerItemContainerChild .slicerCheckbox.selected span.checkbox {
-    border-color: #212121;
+.slicerContainer .slicerItemContainer:hover span.checkbox {
+    outline-color: #212121;
+}
+
+.slicerContainer .slicerItemContainer input:checked + span.checkbox {
+    background-color: #212121;
 }
 
 .slicerContainer.isMultiSelectEnabled :not(.partiallySelected).slicerCheckbox.selected span.checkbox::before {
@@ -1395,4 +1401,37 @@ li, ol, ul {
     position: absolute;
     display: block;
     opacity: 0.8;
+}
+
+.slicerItemContainerExpander {
+    padding: 0;
+    width: 1em;
+    height: 1em;
+    background-color: inherit;
+    border-style: none;
+}
+
+.slicerItemContainerExpander path {
+    transform-origin: 50% 50%;
+    transition-property: "transform";
+    transition-duration: 300ms;
+}
+
+.slicerItemContainerExpander.expanded path {
+    transform: rotate(0deg);
+}
+
+.slicerItemContainerExpander.collapsed path {
+    transform: rotate(-90deg);
+
+}
+
+.slicerItemContainerChild input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    border: none;
 }

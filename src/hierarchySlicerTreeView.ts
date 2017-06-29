@@ -33,26 +33,6 @@ module powerbi.extensibility.visual {
     // d3
     import Selection = d3.Selection;
 
-    export interface HierarchySlicerTreeViewOptions {
-        enter: (selection: Selection<any>) => void;
-        exit: (selection: Selection<any>) => void;
-        update: (selection: Selection<any>) => void;
-        // loadMoreData: () => void;
-        baseContainer: Selection<any>;
-        rowHeight: number;
-        viewport: IViewport;
-        scrollEnabled: boolean;
-        // isReadMode: () => boolean;
-    }
-
-    export interface IHierarchySlicerTreeView {
-        data(data: any[], dataIdFunction: (d) => {}, dataAppended: boolean): IHierarchySlicerTreeView;
-        rowHeight(rowHeight: number): IHierarchySlicerTreeView;
-        viewport(viewport: IViewport): IHierarchySlicerTreeView;
-        render(): void;
-        empty(): void;
-    }
-
     export module HierarchySlicerTreeViewFactory {
         export function createListView(options): IHierarchySlicerTreeView {
             return new HierarchySlicerTreeView(options);
@@ -64,6 +44,7 @@ module powerbi.extensibility.visual {
      * It can create lists containing either HTML or SVG elements.
      */
     class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
+
         private getDatumIndex: (d: any) => {};
         private _data: any[];
         private _totalRows: number;
@@ -147,19 +128,21 @@ module powerbi.extensibility.visual {
             let scrollPosition = (scrollTop === 0) ? 0 : Math.floor(scrollTop / rowHeight);
             let transformAttr = SVGUtil.translateWithPixels(0, scrollPosition * rowHeight);
 
+            visibleGroupContainer.selectAll("*").remove();
             let rowSelection = visibleGroupContainer
                 .selectAll(".row")
                 .data(<HierarchySlicerDataPoint[]>this._data);
-
             rowSelection
                 .enter()
                 .append("div")
-                .classed("row", true);
-
-            rowSelection
+                .classed("row", true)
                 .style({
                     "height": PixelConverter.fromPointToPixel(this.options.rowHeight) + "px"
                 });
+
+            rowSelection
+                .exit()
+                .remove();
 
             rowSelection.call((selection: Selection<any>) => {
                 options.enter(selection);
@@ -168,11 +151,6 @@ module powerbi.extensibility.visual {
             rowSelection.call((selection: Selection<any>) => {
                 options.update(selection);
             });
-
-            rowSelection
-                .exit()
-                .call(d => options.exit(d))
-                .remove();
         }
 
         private setTotalRows(): void {

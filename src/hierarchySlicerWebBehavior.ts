@@ -132,21 +132,7 @@ module powerbi.extensibility.visual {
             });
 
 
-            slicerCollapse.on("click", (d: HierarchySlicerDataPoint) => {
-                if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
-                    this.addSpinner();
-                    this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = false);
-                    this.persistExpand(true);
-                }
-            });
 
-            slicerExpand.on("click", (d: HierarchySlicerDataPoint) => {
-                if (this.dataPoints.filter((d) => !d.isExpand && !d.isLeaf).length > 0) {
-                    this.addSpinner();
-                    this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = true);
-                    this.persistExpand(true);
-                }
-            });
 
             options.slicerContainer.classed("hasSelection", true);
 
@@ -168,12 +154,12 @@ module powerbi.extensibility.visual {
 
             slicers.on("click", (d: HierarchySlicerDataPoint, index) => {
                 debugger;
+                (d3.event as MouseEvent).preventDefault();
                 if (!d.selectable) {
                     return;
                 }
                 this.addSpinner();
                 let settings: HierarchySlicerSettings = this.settings;
-                (d3.event as MouseEvent).preventDefault();
                 if (!settings.selection.singleSelect) { // multi select value
                     let selected = d.selected;
                     d.selected = !selected; // Toggle selection
@@ -200,7 +186,7 @@ module powerbi.extensibility.visual {
                     }
                 }
                 else { // single select value
-                    let selected = d.selected;
+                    let selected = !d.selected;
                     this.dataPoints.map((d) => d.selected = false); // Clear selection
                     if (!selected) {
                         let selectDataPoints = [d]; // Self
@@ -217,6 +203,22 @@ module powerbi.extensibility.visual {
                 this.applyFilter();
             });
 
+            // HEADER EVENTS
+            slicerCollapse.on("click", (d: HierarchySlicerDataPoint) => {
+                if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
+                    this.addSpinner();
+                    this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = false);
+                    this.persistExpand(true);
+                }
+            });
+
+            slicerExpand.on("click", (d: HierarchySlicerDataPoint) => {
+                if (this.dataPoints.filter((d) => !d.isExpand && !d.isLeaf).length > 0) {
+                    this.addSpinner();
+                    this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = true);
+                    this.persistExpand(true);
+                }
+            });
             slicerClear.on("click", (d: HierarchySlicerDataPoint) => {
                 this.selectionHandler.handleClearSelection();
                 this.persistFilter(null);
@@ -323,6 +325,9 @@ module powerbi.extensibility.visual {
             }
             // simple filter
             const selectedLeafs: HierarchySlicerDataPoint[] = this.dataPoints.filter((point) => point.isLeaf && point.selected);
+            if (!selectedLeafs.length) {
+                return;
+            }
             const target: IFilterTarget = selectedLeafs[0].filterTarget;
             const filter: IBasicFilter = new window["powerbi-models"].BasicFilter(
                 target,
@@ -446,16 +451,7 @@ module powerbi.extensibility.visual {
         }*/
 
         private persistFilter(filter: IFilter) {
-            this.hostServices.applyJsonFilter(filter,
-                hierarchySlicerProperties.filterPropertyIdentifier.objectName,
-                hierarchySlicerProperties.filterPropertyIdentifier.propertyName);
-
             let properties: { [propertyName: string]: DataViewPropertyValue } = {};
-            // if (filter) {
-            //     properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = filter;
-            // } else {
-            //     properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = "";
-            // }
             let filterValues = this.dataPoints.filter((d) => d.selected).map((d) => d.ownId).join(",");
             if (filterValues) {
                 properties[hierarchySlicerProperties.filterValuePropertyIdentifier.propertyName] = filterValues;
@@ -463,37 +459,22 @@ module powerbi.extensibility.visual {
                 properties[hierarchySlicerProperties.filterValuePropertyIdentifier.propertyName] = "";
             }
 
-            let selectionIdKeys =  this.dataPoints.filter((d) => d.selected).map(d => (d as any).getKey());
+            let selectionIdKeys = this.dataPoints.filter((d) => d.selected).map(d => d.ownId);
             properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = selectionIdKeys && JSON.stringify(selectionIdKeys) || "";
-
-            // properties = {};
-            // properties["filter"] = filter;
 
             let objects: VisualObjectInstancesToPersist = {
                 merge: [
                     <VisualObjectInstance>{
-                        objectName: "general", // hierarchySlicerProperties.filterPropertyIdentifier.objectName,
-                        properties: properties,
-                        selector: undefined
+                        objectName: hierarchySlicerProperties.filterPropertyIdentifier.objectName,
+                        properties: properties
                     }]
             };
 
             this.hostServices.persistProperties(objects);
-            // let json = //JSON.stringify(filter);
-            // let json = {
-            //     "target": {
-            //         "table": "Orders",
-            //         "column": "Customer Segment"
-            //     },
-            //     "logicalOperator": "And",
-            //     "conditions": [{
-            //         "value": "Small Business",
-            //         "operator": "Is"
-            //     }]
-            // };
-            // this.hostServices.applyJsonFilter(json, "general", "filter");
-            // this.hostServices.persistProperties(objects)
-            (<any>this.selectionHandler).sendSelectionToHost(null);
+            debugger;
+            this.hostServices.applyJsonFilter(filter,
+                hierarchySlicerProperties.filterPropertyIdentifier.objectName,
+                hierarchySlicerProperties.filterPropertyIdentifier.propertyName);
         }
 
         private persistExpand(updateScrollbar: boolean) {
