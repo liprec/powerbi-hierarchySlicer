@@ -322,12 +322,13 @@ module powerbi.extensibility.visual {
                 return;
             }
             // simple filter
-            const target: IFilterTarget = null;
-            const values: string[] = this.dataPoints.filter((point) => point.isLeaf && point.selected).map((x) => x.value);
+            const selectedLeafs: HierarchySlicerDataPoint[] = this.dataPoints.filter((point) => point.isLeaf && point.selected);
+            const target: IFilterTarget = selectedLeafs[0].filterTarget;
             const filter: IBasicFilter = new window["powerbi-models"].BasicFilter(
                 target,
                 "In",
-                values);
+                selectedLeafs.map((point) => point.value));
+            this.persistFilter(filter);
             /*let selectNrValues: number = 0;
             //  let filter: ISemanticFilter;
             let rootLevels = this.dataPoints.filter((d) => d.level === 0 && d.selected);
@@ -390,8 +391,8 @@ module powerbi.extensibility.visual {
             }
         }
 
-        private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): void {// { filters: SQExpr; memberCount: number; } {
-            /*    let memberCount: number = 0;
+        /*private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): void {// { filters: SQExpr; memberCount: number; } {
+                let memberCount: number = 0;
                 let childFilters = dataPoints.filter((d) => d.level === level && d.parentId === parentId && d.selected);
                 let totalChildren = dataPoints.filter((d) => d.level === level && d.parentId === parentId).length;
                 if (!childFilters || (childFilters.length === 0)) {
@@ -441,16 +442,20 @@ module powerbi.extensibility.visual {
                         filters: returnFilter,
                         memberCount: memberCount,
                     };
-                }*/
-        }
+                }
+        }*/
 
-        private persistFilter(filter: ISemanticFilter) {
+        private persistFilter(filter: IFilter) {
+            this.hostServices.applyJsonFilter(filter,
+                hierarchySlicerProperties.filterPropertyIdentifier.objectName,
+                hierarchySlicerProperties.filterPropertyIdentifier.propertyName);
+
             let properties: { [propertyName: string]: DataViewPropertyValue } = {};
-            if (filter) {
-                properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = filter;
-            } else {
-                properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = "";
-            }
+            // if (filter) {
+            //     properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = filter;
+            // } else {
+            //     properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = "";
+            // }
             let filterValues = this.dataPoints.filter((d) => d.selected).map((d) => d.ownId).join(",");
             if (filterValues) {
                 properties[hierarchySlicerProperties.filterValuePropertyIdentifier.propertyName] = filterValues;
@@ -458,11 +463,11 @@ module powerbi.extensibility.visual {
                 properties[hierarchySlicerProperties.filterValuePropertyIdentifier.propertyName] = "";
             }
 
-            // let selectionIdKeys =  this.dataPoints.filter((d) => d.selected).map(d => (d as any).getKey());
-            // properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = selectionIdKeys && JSON.stringify(selectionIdKeys) || "";
+            let selectionIdKeys =  this.dataPoints.filter((d) => d.selected).map(d => (d as any).getKey());
+            properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = selectionIdKeys && JSON.stringify(selectionIdKeys) || "";
 
-            properties = {};
-            properties["filter"] = filter;
+            // properties = {};
+            // properties["filter"] = filter;
 
             let objects: VisualObjectInstancesToPersist = {
                 merge: [
@@ -475,17 +480,17 @@ module powerbi.extensibility.visual {
 
             this.hostServices.persistProperties(objects);
             // let json = //JSON.stringify(filter);
-            let json = {
-                "target": {
-                    "table": "Orders",
-                    "column": "Customer Segment"
-                },
-                "logicalOperator": "And",
-                "conditions": [{
-                    "value": "Small Business",
-                    "operator": "Is"
-                }]
-            };
+            // let json = {
+            //     "target": {
+            //         "table": "Orders",
+            //         "column": "Customer Segment"
+            //     },
+            //     "logicalOperator": "And",
+            //     "conditions": [{
+            //         "value": "Small Business",
+            //         "operator": "Is"
+            //     }]
+            // };
             // this.hostServices.applyJsonFilter(json, "general", "filter");
             // this.hostServices.persistProperties(objects)
             (<any>this.selectionHandler).sendSelectionToHost(null);

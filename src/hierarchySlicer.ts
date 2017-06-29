@@ -339,6 +339,10 @@ module powerbi.extensibility.visual {
                     let isLeaf = c === rows[r].length - 1;
 
                     let dataPoint: HierarchySlicerDataPoint = {
+                        filterTarget: {
+                            table: dataView.table.columns[c].queryName.substr(0, dataView.table.columns[c].queryName.indexOf(".")),
+                            column: dataView.table.columns[c].displayName
+                        },
                         identity: null, // identity,
                         selected: selectedIds.filter((d) => d === ownId).length > 0,
                         value: labelValue,
@@ -483,7 +487,7 @@ module powerbi.extensibility.visual {
                 .append("button")
                 .classed(HierarchySlicer.Icon.className, true)
                 .attr("title", (d) => d.title)
-                .each(function(d) { this.classList.add(d.class); })
+                .each(function (d) { this.classList.add(d.class); })
                 .on("mouseover", function (d) { d3.select(this).style("color", self.settings.slicerText.hoverColor); })
                 .on("mouseout", function (d) { d3.select(this).style("color", self.settings.slicerText.fontColor); })
                 .html((d) => d.icon);

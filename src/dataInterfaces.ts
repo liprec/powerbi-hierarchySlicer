@@ -17,6 +17,7 @@ module powerbi.extensibility.visual {
         ownId: string;
         parentId: string;
         order: number;
+        filterTarget: IFilterTarget;
     }
 
     export interface HierarchySlicerData {
