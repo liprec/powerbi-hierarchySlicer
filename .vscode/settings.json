@@ -11,27 +11,26 @@
     ".tmp": true
   },
   "search.exclude": {
-    ".tmp": true,
-    "typings": true
+    ".tmp": true
   },
   "json.schemas": [
     {
       "fileMatch": [
         "/pbiviz.json"
       ],
-      "url": "./.api/v1.6.0/schema.pbiviz.json"
+      "url": "./.api/v1.7.0/schema.pbiviz.json"
     },
     {
       "fileMatch": [
         "/capabilities.json"
       ],
-      "url": "./.api/v1.6.0/schema.capabilities.json"
+      "url": "./.api/v1.7.0/schema.capabilities.json"
     },
     {
       "fileMatch": [
-        "./external/advancedFilter.json"
+        "/dependencies.json"
       ],
-      "url": "./external/schema.advancedFilter.json"
+      "url": "./.api/v1.7.0/schema.dependencies.json"
     }
   ]
 }
