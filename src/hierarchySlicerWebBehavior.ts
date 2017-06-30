@@ -346,7 +346,6 @@ module powerbi.extensibility.visual {
                         properties: properties
                     }]
             };
-            debugger;
 
             this.hostServices.persistProperties(objects);
             this.hostServices.applyJsonFilter(filter,

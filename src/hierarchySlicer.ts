@@ -123,7 +123,6 @@ module powerbi.extensibility.visual {
             let order: number = 0;
             let isRagged: boolean = false;
             let raggedParents = [];
-            debugger;
             selectedIds = this.settings.general.selected.split(",");
             expandedIds = this.settings.general.expanded.split(",");
 
