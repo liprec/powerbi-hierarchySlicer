@@ -30,35 +30,12 @@ module powerbi.extensibility.visual {
     import IInteractiveBehavior = powerbi.extensibility.utils.interactivity.IInteractiveBehavior;
     import IInteractivityService = powerbi.extensibility.utils.interactivity.IInteractivityService;
     import ISelectionHandler = powerbi.extensibility.utils.interactivity.ISelectionHandler;
-    // powerbi.extensibility.utils.sq
-    // import SQExpr = powerbi.extensibility.utils.sq.SQExpr;
-    // import SQExprBuilder = powerbi.extensibility.utils.sq.SQExprBuilder;
-    // import SemanticFilter_ext = powerbi.extensibility.utils.sq.SemanticFilter;
     // d3
     import Selection = d3.Selection;
     // powerbi.data
     import ISemanticFilter = powerbi.data.ISemanticFilter;
 
     let hierarchySlicerProperties = {
-        selection: {
-            selectAll: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "selectAll" },
-            singleselect: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "singleSelect" },
-        },
-        header: {
-            show: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "show" },
-            title: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "title" },
-            fontColor: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "fontColor" },
-            background: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "background" },
-            textSize: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "textSize" },
-        },
-        items: {
-            emptyLeafs: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "emptyLeafs" },
-            fontColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "fontColor" },
-            background: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "background" },
-            selectedColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "selectedColor" },
-            hoverColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "hoverColor" },
-            textSize: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "textSize" },
-        },
         selectedPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selected" },
         expandedValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "expanded" },
         selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
@@ -153,7 +130,6 @@ module powerbi.extensibility.visual {
             });
 
             slicers.on("click", (d: HierarchySlicerDataPoint, index) => {
-                debugger;
                 (d3.event as MouseEvent).preventDefault();
                 if (!d.selectable) {
                     return;
@@ -188,7 +164,7 @@ module powerbi.extensibility.visual {
                 else { // single select value
                     let selected = !d.selected;
                     this.dataPoints.map((d) => d.selected = false); // Clear selection
-                    if (!selected) {
+                    if (selected) {
                         let selectDataPoints = [d]; // Self
                         selectDataPoints = selectDataPoints.concat(this.dataPoints.filter((dp) => dp.parentId.indexOf(d.ownId) >= 0)); // Children
                         selectDataPoints = selectDataPoints.concat(this.getParentDataPoints(this.dataPoints, d.parentId)); // Parents
@@ -334,51 +310,6 @@ module powerbi.extensibility.visual {
                 "In",
                 selectedLeafs.map((point) => point.value));
             this.persistFilter(filter);
-            /*let selectNrValues: number = 0;
-            //  let filter: ISemanticFilter;
-            let rootLevels = this.dataPoints.filter((d) => d.level === 0 && d.selected);
-
-            if (!rootLevels || (rootLevels.length === 0)) {
-                this.selectionHandler.handleClearSelection();
-                this.persistFilter(null);
-            }
-            else {
-                selectNrValues++;
-                let children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
-                let rootFilters = [];
-                if (children) {
-                    // rootFilters.push(SQExprBuilder.and(rootLevels[0].id, children.filters));
-                    selectNrValues += children.memberCount;
-                } else {
-                    rootFilters.push(rootLevels[0].id);
-                }
-
-                if (rootLevels.length > 1) {
-                    for (let i = 1; i < rootLevels.length; i++) {
-                        selectNrValues++;
-                        children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
-                        if (children) {
-                            // rootFilters.push(SQExprBuilder.and(rootLevels[i].id, children.filters));
-                            selectNrValues += children.memberCount;
-                        } else {
-                            rootFilters.push(rootLevels[i].id);
-                        }
-                    }
-                }
-
-                // let rootFilter: SQExpr = rootFilters[0];
-                for (let i = 1; i < rootFilters.length; i++) {
-                    // rootFilter = SQExprBuilder.or(rootFilter, rootFilters[i]);
-                }
-
-                if (selectNrValues > 120) {
-
-                }
-
-                // filter = SemanticFilter_ext.fromSQExpr(rootFilter);
-                // let f = SemanticFilter_ext.fromSQExpr(rootFilter);
-                // this.persistFilter(f);
-            }*/
         }
 
         private getParentDataPoints(dataPoints: HierarchySlicerDataPoint[], parentId: string): HierarchySlicerDataPoint[] {
@@ -396,60 +327,6 @@ module powerbi.extensibility.visual {
             }
         }
 
-        /*private getChildFilters(dataPoints: HierarchySlicerDataPoint[], parentId: string, level: number): void {// { filters: SQExpr; memberCount: number; } {
-                let memberCount: number = 0;
-                let childFilters = dataPoints.filter((d) => d.level === level && d.parentId === parentId && d.selected);
-                let totalChildren = dataPoints.filter((d) => d.level === level && d.parentId === parentId).length;
-                if (!childFilters || (childFilters.length === 0)) {
-                    return;
-                }
-                else if (childFilters[0].isLeaf) { // Leaf level
-                    if ((totalChildren !== childFilters.length) || this.options.slicerSettings.general.selfFilterEnabled) { // Needs extra check for empty search string
-                        let returnFilter = childFilters[0].id;
-                        memberCount += childFilters.length;
-                        if (childFilters.length > 1) {
-                            for (let i = 1; i < childFilters.length; i++) {
-                                returnFilter = SQExprBuilder.or(returnFilter, childFilters[i].id);
-                            }
-                        }
-                        return {
-                            filters: returnFilter,
-                            memberCount: memberCount,
-                        };
-                    } else {
-                        return;
-                    }
-                } else {
-                    let returnFilter: SQExpr;
-                    let allSelected = (totalChildren === childFilters.length);
-                    memberCount += childFilters.length;
-                    for (let i = 0; i < childFilters.length; i++) {
-                        let childChildFilter = this.getChildFilters(dataPoints, childFilters[i].ownId, level + 1);
-                        if ((childChildFilter) || this.options.slicerSettings.general.selfFilterEnabled) { // Needs extra check for empty search string
-                            allSelected = false;
-                            memberCount += childChildFilter.memberCount;
-                            if (returnFilter) {
-                                returnFilter = SQExprBuilder.or(returnFilter,
-                                    SQExprBuilder.and(childFilters[i].id,
-                                        childChildFilter.filters));
-                            } else {
-                                returnFilter = SQExprBuilder.and(childFilters[i].id, childChildFilter.filters);
-                            }
-                        } else {
-                            if (returnFilter) {
-                                returnFilter = SQExprBuilder.or(returnFilter, childFilters[i].id);
-                            } else {
-                                returnFilter = childFilters[i].id;
-                            }
-                        }
-                    }
-                    return allSelected ? undefined : {
-                        filters: returnFilter,
-                        memberCount: memberCount,
-                    };
-                }
-        }*/
-
         private persistFilter(filter: IFilter) {
             let properties: { [propertyName: string]: DataViewPropertyValue } = {};
             let filterValues = this.dataPoints.filter((d) => d.selected).map((d) => d.ownId).join(",");
@@ -460,7 +337,7 @@ module powerbi.extensibility.visual {
             }
 
             let selectionIdKeys = this.dataPoints.filter((d) => d.selected).map(d => d.ownId);
-            properties[hierarchySlicerProperties.filterPropertyIdentifier.propertyName] = selectionIdKeys && JSON.stringify(selectionIdKeys) || "";
+            properties[hierarchySlicerProperties.selectedPropertyIdentifier.propertyName] = selectionIdKeys.join(",") || "";
 
             let objects: VisualObjectInstancesToPersist = {
                 merge: [
@@ -469,9 +346,9 @@ module powerbi.extensibility.visual {
                         properties: properties
                     }]
             };
+            debugger;
 
             this.hostServices.persistProperties(objects);
-            debugger;
             this.hostServices.applyJsonFilter(filter,
                 hierarchySlicerProperties.filterPropertyIdentifier.objectName,
                 hierarchySlicerProperties.filterPropertyIdentifier.propertyName);

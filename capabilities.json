@@ -28,8 +28,7 @@
         "general": {
             "displayName": "General",
             "properties": {
-                "selection": {
-                    "displayName": "Selection",
+                "selected": {
                     "type": {
                         "text": true
                     }

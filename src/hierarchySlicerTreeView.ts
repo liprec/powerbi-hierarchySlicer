@@ -127,7 +127,6 @@ module powerbi.extensibility.visual {
             let scrollTop: number = 0; // this.scrollbarInner.node().scrollTop;
             let scrollPosition = (scrollTop === 0) ? 0 : Math.floor(scrollTop / rowHeight);
             let transformAttr = SVGUtil.translateWithPixels(0, scrollPosition * rowHeight);
-
             visibleGroupContainer.selectAll("*").remove();
             let rowSelection = visibleGroupContainer
                 .selectAll(".row")

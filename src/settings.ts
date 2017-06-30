@@ -51,7 +51,7 @@ module powerbi.extensibility.visual {
     }
 
     class GeneralSettings {
-        public selection: string = "";
+        public selected: string = "";
         public filterValues: string = "";
         public expanded: string = "";
         public hidden: boolean = false;

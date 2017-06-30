@@ -42,93 +42,8 @@ module powerbi.extensibility.visual {
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
 
-    // import SQExpr = powerbi.extensibility.utils.sq.SQExpr;
-    // import SQExprBuilder = powerbi.extensibility.utils.sq.SQExprBuilder;
-    // import SQConstantExpr = powerbi.extensibility.utils.sq.SQConstantExpr;
-    // import QueryComparisonKind = powerbi.extensibility.utils.sq.QueryComparisonKind;
-
     import DataViewObjects = powerbi.DataViewObjects;
     import DataViewObjectsModule = powerbi.extensibility.utils.dataview.DataViewObjects;
-
-    /*export let hierarchySlicerProperties = {
-        selection: {
-            selectAll: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "selectAll" },
-            singleselect: <DataViewObjectPropertyIdentifier>{ objectName: "selection", propertyName: "singleSelect" },
-        },
-        header: {
-            show: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "show" },
-            title: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "title" },
-            fontColor: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "fontColor" },
-            background: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "background" },
-            textSize: <DataViewObjectPropertyIdentifier>{ objectName: "header", propertyName: "textSize" },
-        },
-        items: {
-            emptyLeafs: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "emptyLeafs" },
-            fontColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "fontColor" },
-            background: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "background" },
-            selectedColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "selectedColor" },
-            hoverColor: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "hoverColor" },
-            textSize: <DataViewObjectPropertyIdentifier>{ objectName: "items", propertyName: "textSize" },
-        },
-        selectedPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selected" },
-        expandedValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "expanded" },
-        selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
-        filterPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filter" },
-        filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" },
-        defaultValue: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "defaultValue" },
-        selfFilterEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selfFilterEnabled" },
-    };*/
-
-    /*export interface HierarchySlicerSettings {
-        general: {
-            rows: number;
-            selectAll: boolean,
-            singleselect: boolean;
-            showDisabled: string;
-            outlineColor: string;
-            outlineWeight: number;
-            selfFilterEnabled: boolean;
-            version: number;
-        };
-        margin: IMargin;
-        header: {
-            borderBottomWidth: number;
-            show: boolean;
-            outline: string;
-            fontColor: string;
-            background: string;
-            textSize: number;
-            outlineColor: string;
-            outlineWeight: number;
-            title: string;
-        };
-        headerText: {
-            marginLeft: number;
-            marginTop: number;
-        };
-        slicerText: {
-            emptyLeafs: boolean;
-            textSize: number;
-            height: number;
-            width: number;
-            fontColor: string;
-            hoverColor: string;
-            selectedColor: string;
-            unselectedColor: string;
-            disabledColor: string;
-            marginLeft: number;
-            outline: string;
-            background: string;
-            transparency: number;
-            outlineColor: string;
-            outlineWeight: number;
-            borderStyle: string;
-        };
-        slicerItemContainer: {
-            marginTop: number;
-            marginLeft: number;
-        };
-    }*/
 
 
 
@@ -182,65 +97,6 @@ module powerbi.extensibility.visual {
         private static HeaderSpinner: ClassAndSelector = createClassAndSelector("headerSpinner");
         private static Input: ClassAndSelector = createClassAndSelector("slicerCheckbox");
 
-        /*public DefaultSlicerSettings(): HierarchySlicerSettings {
-            return {
-                general: {
-                    rows: 0,
-                    selectAll: false,
-                    singleselect: true,
-                    showDisabled: "",
-                    outlineColor: "#808080",
-                    outlineWeight: 1,
-                    selfFilterEnabled: false,
-                    version: 801, // 0.08.01
-                },
-                margin: {
-                    top: 50,
-                    bottom: 50,
-                    right: 50,
-                    left: 50
-                },
-                header: {
-                    borderBottomWidth: 1,
-                    show: true,
-                    outline: "BottomOnly",
-                    fontColor: "#666666",
-                    background: undefined,
-                    textSize: 12,
-                    outlineColor: "#a6a6a6",
-                    outlineWeight: 1,
-                    title: "",
-                },
-                headerText: {
-                    marginLeft: 8,
-                    marginTop: 0
-                },
-                slicerText: {
-                    emptyLeafs: false,
-                    textSize: 12,
-                    height: 18,
-                    width: 0,
-                    fontColor: "#666666",
-                    hoverColor: "#212121",
-                    selectedColor: "#444444",
-                    unselectedColor: "#ffffff",
-                    disabledColor: "grey",
-                    marginLeft: 8,
-                    outline: "Frame",
-                    background: undefined,
-                    transparency: 0,
-                    outlineColor: "#000000",
-                    outlineWeight: 1,
-                    borderStyle: "Cut",
-                },
-                slicerItemContainer: {
-                    // The margin is assigned in the less file. This is needed for the height calculations.
-                    marginTop: 5,
-                    marginLeft: 0,
-                },
-            };
-        }*/
-
         public converter(dataView: DataView, searchText: string): HierarchySlicerData {
             if (!dataView ||
                 !dataView.table ||
@@ -267,9 +123,9 @@ module powerbi.extensibility.visual {
             let order: number = 0;
             let isRagged: boolean = false;
             let raggedParents = [];
-            selectedIds = this.settings.general.filterValues.split(",");
-            expandedIds = this.settings.general.expanded.split(",");
             debugger;
+            selectedIds = this.settings.general.selected.split(",");
+            expandedIds = this.settings.general.expanded.split(",");
 
             for (let r = 0; r < rows.length; r++) {
                 let parentExpr = null;
@@ -562,34 +418,11 @@ module powerbi.extensibility.visual {
 
         private updateSettings(): void {
             this.updateSelectionStyle();
-            // this.updateFontStyle();
-            // this.updateHeaderStyle();
         }
 
         private updateSelectionStyle(): void {
             this.slicerContainer.classed("isMultiSelectEnabled", !this.settings.selection.singleSelect);
         }
-
-        // private updateFontStyle(): void {
-        //     let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
-        //     if (objects) {
-        //         this.settings.slicerText.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.fontColor, this.settings.slicerText.fontColor);
-        //         this.settings.slicerText.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.background, this.settings.slicerText.background);
-        //         this.settings.slicerText.selectedColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.selectedColor, this.settings.slicerText.selectedColor);
-        //         this.settings.slicerText.hoverColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.items.hoverColor, this.settings.slicerText.hoverColor);
-        //         this.settings.slicerText.textSize = DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.items.textSize, this.settings.slicerText.textSize);
-        //     }
-        // }
-
-        // private updateHeaderStyle(): void {
-        //     let objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
-        //     if (objects) {
-        //         this.settings.header.show = DataViewObjectsModule.getValue<boolean>(objects, hierarchySlicerProperties.header.show, this.settings.header.show);
-        //         this.settings.header.fontColor = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.fontColor, this.settings.header.fontColor);
-        //         this.settings.header.background = DataViewObjectsModule.getFillColor(objects, hierarchySlicerProperties.header.background, this.settings.header.background);
-        //         this.settings.header.textSize = DataViewObjectsModule.getValue<number>(objects, hierarchySlicerProperties.header.textSize, this.settings.header.textSize);
-        //     }
-        // }
 
         private updateSlicerBodyDimensions(): void {
             let slicerViewport: IViewport = this.getBodyViewport(this.viewport);
@@ -686,7 +519,12 @@ module powerbi.extensibility.visual {
             checkBoxInput
                 .enter()
                 .append("input")
-                .attr("type", "checkbox");
+                .attr("type", "checkbox")
+                .each(function (d) {
+                    if (d.selected) {
+                        d3.select(this).attr("checked", true);
+                    }
+                });
 
             let alignCorrection = Math.ceil(.1 * PixelConverter.fromPointToPixel(settings.slicerText.textSize));
             if (alignCorrection <= 2) {
