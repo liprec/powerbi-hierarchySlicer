@@ -51,7 +51,4 @@ node_modules
 
 # Power BI custom visuals
 .tmp
-
-# Not finished visuals
-boxWhiskerChart
-hierarchySlicer
+*.pbiviz
