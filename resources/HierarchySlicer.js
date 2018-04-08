@@ -1284,8 +1284,7 @@ var powerbi;
                         var height = $(currentExpander[0][0].firstChild).height();
                         var width = $(currentExpander[0][0].firstChild).width();
                         var scale = height / 26.0;
-                        currentExpander.select(".collapsed").remove();
-                        currentExpander.select(".expanded").remove();
+                        currentExpander.select(".icon").remove();
                         var container = currentExpander.select(".spinner-icon").style("display", "inline");
                         var margin = _this.settings.slicerText.textSize / 1.25;
                         var spinner = container.append("div").classed("xsmall", true).classed("powerbi-spinner", true).style({
@@ -1333,6 +1332,30 @@ var powerbi;
                     slicers.on("click", function (d, index) {
                         if (!d.selectable) {
                             return;
+                        }
+                        var currentExpander = expanders.filter(function (e, l) { return index === l; });
+                        var height = $(currentExpander[0][0].firstChild).height();
+                        var width = $(currentExpander[0][0].firstChild).width();
+                        var scale = height / 26.0;
+                        currentExpander.select(".collapsed").remove();
+                        currentExpander.select(".expanded").remove();
+                        var container = currentExpander.select(".spinner-icon").style("display", "inline");
+                        var margin = _this.settings.slicerText.textSize / 1.25;
+                        var spinner = container.append("div").classed("xsmall", true).classed("powerbi-spinner", true).style({
+                            "top": "25%",
+                            "right": "50%",
+                            "transform": "scale("+ scale + ")",
+                            "margin": "0px;",
+                            "padding-left": "5px;",
+                            "display": "block;",
+                            "top": "25%",
+                            "right": "50%",
+                            "margin-top": _this.settings.slicerText.textSize < 12 ? "0px" : margin + "px",
+                            "margin-left": _this.settings.slicerText.textSize < 12 ? "0px" : (margin * .6) + "px"
+                        }).attr("ng-if", "viewModel.showProgressBar") //.attr("delay", "500")
+                            .append("div").classed("spinner", true);
+                        for (var i = 0; i < 5; i++) {
+                            spinner.append("div").classed("circle", true);
                         }
                         var selected = d.partialSelected ? !d.selected : d.selected;
                         if (d.ownId==="selectAll") {
@@ -1501,48 +1524,67 @@ var powerbi;
                         _this.slicerItemLabels[0][i].style.color = d.selected ? _this.settings.slicerText.selectedColor : _this.settings.slicerText.fontColor;                                                
                     });
                 };
+                HierarchySlicerWebBehavior.prototype.visitDataPoint = function (dataPoint, exprMap) {
+                    var name = dataPoint.columnExpr.queryName;
+                    var expr = dataPoint.columnExpr.expr;
+
+                    if (!exprMap[name]) {
+                        exprMap[name] = {
+                            expr: expr,
+                            ids: []
+                        };
+                    }
+
+                    exprMap[name].ids.push(dataPoint.id);
+
+                    if (dataPoint.parentDataPoint) {
+                        this.visitDataPoint(dataPoint.parentDataPoint, exprMap);
+                    }
+                }
                 HierarchySlicerWebBehavior.prototype.applyFilter = function () {
                     if (this.dataPoints.length === 0) {
                         return;
                     }
-                    var selectNrValues = 0;
-                    var filter;
-                    var rootLevels = this.dataPoints.filter(function (d) { return d.level === 0 && d.selected && d.ownId !== "selectAll"; });
+                    
+                    var rootLevels = this.dataPoints.filter(function (d) {
+                        return d.level === 0 && d.selected && d.ownId !== "selectAll";
+                    });
+
                     if (!rootLevels || (rootLevels.length === 0)) {
                         this.selectionHandler.handleClearSelection();
                         this.persistFilter(null);
-                    }
-                    else {
-                        selectNrValues++;
-                        var children = this.getChildFilters(this.dataPoints, rootLevels[0].ownId, 1);
-                        var rootFilters = [];
-                        if (children) {
-                            rootFilters.push(powerbi.data.SQExprBuilder.and(rootLevels[0].id, children.filters));
-                            selectNrValues += children.memberCount;
-                        }
-                        else {
-                            rootFilters.push(rootLevels[0].id);
-                        }
-                        if (rootLevels.length > 1) {
-                            for (var i = 1; i < rootLevels.length; i++) {
-                                selectNrValues++;
-                                children = this.getChildFilters(this.dataPoints, rootLevels[i].ownId, 1);
-                                if (children) {
-                                    rootFilters.push(powerbi.data.SQExprBuilder.and(rootLevels[i].id, children.filters));
-                                    selectNrValues += children.memberCount;
-                                }
-                                else {
-                                    rootFilters.push(rootLevels[i].id);
-                                }
+                    } else {
+                        var exprMap = {};
+
+                        var self = this;
+
+                        this.dataPoints.forEach(function (dataPoint) {
+                            if (dataPoint.selected && dataPoint.ownId !== "selectAll" && dataPoint.isLeaf) {
+                                self.visitDataPoint(dataPoint, exprMap)
                             }
-                        }
-                        var rootFilter = rootFilters[0];
-                        for (var i = 1; i < rootFilters.length; i++) {
-                            rootFilter = powerbi.data.SQExprBuilder.or(rootFilter, rootFilters[i]);
-                        }
-                        if (selectNrValues > 120) {
-                        }
-                        filter = powerbi.data.SemanticFilter.fromSQExpr(rootFilter);
+                        });
+
+                        var args = [];
+                        var values = [];
+
+                        Object.keys(exprMap).forEach(function (key) {
+                            var expr = exprMap[key];
+
+                            args.push(expr.expr);
+
+                            expr.ids.forEach(function (id, index) {
+                                if (!values[index]) {
+                                    values.push([]);
+                                }
+
+                                values[index].push(id);
+                            });
+                        });
+
+                        var finalExpr = powerbi.data.SQExprBuilder.inValues(args, values);
+
+                        var filter = powerbi.data.SemanticFilter.fromSQExpr(finalExpr);
+
                         this.persistFilter(filter);
                     }
                 };
@@ -1558,62 +1600,6 @@ var powerbi;
                         var returnParents = [];
                         returnParents = returnParents.concat(parent, this.getParentDataPoints(dataPoints, parent[0].parentId));
                         return returnParents;
-                    }
-                };
-                HierarchySlicerWebBehavior.prototype.getChildFilters = function (dataPoints, parentId, level) {
-                    var memberCount = 0;
-                    var childFilters = dataPoints.filter(function (d) { return d.level === level && d.parentId === parentId && d.selected; });
-                    var totalChildren = dataPoints.filter(function (d) { return d.level === level && d.parentId === parentId; }).length;
-                    if (!childFilters || (childFilters.length === 0)) {
-                        return;
-                    }
-                    else if (childFilters[0].isLeaf) {
-                        if ((totalChildren !== childFilters.length) || this.options.slicerSettings.general.selfFilterEnabled) {
-                            var returnFilter = childFilters[0].id;
-                            memberCount += childFilters.length;
-                            if (childFilters.length > 1) {
-                                for (var i = 1; i < childFilters.length; i++) {
-                                    returnFilter = powerbi.data.SQExprBuilder.or(returnFilter, childFilters[i].id);
-                                }
-                            }
-                            return {
-                                filters: returnFilter,
-                                memberCount: memberCount,
-                            };
-                        }
-                        else {
-                            return;
-                        }
-                    }
-                    else {
-                        var returnFilter;
-                        var allSelected = (totalChildren === childFilters.length);
-                        memberCount += childFilters.length;
-                        for (var i = 0; i < childFilters.length; i++) {
-                            var childChildFilter = this.getChildFilters(dataPoints, childFilters[i].ownId, level + 1);
-                            if ((childChildFilter) || this.options.slicerSettings.general.selfFilterEnabled) {
-                                allSelected = false;
-                                memberCount += childChildFilter.memberCount;
-                                if (returnFilter) {
-                                    returnFilter = powerbi.data.SQExprBuilder.or(returnFilter, powerbi.data.SQExprBuilder.and(childFilters[i].id, childChildFilter.filters));
-                                }
-                                else {
-                                    returnFilter = powerbi.data.SQExprBuilder.and(childFilters[i].id, childChildFilter.filters);
-                                }
-                            }
-                            else {
-                                if (returnFilter) {
-                                    returnFilter = powerbi.data.SQExprBuilder.or(returnFilter, childFilters[i].id);
-                                }
-                                else {
-                                    returnFilter = childFilters[i].id;
-                                }
-                            }
-                        }
-                        return allSelected ? undefined : {
-                            filters: returnFilter,
-                            memberCount: memberCount,
-                        };
                     }
                 };
                 HierarchySlicerWebBehavior.prototype.persistFilter = function (filter) {
@@ -1641,7 +1627,7 @@ var powerbi;
                         ]
                     };
                     this.hostServices.persistProperties(objects);
-                    this.hostServices.onSelect({ data2: [] });
+                    this.hostServices.onSelect({ data: [] });
                 };
                 HierarchySlicerWebBehavior.prototype.persistExpand = function (updateScrollbar) {
                     var properties = {};
@@ -1697,7 +1683,8 @@ var powerbi;
                         expandAll: "<svg  width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
                         collapseAll: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M19 13H5v-2h14v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
                         clearAll: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M5 13h14v-2H5v2zm-2 4h14v-2H3v2zM7 7v2h14V7H7z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
-                        expand: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
+                        collapse: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M9 5l7 7l-7 7Z\" /><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
+                        expand: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M17 9l0 10l-10 0Z\" /><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
                         checkboxTick: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 1 1\"><path d=\"M 0.04038059,0.6267767 0.14644661,0.52071068 0.42928932,0.80355339 0.3232233,0.90961941 z M 0.21715729,0.80355339 0.85355339,0.16715729 0.95961941,0.2732233 0.3232233,0.90961941 z\" style=\"fill:#ffffff;fill-opacity:1;stroke:none\" /></svg>"
                     };
                     if (options) {
@@ -1821,15 +1808,15 @@ var powerbi;
                     
                     // get FilterManager
                     let FilterManager = powerbi.visuals.filter.FilterManager;
-                    // convert Semantic Filter to Advanced fiter
-                    let restoredAdvancedFilter = FilterManager.restoreFilter(filter);
-                    if (restoredAdvancedFilter) {
+                    if (filter
+                        && filter.whereItems
+                        && filter.whereItems[0]
+                        && filter.whereItems[0].condition) {
                         let childIdentityFields = dataView.tree.root.childIdentityFields;
+                        let restoredAdvancedFilter = filter.whereItems[0].condition
                         // convert advanced filter conditions list to HierarchySlicer selected values format
-                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter.conditions,childIdentityFields, "");
+                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter,childIdentityFields, "");
                     }
-                    console.log(selectedIds);                    
-                    //selectedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.filterValuePropertyIdentifier, "").split(",");
                     expandedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.expandedValuePropertyIdentifier, "").split(",");
                     defaultSettings.general.selfFilterEnabled = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.selfFilterEnabled, defaultSettings.general.selfFilterEnabled);
                     if (selectAll) {
@@ -1851,8 +1838,8 @@ var powerbi;
                         });
                     }
                     for (var r = 0; r < rows.length; r++) {
-                        var parentExpr = null;
                         var parentId = "";
+                        var parentDataPoint = null;
                         for (var c = 0; c < hierarchyRows; c++) {
                             if ((rows[r][c] === null) && (!defaultSettings.general.emptyLeafs)) {
                                 isRagged = true;
@@ -1866,53 +1853,51 @@ var powerbi;
                             var value;
                             if (rows[r][c] === null) {
                                 value = powerbi.data.SQExprBuilder.nullConstant();
-                            }
-                            else {
+                            } else {
                                 if (dataType.text) {
                                     value = powerbi.data.SQExprBuilder.text(rows[r][c]);
-                                }
-                                else if (dataType.integer) {
+                                } else if (dataType.integer) {
                                     value = powerbi.data.SQExprBuilder.integer(rows[r][c]);
-                                }
-                                else if (dataType.numeric) {
+                                } else if (dataType.numeric) {
                                     value = powerbi.data.SQExprBuilder.double(rows[r][c]);
-                                }
-                                else if (dataType.bool) {
+                                } else if (dataType.bool) {
                                     value = powerbi.data.SQExprBuilder.boolean(rows[r][c]);
-                                }
-                                else if (dataType.dateTime) {
+                                } else if (dataType.dateTime) {
                                     value = powerbi.data.SQExprBuilder.dateTime(rows[r][c]);
-                                }
-                                else {
+                                } else {
                                     value = powerbi.data.SQExprBuilder.text(rows[r][c]);
                                 }
                             }
-                            var filterExpr = powerbi.data.SQExprBuilder.compare(0, dataView.table.columns[c].expr ? dataView.table.columns[c].expr : dataView.categorical.categories[0].identityFields[c], value);
-                            if (c > 0) {
-                                parentExpr = powerbi.data.SQExprBuilder.and(parentExpr, filterExpr);
-                            }
-                            else {
+                            if (c <= 0) {
                                 parentId = "";
-                                parentExpr = filterExpr;
                             }
                             var ownId = parentId + (parentId === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + c;
                             var isLeaf = c === hierarchyRows - 1;
                             var dataPoint = {
+                                parentDataPoint: parentDataPoint,
+                                columnExpr: dataView.table.columns[c],
                                 identity: null,
-                                selected: selectedIds.filter(function (d) { return d === ownId; }).length > 0,
+                                selected: selectedIds.filter(function (d) {
+                                    return d === ownId;
+                                }).length > 0,
                                 value: labelValue,
                                 tooltip: labelValue,
                                 level: c,
                                 selectable: true,
                                 partialSelected: false,
                                 isLeaf: isLeaf,
-                                isExpand: expandedIds === [] ? false : expandedIds.filter(function (d) { return d === ownId; }).length > 0 || false,
+                                isExpand: expandedIds === [] ? false : expandedIds.filter(function (d) {
+                                    return d === ownId; 
+                                }).length > 0 || false,
                                 isHidden: c === 0 ? false : true,
-                                id: filterExpr,
+                                id: value,
                                 ownId: ownId,
                                 parentId: parentId,
                                 order: order++,
                             };
+
+                            parentDataPoint = dataPoint;
+                            
                             parentId = ownId;
                             if (identityValues.indexOf(ownId) === -1) {
                                 identityValues.push(ownId);
@@ -1958,13 +1943,6 @@ var powerbi;
                     } else {
                         dataPoints = dataPoints.sort(function (d1, d2) { return d1.order - d2.order; });
                     }
-                    // Restore full selected children
-                    var selectedNodes = dataPoints.filter(function(d) { return d.selected; });
-                    var selectedParentIds = selectedNodes.map(function(d) { return d.parentId; }).filter(function(d) { return d!==""; });
-                    if (selectedParentIds.length > 0) {
-                        var removeParents = selectedParentIds.filter((value, index, self) => self.indexOf(value) === index) // Make unique
-                        selectedNodes = selectedNodes.filter(value => !removeParents.some(function(p) { return p===value.parentId; }));
-                    }
                     // Set isHidden property
                     var parentRootNodes = [];
                     var parentRootNodesTemp = [];
@@ -1983,13 +1961,21 @@ var powerbi;
                         parentRootNodes = parentRootNodesTotal;
                     }
                     // Determine partiallySelected
-                    for (var l = levels-1; l >= 0; l--) {
-                        var selectedRootNodes = dataPoints.filter(function(d) { return d.selected && d.level === l; });
-                        if (selectedRootNodes.length > 0) {
-                            for (var n = 0; n < selectedRootNodes.length; n++) {
-                                var children = dataPoints.filter(function(d) { return d.parentId === selectedRootNodes[n].ownId; })
-                                if (children.length > children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
-                                    selectedRootNodes[n].partialSelected = true;
+                    for (var l = levels; l >= 1; l--) {
+                        var selectedNodes = dataPoints.filter(function(d) { return d.selected && d.level === l; });
+                        if (selectedNodes.length > 0) {
+                            for (var n = 0; n < selectedNodes.length; n++) {
+                                var parents = dataPoints.filter(function(d) { return d.ownId === selectedNodes[n].parentId; })
+                                                        .filter((value, index, self) => self.indexOf(value) === index) // Make unique
+                                for (var p = 0; p < parents.length; p++) {
+                                    var children = dataPoints.filter(function(d) { return d.parentId === parents[p].ownId; })
+                                    if (children.length > children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
+                                        parents[p].partialSelected = true;
+                                        parents[p].selected = true;
+                                    }
+                                    if (children.length === children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
+                                        parents[p].selected = true;
+                                    }
                                 }
                             }
                         }
@@ -2091,6 +2077,24 @@ var powerbi;
                     this.viewport = viewPort;
                     this.updateInternal(false);
                 };
+                HierarchySlicer.prototype.convertAdvancedFilterConditionsToSlicerData = function (conditions, childIdentityFields) {
+                    if (conditions.Count === 0) {
+                        return [];
+                    }
+                    
+                    let result = [];
+                    conditions.values.forEach(function(value) {
+                        let res = "";
+                        
+                        value.reverse().forEach(function(level, index) {
+                            res += (res === "" ? "" : "_") + level.value.replace(/,/g, "") + "-" + index;
+                        });
+
+                        result.push(res);
+                    });
+                    
+                    return result;
+                };
                 HierarchySlicer.prototype.updateInternal = function (resetScrollbar) {
                     var dataView = this.dataView, data = this.data = this.converter(dataView, this.searchInput.val());
                     this.settings = this.data.settings;
@@ -2182,19 +2186,21 @@ var powerbi;
                             .append("div", ":first-child")
                             .classed(HierarchySlicer.ItemContainerExpander.class, true)
                             .insert("div")
-                            .classed("collapsed", function(d) { return !d.isExpand })
-                            .classed("expanded", function(d) { return d.isExpand })
                             .classed("icon", true)
                             .classed("icon-left", true)
                             .style({
                                 "visibility": function (d) { return d.isLeaf ? "hidden" : "visible"; },
                                 "font-size": PixelConverter.toString(PixelConverter.fromPointToPixel(settings.slicerText.textSize)),
-                                "margin-left" :  function(d) { return PixelConverter.toString(-settings.slicerText.textSize / ( 2.5)); },
+                                "margin-left" :  function(d) { return PixelConverter.toString(-settings.slicerText.textSize / (2.5)); },
                                 "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
                                 "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
                                 "color": settings.slicerText.fontColor,
                             })
-                                .html(_this.IconSet.expand);
+                                .html(function(d) { return d.isExpand ? _this.IconSet.expand : _this.IconSet.collapse });
+
+                                //.classed("collapsed", function(d) { return !d.isExpand })
+                                //.classed("expanded", function(d) { return d.isExpand })
+                            
                         expandCollapse.selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
                             .data(function(d) {
                                 return [d];
@@ -2258,6 +2264,10 @@ var powerbi;
                             "border-width": this.getBorderWidth(settings.header.outline, settings.header.outlineWeight),
                             "font-size": PixelConverter.fromPoint(settings.header.textSize),
                         });
+                        this.slicerHeader
+                            .selectAll(HierarchySlicer.Icon.class)
+                            .style("font-size", function(d) { return "20px";});
+                            //PixelConverter.toString(PixelConverter.fromPointToPixel(settings.header.textSize)));
                         this.slicerBody.classed("slicerBody", true);
                         var slicerText = rowSelection.selectAll(HierarchySlicer.LabelText.selector);
                         slicerText.text(function (d) {
@@ -2534,8 +2544,8 @@ var powerbi;
                                     type: { bool: true }
                                 },
                                 emptyLeafs: {
-                                    displayName: "Empty Leafs",
-                                    description: "Show empty leafs as (Blank)",
+                                    displayName: "Empty Leaves",
+                                    description: "Show empty leaves as (Blank)",
                                     type: { bool: true }
                                 },
                                 selectAll: {
@@ -2608,7 +2618,7 @@ var powerbi;
                     supportsHighlight: true,
                     suppressDefaultTitle: true,
                     //supportsSynchronizingFilterState: true,
-                    supportsMultiVisualSelection: true,
+                    //supportsMultiVisualSelection: true,
                     filterMappings: {
                         measureFilter: { targetRoles: ["Fields"] },
                     },
