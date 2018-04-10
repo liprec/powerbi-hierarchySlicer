@@ -872,6 +872,15 @@
     max-height: calc(100% - 12px)
 }
 
+.visual-HierarchySlicer1458836712039 .scroll-wrapper .scroll-element .scroll-bar {
+    background-color: #c8c8c8 !important;
+    opacity: 0
+}
+
+.visual-HierarchySlicer1458836712039 .scroll-wrapper .scroll-element .scroll-bar, .visual .scroll-wrapper .scroll-element .scroll-element_outer {
+    border-radius: 0;
+}
+
 .visual-HierarchySlicer1458836712039 .pbi-spinner {
     background-position: -32px 0;
     width: 20px;
@@ -1271,17 +1280,17 @@
 }
 
 /* Custom: no horizontal scrollbars */
-
+/*
 .visual-HierarchySlicer1458836712039 .scrollbar-inner>.scroll-element.scroll-x {
     visibility: hidden;
 }
-
+*/
 .visual-HierarchySlicer1458836712039 .slicerContainer {
     display: block;
 }
 
 .visual-HierarchySlicer1458836712039 .slicerContainer .slicerItemContainer * {
-    vertical-align: bottom !important;
+    vertical-align: bottom;
 }
 
 .visual-HierarchySlicer1458836712039 .icon {
@@ -1291,15 +1300,18 @@
     width: 12px;
     height: 12px;
     font-style: normal;
-    visibility: hidden;
     align-items: flex-end;
     padding: 0;
     background-color: inherit;
     border-style: none;
 }
 
-.visual-HierarchySlicer1458836712039 .hasSelection:hover .icon,
-.visual-HierarchySlicer1458836712039 .slicerContainer.hasSelection:hover .icon {
+.visual-HierarchySlicer1458836712039 .hiddenicon {
+    visibility: hidden;
+}
+
+.visual-HierarchySlicer1458836712039 .hasSelection:hover .hiddenicon,
+.visual-HierarchySlicer1458836712039 .slicerContainer.hasSelection:hover .hiddenicon {
     visibility: visible;
 }
 
@@ -1315,7 +1327,6 @@
     padding: 0;
     background-color: inherit;
     border-style: none;
-    vertical-align: baseline !important;
 }
 
 .visual-HierarchySlicer1458836712039 .slicerItemContainerExpander {
@@ -1332,12 +1343,8 @@
     transition-duration: 300ms;
 }
 
-.visual-HierarchySlicer1458836712039 .slicerItemContainerExpander .expanded svg {
-    transform: rotate(-45deg);
-}
-
-.visual-HierarchySlicer1458836712039 .slicerItemContainerExpander .collapsed svg {
-    transform: rotate(-90deg);
+.visual-HierarchySlicer1458836712039 .slicerItemContainerExpander svg {
+    vertical-align: sub !important;
 }
 
 .visual-HierarchySlicer1458836712039 .slicerItemContainerExpander .spinner-icon {
@@ -1354,10 +1361,6 @@
 
 .visual-HierarchySlicer1458836712039 .slicerContainer {
     height: 100%;
-}
-
-.visual-HierarchySlicer1458836712039 .slicerContainer .slicerItemContainer {
-    justify-content: flex-start !important;
 }
 
 .visual-HierarchySlicer1458836712039 .scroll-element,

@@ -1337,8 +1337,7 @@ var powerbi;
                         var height = $(currentExpander[0][0].firstChild).height();
                         var width = $(currentExpander[0][0].firstChild).width();
                         var scale = height / 26.0;
-                        currentExpander.select(".collapsed").remove();
-                        currentExpander.select(".expanded").remove();
+                        currentExpander.select(".icon").remove();
                         var container = currentExpander.select(".spinner-icon").style("display", "inline");
                         var margin = _this.settings.slicerText.textSize / 1.25;
                         var spinner = container.append("div").classed("xsmall", true).classed("powerbi-spinner", true).style({
@@ -1357,6 +1356,7 @@ var powerbi;
                         for (var i = 0; i < 5; i++) {
                             spinner.append("div").classed("circle", true);
                         }
+                        return;
                         var selected = d.partialSelected ? !d.selected : d.selected;
                         if (d.ownId==="selectAll") {
                             _this.dataPoints.forEach(function(dp) { dp.selected = !selected; });
@@ -1472,7 +1472,7 @@ var powerbi;
                         }
                     });
                     this.expanders.style({
-                        "color": function (d) {
+                        "fill": function (d) {
                             if (d.mouseOver)
                                 return _this.settings.slicerText.hoverColor;
                             else if (d.mouseOut) {
@@ -1659,6 +1659,7 @@ var powerbi;
                     title: { objectName: "header", propertyName: "title" },
                     fontColor: { objectName: "header", propertyName: "fontColor" },
                     background: { objectName: "header", propertyName: "background" },
+                    hoverColor: { objectName: "header", propertyName: "hoverColor" },
                     textSize: { objectName: "header", propertyName: "textSize" },
                 },
                 items: {
@@ -1667,6 +1668,12 @@ var powerbi;
                     background: { objectName: "items", propertyName: "background" },
                     hoverColor: { objectName: "items", propertyName: "hoverColor" },
                     textSize: { objectName: "items", propertyName: "textSize" },
+                },
+                search: {
+                    fontColor: { objectName: "search", propertyName: "fontColor" },
+                    iconColor: { objectName: "search", propertyName: "iconColor" },
+                    background: { objectName: "search", propertyName: "background" },
+                    textSize: { objectName: "search", propertyName: "textSize" },
                 },
                 selectedPropertyIdentifier: { objectName: "general", propertyName: "selected" },
                 expandedValuePropertyIdentifier: { objectName: "general", propertyName: "expanded" },
@@ -1680,12 +1687,14 @@ var powerbi;
             var HierarchySlicer = (function () {
                 function HierarchySlicer(options) {
                     this.IconSet = {
-                        expandAll: "<svg  width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
-                        collapseAll: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M19 13H5v-2h14v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
-                        clearAll: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M5 13h14v-2H5v2zm-2 4h14v-2H3v2zM7 7v2h14V7H7z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
+                        expandAll: "<svg  width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M19 19h-6v6h-2v-6H5v-2h6V11h2v6h6v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
+                        collapseAll: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M19 19H5v-2h14v2z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
+                        clearAll: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M5 19h14v-2H5v2zm-2 4h14v-2H3v2zM7 13v2h14V13H7z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
                         collapse: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M9 5l7 7l-7 7Z\" /><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
                         expand: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M17 9l0 10l-10 0Z\" /><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
-                        checkboxTick: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 1 1\"><path d=\"M 0.04038059,0.6267767 0.14644661,0.52071068 0.42928932,0.80355339 0.3232233,0.90961941 z M 0.21715729,0.80355339 0.85355339,0.16715729 0.95961941,0.2732233 0.3232233,0.90961941 z\" style=\"fill:#ffffff;fill-opacity:1;stroke:none\" /></svg>"
+                        checkboxTick: "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 1 1\"><path d=\"M 0.04038059,0.6267767 0.14644661,0.52071068 0.42928932,0.80355339 0.3232233,0.90961941 z M 0.21715729,0.80355339 0.85355339,0.16715729 0.95961941,0.2732233 0.3232233,0.90961941 z\" style=\"fill:#ffffff;fill-opacity:1;stroke:none\" /></svg>",
+                        search: "<svg  width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M15.75 15q1.371 0 2.602-0.521t2.168-1.459 1.459-2.168 0.521-2.602-0.521-2.602-1.459-2.168-2.168-1.459-2.602-0.521-2.602 0.521-2.168 1.459-1.459 2.168-0.521 2.602 0.521 2.602 1.459 2.168 2.168 1.459 2.602 0.521zM7.5 8.25q0-3.41 1.98-5.391t3.568-2.42 3.85-0.439 4.242 1.98 2.42 3.568 0.439 3.85-1.98 4.242-3.568 2.42-2.701 0.439q-2.93 0-5.273-1.91l-9.199 9.188q-0.223 0.223-0.527 0.223t-0.527-0.223-0.223-0.527 0.223-0.527l9.188-9.199q-1.91-2.344-1.91-5.273z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>",
+                        delete: "<svg  width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\"><path d=\"M10.889 10l8.926 8.936-0.879 0.879-8.936-8.926-8.936 8.926-0.879-0.879 8.926-8.936-8.926-8.936 0.879-0.879 8.936 8.926 8.936-8.926 0.879 0.879z\"/><path d=\"M0 0h24v24H0z\" fill=\"none\"/></svg>"
                     };
                     if (options) {
                         if (options.margin) {
@@ -1723,7 +1732,8 @@ var powerbi;
                             borderBottomWidth: 1,
                             show: true,
                             outline: "BottomOnly",
-                            fontColor: "#666666",
+                            fontColor: "#808080",
+                            hoverColor: "#666666",
                             background: undefined,
                             textSize: 10,
                             outlineColor: "#a6a6a6",
@@ -1751,6 +1761,12 @@ var powerbi;
                             outlineWeight: 1,
                             borderStyle: "Cut",
                         },
+                        search: {
+                            fontColor: "#808080",
+                            iconColor: "#666666",
+                            background: undefined,
+                            textSize: 10,
+                        },
                         slicerItemContainer: {
                             // The margin is assigned in the less file. This is needed for the height calculations.
                             marginTop: 5,
@@ -1770,7 +1786,7 @@ var powerbi;
                     }
                     return false;
                 };
-                                HierarchySlicer.prototype.converter = function (dataView, searchText) {
+                HierarchySlicer.prototype.converter = function (dataView, searchText) {
                     if (!dataView || !dataView.table || !dataView.table.rows || !(dataView.table.rows.length > 0) || !dataView.table.columns || !(dataView.table.columns.length > 0)) {
                         return {
                             dataPoints: [],
@@ -2019,10 +2035,11 @@ var powerbi;
                         .enter()
                         .append("div")
                         .classed(HierarchySlicer.Icon.class, true)
+                        .classed("hiddenicon", true)
                         .attr("title", function (d) { return d.title; })
                         .each(function (d) { this.classList.add(d.class); })
-                        .on("mouseover", function (d) { d3.select(this).style("color", _this.settings.slicerText.hoverColor); })
-                        .on("mouseout", function (d) { d3.select(this).style("color", _this.settings.slicerText.fontColor); })
+                        //.on("mouseover", function (d) { d3.select(this).style("color", _this.settings.slicerText.hoverColor); })
+                        //.on("mouseout", function (d) { d3.select(this).style("color", _this.settings.slicerText.fontColor); })
                         .html(function (d) { return d.icon; });
                     this.slicerHeader.append("div").classed(HierarchySlicer.HeaderText.class, true);
                     this.createSearchHeader($(this.slicerHeaderContainer.node()));
@@ -2114,6 +2131,7 @@ var powerbi;
                     this.updateSelectionStyle();
                     this.updateFontStyle();
                     this.updateHeaderStyle();
+                    this.updateSearchStyle();
                 };
                 HierarchySlicer.prototype.updateSelectionStyle = function () {
                     var objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
@@ -2136,8 +2154,18 @@ var powerbi;
                     if (objects) {
                         this.settings.header.show = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.show, this.settings.header.show);
                         this.settings.header.fontColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.fontColor, this.settings.header.fontColor);
+                        this.settings.header.hoverColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.hoverColor, this.settings.header.hoverColor);
                         this.settings.header.background = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.background, this.settings.header.background);
                         this.settings.header.textSize = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.textSize, this.settings.header.textSize);
+                    }
+                };
+                HierarchySlicer.prototype.updateSearchStyle = function () {
+                    var objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
+                    if (objects) {
+                        this.settings.search.fontColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.fontColor, this.settings.search.fontColor);
+                        this.settings.search.iconColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.iconColor, this.settings.search.iconColor);
+                        this.settings.search.background = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.background, this.settings.search.background);
+                        this.settings.search.textSize = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.textSize, this.settings.search.textSize);
                     }
                 };
                 HierarchySlicer.prototype.updateSlicerBodyDimensions = function () {
@@ -2194,7 +2222,7 @@ var powerbi;
                                 "margin-left" :  function(d) { return PixelConverter.toString(-settings.slicerText.textSize / (2.5)); },
                                 "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
                                 "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
-                                "color": settings.slicerText.fontColor,
+                                "fill": settings.slicerText.fontColor,
                             })
                                 .html(function(d) { return d.isExpand ? _this.IconSet.expand : _this.IconSet.collapse });
 
@@ -2262,12 +2290,17 @@ var powerbi;
                             "border-style": "solid",
                             "border-color": settings.general.outlineColor,
                             "border-width": this.getBorderWidth(settings.header.outline, settings.header.outlineWeight),
-                            "font-size": PixelConverter.fromPoint(settings.header.textSize),
+                            "font-size": settings.header.textSize + "pt" //PixelConverter.fromPoint(settings.header.textSize),
                         });
-                        this.slicerHeader
-                            .selectAll(HierarchySlicer.Icon.class)
-                            .style("font-size", function(d) { return "20px";});
-                            //PixelConverter.toString(PixelConverter.fromPointToPixel(settings.header.textSize)));
+                        let icons = this.slicerHeader.selectAll(HierarchySlicer.Icon.selector);
+                        icons.style({
+                                "height": PixelConverter.toString(PixelConverter.fromPointToPixel(settings.header.textSize)),
+                                "width": PixelConverter.toString(PixelConverter.fromPointToPixel(settings.header.textSize)),
+                                "fill": settings.header.fontColor,
+                                "background-color": settings.header.background
+                            })
+                            .on("mouseover", function (d) { d3.select(this).style("fill", settings.header.hoverColor); })
+                            .on("mouseout", function (d) { d3.select(this).style("fill", settings.header.fontColor); })
                         this.slicerBody.classed("slicerBody", true);
                         var slicerText = rowSelection.selectAll(HierarchySlicer.LabelText.selector);
                         slicerText.text(function (d) {
@@ -2378,40 +2411,71 @@ var powerbi;
                     var _this = this;
                     this.searchHeader = $("<div>").appendTo(container).addClass("searchHeader").addClass("collapsed");
                     var counter = 0;
-                    $("<div>").appendTo(this.searchHeader).attr("title", "Search").addClass("powervisuals-glyph").addClass("search").on("click", function () { return _this.hostServices.persistProperties({
-                        merge: [{
-                            objectName: "general",
-                            selector: null,
-                            properties: {
-                                counter: counter++
-                            }
-                        }]
-                    }); });
-                    this.searchInput = $("<input>").appendTo(this.searchHeader).attr("type", "text").attr("drag-resize-disabled", "true").addClass("searchInput").on("input", function () { return _this.hostServices.persistProperties({
-                        merge: [{
-                            objectName: "general",
-                            selector: null,
-                            properties: {
-                                counter: counter++
-                            }
-                        }]
-                    }); });
-                    $("<div>").appendTo(this.searchHeader).attr("title", "Delete").addClass("delete glyphicon pbi-glyph-close glyph-micro").addClass("delete").on("click", function () {
-                        _this.searchInput[0].value = "";
-                        _this.hostServices.persistProperties({
-                            merge: [{
-                                objectName: "general",
-                                selector: null,
-                                properties: {
-                                    counter: counter++
-                                }
-                            }]
+                    $("<div>").appendTo(this.searchHeader)
+                        .attr("title", "Search")
+                        .addClass(HierarchySlicer.Icon.class)
+                        .addClass("search")
+                        .css({
+                            "fill": this.settings.search.iconColor,
+                            "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
+                            "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
+                        })
+                        .html(this.IconSet.search)
+                        .on("click", function () {
+                            return _this.hostServices.persistProperties({
+                                merge: [{
+                                    objectName: "general",
+                                    selector: null,
+                                    properties: {
+                                        counter: counter++
+                                    }
+                                }]
+                            });
                         });
-                    });
+                    this.searchInput = $("<input>").appendTo(this.searchHeader)
+                        .attr("type", "text")
+                        .attr("drag-resize-disabled", "true")
+                        .addClass("searchInput")
+                        .on("input", function () {
+                            return _this.hostServices.persistProperties({
+                                merge: [{
+                                    objectName: "general",
+                                    selector: null,
+                                    properties: {
+                                        counter: counter++
+                                    }
+                                }]
+                            }); 
+                        });
+                    $("<div>").appendTo(this.searchHeader)
+                        .attr("title", "Delete")
+                        .addClass(HierarchySlicer.Icon.class)
+                        .addClass("delete")
+                        .css({
+                            "fill": this.settings.search.iconColor,
+                            "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
+                            "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
+                        })
+                        .html(this.IconSet.delete)
+                        .on("click", function () {
+                            _this.searchInput[0].value = "";
+                            _this.hostServices.persistProperties({
+                                merge: [{
+                                    objectName: "general",
+                                    selector: null,
+                                    properties: {
+                                        counter: counter++
+                                    }
+                                }]
+                            });
+                        });
                 };
                 HierarchySlicer.prototype.updateSearchHeader = function () {
                     this.searchHeader.toggleClass("show", this.settings.general.selfFilterEnabled);
                     this.searchHeader.toggleClass("collapsed", !this.settings.general.selfFilterEnabled);
+                    if (this.settings.general.selfFilterEnabled) {
+                        this.searchHeader
+                    }
                 };
                 HierarchySlicer.prototype.enumerateObjectInstances = function (options) {
                     var instances = [];
@@ -2453,6 +2517,7 @@ var powerbi;
                                     show: powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.show, this.settings.header.show),
                                     title: powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.title, this.settings.header.title),
                                     fontColor: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.fontColor, this.settings.header.fontColor),
+                                    hoverColor: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.hoverColor, this.settings.header.hoverColor),
                                     background: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.background, this.settings.header.background),
                                     textSize: powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.header.textSize, this.settings.header.textSize),
                                 }
@@ -2473,6 +2538,20 @@ var powerbi;
                                 }
                             };
                             instances.push(items);
+                            break;
+                        case "search":
+                            let search = {
+                                objectName: "search",
+                                displayName: "Search",
+                                selector: null,
+                                properties: {
+                                    fontColor: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.fontColor, this.settings.search.fontColor),
+                                    iconColor: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.iconColor, this.settings.search.iconColor),
+                                    background: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.background, this.settings.search.background),
+                                    textSize: powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.textSize, this.settings.search.textSize),
+                                }
+                            };
+                            instances.push(search);
                             break;
                     }
                     return instances;
@@ -2576,6 +2655,11 @@ var powerbi;
                                     description: "Font color of the title",
                                     type: { fill: { solid: { color: true } } }
                                 },
+                                hoverColor: {
+                                    displayName: "Hover",
+                                    description: "Title color of the cells when the mouse if hovered over",
+                                    type: { fill: { solid: { color: true } } }
+                                },
                                 background: {
                                     displayName: "Background",
                                     type: { fill: { solid: { color: true } } }
@@ -2599,13 +2683,37 @@ var powerbi;
                                     description: "Font color of the selected cells",
                                     type: { fill: { solid: { color: true } } }
                                 },
+                                hoverColor: {
+                                    displayName: "Hover",
+                                    description: "Color of the cells when the mouse if hovered over",
+                                    type: { fill: { solid: { color: true } } }
+                                },
                                 background: {
                                     displayName: "Background",
                                     type: { fill: { solid: { color: true } } }
                                 },
-                                hoverColor: {
-                                    displayName: "Hover",
-                                    description: "Color of the cells when the mouse if hovered over",
+                                textSize: {
+                                    displayName: "Text Size",
+                                    type: { formatting: { fontSize: true } }
+                                },
+                            },
+                        },
+                        search: {
+                            displayName: "Search",
+                            properties: {
+                                fontColor: {
+                                    displayName: "Font color",
+                                    description: "Font color of the search",
+                                    type: { fill: { solid: { color: true } } }
+                                },
+                                iconColor: {
+                                    displayName: "Icon color",
+                                    description: "Color of the search icons",
+                                    type: { fill: { solid: { color: true } } }
+                                },
+                                background: {
+                                    displayName: "Background",
+                                    discription: "Background color of the searchbox",
                                     type: { fill: { solid: { color: true } } }
                                 },
                                 textSize: {
