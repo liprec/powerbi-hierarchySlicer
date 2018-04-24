@@ -1263,6 +1263,7 @@ var powerbi;
                     this.slicerItemLabels = options.slicerItemLabels;
                     this.slicerItemInputs = options.slicerItemInputs;
                     this.dataPoints = options.dataPoints;
+                    this.fullTree = options.fullTree;
                     this.interactivityService = options.interactivityService;
                     this.selectionHandler = selectionHandler;
                     this.settings = options.slicerSettings;
@@ -1356,7 +1357,6 @@ var powerbi;
                         for (var i = 0; i < 5; i++) {
                             spinner.append("div").classed("circle", true);
                         }
-                        return;
                         var selected = d.partialSelected ? !d.selected : d.selected;
                         if (d.ownId==="selectAll") {
                             _this.dataPoints.forEach(function(dp) { dp.selected = !selected; });
@@ -1365,41 +1365,48 @@ var powerbi;
                             return
                         }
                         var settings = _this.settings;
+                        let multiSelect = !settings.general.singleselect;
+                        let selectionDataPoints = [];
+                        if (multiSelect && settings.search.addSelection) {
+                            selectionDataPoints = _this.fullTree;
+                        } else {
+                            selectionDataPoints = _this.dataPoints;
+                        }
                         d3.event.preventDefault();
-                        if (!settings.general.singleselect) {
+                        if (multiSelect) {
                             d.selected = !selected; // Toggle selection
                             if (!selected) {
-                                var selectDataPoints = _this.dataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; });
+                                var selectDataPoints = selectionDataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; });
                                 for (var i = 0; i < selectDataPoints.length; i++) {
                                     if (selected === selectDataPoints[i].selected) {
                                         selectDataPoints[i].selected = !selected;
                                     }
                                 }
-                                selectDataPoints = _this.getParentDataPoints(_this.dataPoints, d.parentId);
+                                selectDataPoints = _this.getParentDataPoints(selectionDataPoints, d.parentId);
                                 for (var i = 0; i < selectDataPoints.length; i++) {
                                     if (!selected && !selectDataPoints[i].selected) {
                                         selectDataPoints[i].selected = !selected;
                                     }
-                                    else if (selected && (_this.dataPoints.filter(function (dp) { return dp.selected && dp.level === d.level && dp.parentId === d.parentId; }).length === 0)) {
+                                    else if (selected && (selectionDataPoints.filter(function (dp) { return dp.selected && dp.level === d.level && dp.parentId === d.parentId; }).length === 0)) {
                                         selectDataPoints[i].selected = !selected;
                                     }
                                 }
                             } else if (!d.isLeaf) {
-                                var selectDataPoints = _this.dataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; });
+                                var selectDataPoints = selectionDataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; });
                                 for (var i = 0; i < selectDataPoints.length; i++) {
                                     if (selected === selectDataPoints[i].selected) {
                                         selectDataPoints[i].selected = !selected;
                                     }
                                 }
                             }
-                            if (_this.dataPoints.filter(function(dp) { return (dp.parentId === d.parentId) && dp.selected }).length===0) { // Last Child Standing
-                                var p = _this.dataPoints.filter(function(dp) { return dp.ownId === d.parentId })[0];
+                            if (selectionDataPoints.filter(function(dp) { return (dp.parentId === d.parentId) && dp.selected }).length===0) { // Last Child Standing
+                                var p = selectionDataPoints.filter(function(dp) { return dp.ownId === d.parentId })[0];
                                 if (p) {
                                     p.selected = !selected;
                                     var parentId = p.parentId;
                                     for(var i = d.level-1; i > 0; i--) {
-                                        var p = _this.dataPoints.filter(function(dp) { return dp.ownId === parentId })[0];
-                                        if (_this.dataPoints.filter(function(dp) { return (dp.parentId === p.ownId) && dp.selected }).length===0) {
+                                        var p = selectionDataPoints.filter(function(dp) { return dp.ownId === parentId })[0];
+                                        if (selectionDataPoints.filter(function(dp) { return (dp.parentId === p.ownId) && dp.selected }).length===0) {
                                             p.selected = !selected;
                                         }
                                         parentId = p.parentId;
@@ -1408,25 +1415,25 @@ var powerbi;
                             }
                         }
                         else {
-                            _this.dataPoints.forEach(function(dp) { dp.selected = false; } );
+                            selectionDataPoints.forEach(function(dp) { dp.selected = false; } );
                             d.selected = !selected;
                             if (!selected) {
                                 var selectDataPoints = [d]; //Self
-                                selectDataPoints = selectDataPoints.concat(_this.dataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; })); // Children
-                                selectDataPoints = selectDataPoints.concat(_this.getParentDataPoints(_this.dataPoints, d.parentId)); // Parents
+                                selectDataPoints = selectDataPoints.concat(selectionDataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; })); // Children
+                                selectDataPoints = selectDataPoints.concat(_this.getParentDataPoints(selectionDataPoints, d.parentId)); // Parents
                                 if (selectDataPoints) {
                                     for (var i = 0; i < selectDataPoints.length; i++) {
                                         selectDataPoints[i].selected = true;
                                     }
                                 }
-                            } else if (_this.dataPoints.filter(function(dp) { return (dp.parentId === d.parentId) && dp.selected }).length===0) { // Last Child Standing
-                                var p = _this.dataPoints.filter(function(dp) { return dp.ownId === d.parentId })[0];
+                            } else if (selectionDataPoints.filter(function(dp) { return (dp.parentId === d.parentId) && dp.selected }).length===0) { // Last Child Standing
+                                var p = selectionDataPoints.filter(function(dp) { return dp.ownId === d.parentId })[0];
                                 if (p) { // Not parent level
                                     p.selected = !selected;
                                     var parentId = p.parentId;
                                     for(var i = d.level-1; i > 0; i--) {
-                                        var p = _this.dataPoints.filter(function(dp) { return dp.ownId === parentId })[0];
-                                        if (_this.dataPoints.filter(function(dp) { return (dp.parentId === p.ownId) && dp.selected }).length===0) {
+                                        var p = selectionDataPoints.filter(function(dp) { return dp.ownId === parentId })[0];
+                                        if (selectionDataPoints.filter(function(dp) { return (dp.parentId === p.ownId) && dp.selected }).length===0) {
                                             p.selected = !selected;
                                         }
                                         parentId = p.parentId;
@@ -1434,7 +1441,7 @@ var powerbi;
                                 }
                             }
                         }
-                        _this.applyFilter();
+                        _this.applyFilter(selectionDataPoints);
                     });
                     slicerClear.on("click", function (d) {
                         _this.selectionHandler.handleClearSelection();
@@ -1447,28 +1454,28 @@ var powerbi;
                         "color": function (d) {
                             if (d.mouseOver)
                                 return _this.settings.slicerText.hoverColor;
-                            else if (d.mouseOut) {
+                            //else if (d.mouseOut) {
                                 if (d.selected)
                                     return _this.settings.slicerText.selectedColor;
                                 else
                                     return _this.settings.slicerText.fontColor;
-                            }
-                            else
-                                return _this.settings.slicerText.fontColor; //fallback
+                            //}
+                            //else
+                            //    return _this.settings.slicerText.fontColor; //fallback
                         }
                     });
                     this.slicerItemInputs.selectAll("span").style({
                         "border-color": function (d) {
                             if (d.mouseOver)
                                 return _this.settings.slicerText.hoverColor;
-                            else if (d.mouseOut) {
+                            //else if (d.mouseOut) {
                                 if (d.selected)
                                     return _this.settings.slicerText.selectedColor;
                                 else
                                     return _this.settings.slicerText.fontColor;
-                            }
-                            else
-                                return _this.settings.slicerText.fontColor; //fallback
+                            //}
+                            //else
+                            //    return _this.settings.slicerText.fontColor; //fallback
                         }
                     });
                     this.expanders.style({
@@ -1541,12 +1548,12 @@ var powerbi;
                         this.visitDataPoint(dataPoint.parentDataPoint, exprMap);
                     }
                 }
-                HierarchySlicerWebBehavior.prototype.applyFilter = function () {
-                    if (this.dataPoints.length === 0) {
+                HierarchySlicerWebBehavior.prototype.applyFilter = function (dataPoints) {
+                    if (dataPoints.length === 0) {
                         return;
                     }
                     
-                    var rootLevels = this.dataPoints.filter(function (d) {
+                    var rootLevels = dataPoints.filter(function (d) {
                         return d.level === 0 && d.selected && d.ownId !== "selectAll";
                     });
 
@@ -1558,7 +1565,7 @@ var powerbi;
 
                         var self = this;
 
-                        this.dataPoints.forEach(function (dataPoint) {
+                        dataPoints.forEach(function (dataPoint) {
                             if (dataPoint.selected && dataPoint.ownId !== "selectAll" && dataPoint.isLeaf) {
                                 self.visitDataPoint(dataPoint, exprMap)
                             }
@@ -1670,10 +1677,11 @@ var powerbi;
                     textSize: { objectName: "items", propertyName: "textSize" },
                 },
                 search: {
+                    addSelection: { objectName: "search", propertyName: "addSelection" },
                     fontColor: { objectName: "search", propertyName: "fontColor" },
                     iconColor: { objectName: "search", propertyName: "iconColor" },
                     background: { objectName: "search", propertyName: "background" },
-                    textSize: { objectName: "search", propertyName: "textSize" },
+                    textSize: { objectName: "search", propertyName: "textSize" }
                 },
                 selectedPropertyIdentifier: { objectName: "general", propertyName: "selected" },
                 expandedValuePropertyIdentifier: { objectName: "general", propertyName: "expanded" },
@@ -1762,6 +1770,7 @@ var powerbi;
                             borderStyle: "Cut",
                         },
                         search: {
+                            addSelection: true,
                             fontColor: "#808080",
                             iconColor: "#666666",
                             background: undefined,
@@ -1790,6 +1799,7 @@ var powerbi;
                     if (!dataView || !dataView.table || !dataView.table.rows || !(dataView.table.rows.length > 0) || !dataView.table.columns || !(dataView.table.columns.length > 0)) {
                         return {
                             dataPoints: [],
+                            fullTree: [],
                             settings: null,
                             levels: null,
                         };
@@ -1800,6 +1810,7 @@ var powerbi;
                     var columns = dataView.table.columns;
                     var levels = hierarchyRows - 1;
                     var dataPoints = [];
+                    let fullTree = [];
                     var defaultSettings = HierarchySlicer.DefaultSlicerSettings();
                     var identityValues = [];
                     var selectedIds = [];
@@ -1926,9 +1937,13 @@ var powerbi;
                         dataPoints.filter(function (d) { raggedParents.filter(function (d1) { d1 === d.ownId }).length > 0 }).forEach(function (d) { d.isLeaf = true });
                     }
 
+                    if (!defaultSettings.general.singleselect) {
+                        fullTree = dataPoints;
+                    }
+
                     if (defaultSettings.general.selfFilterEnabled && searchText) {
                         searchText = searchText.toLowerCase();
-                        var filteredDataPoints = dataPoints.filter(function (d) { return d.value.toLowerCase().indexOf(searchText) >= 0; });
+                        var filteredDataPoints = dataPoints.filter(function (d) { return d.ownId.toLowerCase().indexOf(searchText) >= 0; });
                         var unique = {};
                         for (var i in filteredDataPoints) {
                             unique[filteredDataPoints[i].ownId] = 0;
@@ -2004,6 +2019,7 @@ var powerbi;
                     }
                     return {
                         dataPoints: dataPoints,
+                        fullTree: fullTree,
                         settings: defaultSettings,
                         levels: levels,
                         hasSelectionOverride: true,
@@ -2042,10 +2058,12 @@ var powerbi;
                         //.on("mouseout", function (d) { d3.select(this).style("color", _this.settings.slicerText.fontColor); })
                         .html(function (d) { return d.icon; });
                     this.slicerHeader.append("div").classed(HierarchySlicer.HeaderText.class, true);
-                    this.createSearchHeader($(this.slicerHeaderContainer.node()));
+                    this.createSearchHeader(this.slicerHeaderContainer);
+
+                    let bodyViewPort = this.getBodyViewport(this.viewport)
                     this.slicerBody = this.slicerContainer.append("div").classed(HierarchySlicer.Body.class, true).style({
-                        "height": PixelConverter.toString(this.viewport.height),
-                        "width": PixelConverter.toString(this.viewport.width),
+                        "height": PixelConverter.toString(bodyViewPort.height),
+                        "width": PixelConverter.toString(bodyViewPort.width),
                     });
                     var rowEnter = function (rowSelection) {
                         _this.onEnterSelection(rowSelection);
@@ -2063,7 +2081,7 @@ var powerbi;
                         update: rowUpdate,
                         loadMoreData: function () { return _this.onLoadMoreData(); },
                         scrollEnabled: true,
-                        viewport: this.getBodyViewport(this.viewport),
+                        viewport: bodyViewPort,
                         baseContainer: this.slicerBody,
                         isReadMode: function () {
                             return (_this.hostServices.getViewMode() !== powerbi.ViewMode.Edit);
@@ -2113,10 +2131,8 @@ var powerbi;
                     return result;
                 };
                 HierarchySlicer.prototype.updateInternal = function (resetScrollbar) {
-                    var dataView = this.dataView, data = this.data = this.converter(dataView, this.searchInput.val());
+                    var dataView = this.dataView, data = this.data = this.converter(dataView, $(this.searchInput)[0][0].value);
                     this.settings = this.data.settings;
-
-                    this.updateSlicerBodyDimensions();
                     this.maxLevels = this.data.levels + 1;
                     if (data.dataPoints.length === 0) {
                         this.treeView.empty();
@@ -2124,6 +2140,7 @@ var powerbi;
                     }
                     
                     this.updateSettings();
+                    this.updateSlicerBodyDimensions();
                     this.treeView.viewport(this.getBodyViewport(this.viewport)).rowHeight(this.getRowHeight()).data(data.dataPoints.filter(function (d) { return !d.isHidden; }), function (d) { return $.inArray(d, data.dataPoints); }, resetScrollbar).render();
                     this.updateSearchHeader();
                 };
@@ -2136,7 +2153,8 @@ var powerbi;
                 HierarchySlicer.prototype.updateSelectionStyle = function () {
                     var objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
                     if (objects) {
-                        this.slicerContainer.classed("isMultiSelectEnabled", !powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.selection.singleselect, this.settings.general.singleselect));
+                        this.settings.general.singleselect = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.selection.singleselect, this.settings.general.singleselect);
+                        this.slicerContainer.classed("isMultiSelectEnabled", !this.settings.general.singleselect);
                     }
                 };
                 HierarchySlicer.prototype.updateFontStyle = function () {
@@ -2162,6 +2180,7 @@ var powerbi;
                 HierarchySlicer.prototype.updateSearchStyle = function () {
                     var objects = this.dataView && this.dataView.metadata && this.dataView.metadata.objects;
                     if (objects) {
+                        this.settings.search.fontColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.addSelection, this.settings.search.addSelection);
                         this.settings.search.fontColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.fontColor, this.settings.search.fontColor);
                         this.settings.search.iconColor = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.iconColor, this.settings.search.iconColor);
                         this.settings.search.background = powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.background, this.settings.search.background);
@@ -2318,6 +2337,7 @@ var powerbi;
                             var behaviorOptions = {
                                 hostServices: this.hostServices,
                                 dataPoints: data.dataPoints,
+                                fullTree: data.fullTree,
                                 expanders: expanders,
                                 slicerContainer: this.slicerContainer,
                                 slicerItemContainers: slicerItemContainers,
@@ -2363,10 +2383,16 @@ var powerbi;
                     };
                 };
                 HierarchySlicer.prototype.getSearchHeight = function () {
-                    return this.searchHeader.height() + 2; // 2 for marge
+                    if (this.settings.general.selfFilterEnabled) {
+                        return powerbi.TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.search.textSize)) + 2; // 2 for marge
+                    }
+                    return 0;
                 }
                 HierarchySlicer.prototype.getHeaderHeight = function () {
-                    return powerbi.TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.header.textSize));
+                    if (this.settings.header.show) {
+                        return powerbi.TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.header.textSize));
+                    }
+                    return 0;
                 };
                 HierarchySlicer.prototype.getRowHeight = function () {
                     return powerbi.TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.slicerText.textSize));
@@ -2376,8 +2402,7 @@ var powerbi;
                     var headerHeight;
                     var slicerBodyHeight;
                     if (settings) {
-                        headerHeight = settings.header.show ? this.getHeaderHeight() : 0;
-                        headerHeight += settings.general.selfFilterEnabled ? this.getSearchHeight() : 0;
+                        headerHeight = this.getHeaderHeight() + this.getSearchHeight();
                         slicerBodyHeight = currentViewport.height - (headerHeight + settings.header.borderBottomWidth);
                     }
                     else {
@@ -2409,13 +2434,16 @@ var powerbi;
                 };
                 HierarchySlicer.prototype.createSearchHeader = function (container) {
                     var _this = this;
-                    this.searchHeader = $("<div>").appendTo(container).addClass("searchHeader").addClass("collapsed");
+                    this.searchHeader = container.append("div")
+                                                .classed(HierarchySlicer.SearchHeader.class, true)
+                                                .classed("collapsed", true);
                     var counter = 0;
-                    $("<div>").appendTo(this.searchHeader)
+                    //$("<div>").appendTo(this.searchHeader)
+                    this.searchHeader.append("div")
                         .attr("title", "Search")
-                        .addClass(HierarchySlicer.Icon.class)
-                        .addClass("search")
-                        .css({
+                        .classed(HierarchySlicer.Icon.class, true)
+                        .classed("search", true)
+                        .style({
                             "fill": this.settings.search.iconColor,
                             "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
                             "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
@@ -2432,10 +2460,14 @@ var powerbi;
                                 }]
                             });
                         });
-                    this.searchInput = $("<input>").appendTo(this.searchHeader)
+                    this.searchInput = this.searchHeader.append("input")
                         .attr("type", "text")
                         .attr("drag-resize-disabled", "true")
-                        .addClass("searchInput")
+                        .classed("searchInput", true)
+                        .style({
+                            "color": this.settings.search.fontColor,
+                            "background-color": this.settings.search.background
+                        })
                         .on("input", function () {
                             return _this.hostServices.persistProperties({
                                 merge: [{
@@ -2447,18 +2479,18 @@ var powerbi;
                                 }]
                             }); 
                         });
-                    $("<div>").appendTo(this.searchHeader)
+                    this.searchHeader.append("div")
                         .attr("title", "Delete")
-                        .addClass(HierarchySlicer.Icon.class)
-                        .addClass("delete")
-                        .css({
+                        .classed(HierarchySlicer.Icon.class, true)
+                        .classed("delete", true)
+                        .style({
                             "fill": this.settings.search.iconColor,
                             "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
                             "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
                         })
                         .html(this.IconSet.delete)
                         .on("click", function () {
-                            _this.searchInput[0].value = "";
+                            $(_this.searchInput)[0][0].value = "";
                             _this.hostServices.persistProperties({
                                 merge: [{
                                     objectName: "general",
@@ -2471,10 +2503,21 @@ var powerbi;
                         });
                 };
                 HierarchySlicer.prototype.updateSearchHeader = function () {
-                    this.searchHeader.toggleClass("show", this.settings.general.selfFilterEnabled);
-                    this.searchHeader.toggleClass("collapsed", !this.settings.general.selfFilterEnabled);
+                    this.searchHeader.classed("show", this.settings.general.selfFilterEnabled);
+                    this.searchHeader.classed("collapsed", !this.settings.general.selfFilterEnabled);
                     if (this.settings.general.selfFilterEnabled) {
-                        this.searchHeader
+                        let icons = this.searchHeader.selectAll(HierarchySlicer.Icon.selector);
+                        icons.style({
+                            "fill": this.settings.search.iconColor,
+                            "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
+                            "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
+                        });
+                        let searchInput = this.searchHeader.selectAll(".searchInput");
+                        searchInput.style({
+                            "color": this.settings.search.fontColor,
+                            "background-color": this.settings.search.background,
+                            "font-size": this.settings.search.textSize
+                        });
                     }
                 };
                 HierarchySlicer.prototype.enumerateObjectInstances = function (options) {
@@ -2545,6 +2588,7 @@ var powerbi;
                                 displayName: "Search",
                                 selector: null,
                                 properties: {
+                                    addSelection: powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.addSelection, this.settings.search.addSelection),
                                     fontColor: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.fontColor, this.settings.search.fontColor),
                                     iconColor: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.iconColor, this.settings.search.iconColor),
                                     background: powerbi.DataViewObjects.getFillColor(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.search.background, this.settings.search.background),
@@ -2701,6 +2745,11 @@ var powerbi;
                         search: {
                             displayName: "Search",
                             properties: {
+                                addSelection: {
+                                    displayName: "Add to selection",
+                                    description: "Add search selection to \ncurrent selection (multiselect only)",
+                                    type: { bool: true }
+                                },
                                 fontColor: {
                                     displayName: "Font color",
                                     description: "Font color of the search",
@@ -2752,6 +2801,7 @@ var powerbi;
                 HierarchySlicer.HeaderContainer = createClassAndSelector("slicerHeaderContainer");
                 HierarchySlicer.Header = createClassAndSelector("slicerHeader");
                 HierarchySlicer.HeaderText = createClassAndSelector("headerText");
+                HierarchySlicer.SearchHeader = createClassAndSelector("searchHeader");
                 HierarchySlicer.Collapse = createClassAndSelector("collapse");
                 HierarchySlicer.Expand = createClassAndSelector("expand");
                 HierarchySlicer.Clear = createClassAndSelector("clear");
