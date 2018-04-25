@@ -2620,7 +2620,7 @@ var powerbi;
                                 [
                                     {for: { in: "Fields" } },
                                     {for: { in: "Values" } }
-                                ], dataReductionAlgorithm: { bottom: { count: 4000 } }
+                                ], dataReductionAlgorithm: { bottom: { count: 30000 } }
                             },
                         }
                     }],
