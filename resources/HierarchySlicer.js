@@ -1934,7 +1934,7 @@ var powerbi;
                     }
 
                     if (isRagged) {
-                        dataPoints.filter(function (d) { raggedParents.filter(function (d1) { d1 === d.ownId }).length > 0 }).forEach(function (d) { d.isLeaf = true });
+                        dataPoints.forEach(function(d) { if (raggedParents.filter(function (d1) { return d1 === d.ownId }).length > 0) { d.isLeaf = true;} });
                     }
 
                     if (!defaultSettings.general.singleselect) {
