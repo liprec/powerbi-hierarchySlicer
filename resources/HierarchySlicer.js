@@ -1897,10 +1897,12 @@ var powerbi;
                             }
                             if (c <= 0) {
                                 parentId = "";
+                                parentSearchStr = "";
                             }
-                            var ownId = parentId + (parentId === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + c;
-                            var isLeaf = c === hierarchyRows - 1;
-                            var dataPoint = {
+                            let ownId = parentId + (parentId === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + c;
+                            let searchStr = parentSearchStr + labelValue.replace(/,/g, "")
+                            let isLeaf = c === hierarchyRows - 1;
+                            let dataPoint = {
                                 parentDataPoint: parentDataPoint,
                                 columnExpr: dataView.table.columns[c],
                                 identity: null,
@@ -1920,12 +1922,14 @@ var powerbi;
                                 id: value,
                                 ownId: ownId,
                                 parentId: parentId,
+                                searchStr: searchStr,
                                 order: order++,
                             };
 
                             parentDataPoint = dataPoint;
                             
                             parentId = ownId;
+                            parentSearchStr = searchStr;
                             if (identityValues.indexOf(ownId) === -1) {
                                 identityValues.push(ownId);
                                 dataPoints.push(dataPoint);
@@ -1943,7 +1947,7 @@ var powerbi;
 
                     if (defaultSettings.general.selfFilterEnabled && searchText) {
                         searchText = searchText.toLowerCase();
-                        var filteredDataPoints = dataPoints.filter(function (d) { return d.ownId.toLowerCase().indexOf(searchText) >= 0; });
+                        var filteredDataPoints = dataPoints.filter(function (d) { return d.searchStr.toLowerCase().indexOf(searchText) >= 0; });
                         var unique = {};
                         for (var i in filteredDataPoints) {
                             unique[filteredDataPoints[i].ownId] = 0;
