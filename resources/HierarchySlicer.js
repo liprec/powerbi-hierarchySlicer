@@ -2244,7 +2244,7 @@ var powerbi;
                                 "font-size": PixelConverter.toString(PixelConverter.fromPointToPixel(settings.slicerText.textSize)),
                                 "margin-left" :  function(d) { return PixelConverter.toString(-settings.slicerText.textSize / (2.5)); },
                                 "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
-                                "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
+                                "height": PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(settings.slicerText.textSize))),
                                 "fill": settings.slicerText.fontColor,
                             })
                                 .html(function(d) { return d.isExpand ? _this.IconSet.expand : _this.IconSet.collapse });
