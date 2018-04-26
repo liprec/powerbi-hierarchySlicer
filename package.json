@@ -1,74 +1,11 @@
 {
-    "build": "13.0.1605.283",
-    "version": "1.1.5",
-    "author": {
-        "name": "Jan Pieter Posthuma",
-        "email": "mail@jppp.org"
-    },
-    "licenseTerms": "https://powerbi.microsoft.com/en-us/visuals-gallery-terms",
-    "privacyTerms": "http://azurebi.jppp.org/visualizations-privacy-terms/",
-    "resources": [
-        {
-            "resourceId": "rId0",
-            "sourceType": 5,
-            "file": "resources/HierarchySlicer.ts"
-        },
-        {
-            "resourceId": "rId1",
-            "sourceType": 0,
-            "file": "resources/HierarchySlicer.js"
-        },
-        {
-            "resourceId": "rId2",
-            "sourceType": 1,
-            "file": "resources/HierarchySlicer.css"
-        },
-        {
-            "resourceId": "rId3",
-            "sourceType": 3,
-            "file": "resources/icon.png"
-        },
-        {
-            "resourceId": "rId4",
-            "sourceType": 6,
-            "file": "resources/HierarchySlicer-thumbnail.png"
-        },
-        {
-            "resourceId": "rId5",
-            "sourceType": 2,
-            "file": "resources/HierarchySlicer-screenshot.png"
-        }
-    ],
-    "visual": {
-        "name": "HierarchySlicer",
-        "version": "1.1.5",
-        "displayName": "HierarchySlicer",
-        "guid": "HierarchySlicer1458836712039",
-        "description": "With the hierarchy slicer it is possible to represent a hierarchy as a single slicer. The different levels are shown as a tree.",
-        "supportUrl": "https://azurebi.jppp.org/visualizations/"
-    },
-    "images": {
-        "icon": {
-            "resourceId": "rId3"
-        },
-        "screenshots": [
-            {
-                "resourceId": "rId5"
-            }
-        ],
-        "thumbnail": {
-            "resourceId": "rId4"
-        }
-    },
-    "code": {
-        "typeScript": {
-            "resourceId": "rId0"
-        },
-        "javaScript": {
-            "resourceId": "rId1"
-        },
-        "css": {
-            "resourceId": "rId2"
-        }
-    }
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.9.3",
+    "gulp-cli": "^2.0.1",
+    "gulp-minify": "^2.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-zip": "^4.1.0"
+  }
 }
