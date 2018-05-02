@@ -1842,7 +1842,10 @@ var powerbi;
                         let childIdentityFields = dataView.tree.root.childIdentityFields;
                         let restoredAdvancedFilter = filter.whereItems[0].condition
                         // convert advanced filter conditions list to HierarchySlicer selected values format
-                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter,childIdentityFields, "");
+                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter,childIdentityFields);
+                        if (selectedIds.length === 0) {
+                            selectedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.filterValuePropertyIdentifier, "").split(",");
+                        }
                     }
                     expandedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.expandedValuePropertyIdentifier, "").split(",");
                     defaultSettings.general.selfFilterEnabled = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.selfFilterEnabled, defaultSettings.general.selfFilterEnabled);
@@ -2117,7 +2120,7 @@ var powerbi;
                     this.updateInternal(false);
                 };
                 HierarchySlicer.prototype.convertAdvancedFilterConditionsToSlicerData = function (conditions, childIdentityFields) {
-                    if (conditions.Count === 0) {
+                    if (conditions || conditions.values) {
                         return [];
                     }
                     
