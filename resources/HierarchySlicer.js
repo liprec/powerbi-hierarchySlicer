@@ -2004,7 +2004,7 @@ var powerbi;
                         if (selectedNodes.length > 0) {
                             for (var n = 0; n < selectedNodes.length; n++) {
                                 var parents = dataPoints.filter(function(d) { return d.ownId === selectedNodes[n].parentId; })
-                                                        .filter((value, index, self) => self.indexOf(value) === index) // Make unique
+                                                        .filter(function(value, index, self) { self.indexOf(value) === index }) // Make unique
                                 for (var p = 0; p < parents.length; p++) {
                                     var children = dataPoints.filter(function(d) { return d.parentId === parents[p].ownId; })
                                     if (children.length > children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {

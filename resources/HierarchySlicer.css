@@ -1383,7 +1383,8 @@ template {
 }
 
 .visual-HierarchySlicer1458836712039 .slicerItemContainerChild {
-    width: 100%
+    width: 100%;
+    display: block !important;
 }
 
 .visual-HierarchySlicer1458836712039 .reportContainerContent i {
