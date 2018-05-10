@@ -1941,9 +1941,20 @@ var powerbi;
                         }
                     }
 
-                    if (dataPoints.filter(function(d) { return d.isRagged === true }).length > 0) { // BUG: New Logic to determine leaves: look at applyFilter
+                    if (dataPoints.filter(function(d) { return d.isRagged === true }).length > 0) {
                         fullTree = dataPoints;
                         dataPoints = dataPoints.filter(function(d) { return d.isRagged === false });
+                        var filteredParents = dataPoints.filter(function (d) { return d.level === levels; })
+                            .map(function(d) { return d.parentId; })
+                            .filter(function(value, index, self) { return self.indexOf(value) === index }); // Make unique
+                        for (var l = levels - 1; l >= 1; l--) {
+                            var newLeaves = dataPoints.filter(function(d) { return d.level === l && filteredParents.indexOf(d.ownId) === -1; });
+                            if (newLeaves.length === 0) {
+                                break; // No new leaves available
+                            }
+                            newLeaves.forEach(function(d) { d.isLeaf = true; });
+                            filteredParents.concat(newLeaves);
+                        }
                     }
 
                     if (!defaultSettings.general.singleselect) {
@@ -1978,8 +1989,6 @@ var powerbi;
                             }
                         }
                         dataPoints.map(function (d) { return d.isLeaf = parent[d.ownId] !== 0; });
-                        // Add
-                        var leafs = dataPoints.filter(function(d) { return d.isLeaf });
                     } else {
                         dataPoints = dataPoints.sort(function (d1, d2) { return d1.order - d2.order; });
                     }
@@ -2006,7 +2015,7 @@ var powerbi;
                         if (selectedNodes.length > 0) {
                             for (var n = 0; n < selectedNodes.length; n++) {
                                 var parents = dataPoints.filter(function(d) { return d.ownId === selectedNodes[n].parentId; })
-                                                        .filter(function(value, index, self) { self.indexOf(value) === index }) // Make unique
+                                                        .filter(function(value, index, self) { return self.indexOf(value) === index }) // Make unique
                                 for (var p = 0; p < parents.length; p++) {
                                     var children = dataPoints.filter(function(d) { return d.parentId === parents[p].ownId; })
                                     if (children.length > children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
