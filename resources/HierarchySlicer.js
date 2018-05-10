@@ -1368,7 +1368,7 @@ var powerbi;
                         var settings = _this.settings;
                         let multiSelect = !settings.general.singleselect;
                         let selectionDataPoints = [];
-                        if (multiSelect && settings.search.addSelection) { // BUG: Add Empty Leaves ON
+                        if ((multiSelect && settings.search.addSelection) || (!settings.general.emptyLeafs)) {
                             selectionDataPoints = _this.fullTree;
                         } else {
                             selectionDataPoints = _this.dataPoints;
@@ -1820,7 +1820,6 @@ var powerbi;
                     var order = 0;
                     var objects = dataView.metadata.objects;
                     var isRagged = false;
-                    var raggedParents = [];
                     var filter = (
                         dataView.metadata &&
                         dataView.metadata.objects &&
@@ -1862,6 +1861,7 @@ var powerbi;
                             isLeaf: true,
                             isExpand: false,
                             isHidden: false,
+                            isRagged: false,
                             id: "selectAll",
                             ownId: "selectAll",
                             parentId: "none",
@@ -1872,10 +1872,9 @@ var powerbi;
                         var parentId = "";
                         var parentDataPoint = null;
                         for (var c = 0; c < hierarchyRows; c++) {
+                            isRagged = false;
                             if ((rows[r][c] === null) && (!defaultSettings.general.emptyLeafs)) {
                                 isRagged = true;
-                                raggedParents.push(parentId);
-                                break;
                             }
                             var format = dataView.table.columns[c].format;
                             var dataType = dataView.table.columns[c].type;
@@ -1923,6 +1922,7 @@ var powerbi;
                                     return d === ownId; 
                                 }).length > 0 || false,
                                 isHidden: c === 0 ? false : true,
+                                isRagged: isRagged,
                                 id: value,
                                 ownId: ownId,
                                 parentId: parentId,
@@ -1941,11 +1941,12 @@ var powerbi;
                         }
                     }
 
-                    if (isRagged) { // BUG: New Logic to determine leaves: look at applyFilter
-                        dataPoints.forEach(function(d) { if (raggedParents.filter(function (d1) { return d1 === d.ownId }).length > 0) { d.isLeaf = true;} });
+                    if (dataPoints.filter(function(d) { return d.isRagged === true }).length > 0) { // BUG: New Logic to determine leaves: look at applyFilter
+                        fullTree = dataPoints;
+                        dataPoints = dataPoints.filter(function(d) { return d.isRagged === false });
                     }
 
-                    if (!defaultSettings.general.singleselect) { // BUG: Add Empty Leaves ON
+                    if (!defaultSettings.general.singleselect) {
                         fullTree = dataPoints;
                     }
 
