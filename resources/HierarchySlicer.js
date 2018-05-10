@@ -1282,8 +1282,8 @@ var powerbi;
                     expanders.on("click", function (d, i) {
                         d.isExpand = !d.isExpand;
                         var currentExpander = expanders.filter(function (e, l) { return i === l; });
-                        var height = $(currentExpander[0][0].firstChild).height();
-                        var width = $(currentExpander[0][0].firstChild).width();
+                        var height = $(this).height();
+                        var width = $(this).width();
                         var scale = height / 26.0;
                         currentExpander.select(".icon").remove();
                         var container = currentExpander.select(".spinner-icon").style("display", "inline");
@@ -1335,9 +1335,10 @@ var powerbi;
                             return;
                         }
                         var currentExpander = expanders.filter(function (e, l) { return index === l; });
-                        var height = $(currentExpander[0][0].firstChild).height();
-                        var width = $(currentExpander[0][0].firstChild).width();
+                        var height = $(this).height();
+                        var width = $(this).width();
                         var scale = height / 26.0;
+                        currentExpander.style({"height": $(this).innerHeight() });
                         currentExpander.select(".icon").remove();
                         var container = currentExpander.select(".spinner-icon").style("display", "inline");
                         var margin = _this.settings.slicerText.textSize / 1.25;
@@ -1367,7 +1368,7 @@ var powerbi;
                         var settings = _this.settings;
                         let multiSelect = !settings.general.singleselect;
                         let selectionDataPoints = [];
-                        if (multiSelect && settings.search.addSelection) {
+                        if (multiSelect && settings.search.addSelection) { // BUG: Add Empty Leaves ON
                             selectionDataPoints = _this.fullTree;
                         } else {
                             selectionDataPoints = _this.dataPoints;
@@ -1940,11 +1941,11 @@ var powerbi;
                         }
                     }
 
-                    if (isRagged) {
+                    if (isRagged) { // BUG: New Logic to determine leaves: look at applyFilter
                         dataPoints.forEach(function(d) { if (raggedParents.filter(function (d1) { return d1 === d.ownId }).length > 0) { d.isLeaf = true;} });
                     }
 
-                    if (!defaultSettings.general.singleselect) {
+                    if (!defaultSettings.general.singleselect) { // BUG: Add Empty Leaves ON
                         fullTree = dataPoints;
                     }
 
