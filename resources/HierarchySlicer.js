@@ -1362,7 +1362,7 @@ var powerbi;
                         if (d.ownId==="selectAll") {
                             _this.dataPoints.forEach(function(dp) { dp.selected = !selected; });
                             d.selected =  !selected;
-                            _this.applyFilter();
+                            _this.applyFilter(_this.dataPoints, _this.levels);
                             return
                         }
                         var settings = _this.settings;
@@ -1442,7 +1442,7 @@ var powerbi;
                                 }
                             }
                         }
-                        _this.applyFilter(selectionDataPoints);
+                        _this.applyFilter(selectionDataPoints, _this.levels);
                     });
                     slicerClear.on("click", function (d) {
                         _this.selectionHandler.handleClearSelection();
@@ -1549,7 +1549,7 @@ var powerbi;
                         this.visitDataPoint(dataPoint.parentDataPoint, exprMap);
                     }
                 }
-                HierarchySlicerWebBehavior.prototype.applyFilter = function (dataPoints) {
+                HierarchySlicerWebBehavior.prototype.applyFilter = function (dataPoints, levels) {
                     if (dataPoints.length === 0) {
                         return;
                     }
@@ -1567,7 +1567,7 @@ var powerbi;
                         var self = this;
 
                         dataPoints.forEach(function (dataPoint) {
-                            if (dataPoint.selected && dataPoint.ownId !== "selectAll" && dataPoint.isLeaf) {
+                            if (dataPoint.selected && dataPoint.ownId !== "selectAll" && dataPoint.level === levels) {
                                 self.visitDataPoint(dataPoint, exprMap)
                             }
                         });
