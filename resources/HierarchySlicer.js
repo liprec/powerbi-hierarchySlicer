@@ -1888,11 +1888,10 @@ var powerbi;
                         && filter.whereItems
                         && filter.whereItems[0]
                         && filter.whereItems[0].condition) {
-                        let childIdentityFields = dataView.tree.root.childIdentityFields;
                         let restoredAdvancedFilter = filter.whereItems[0].condition;
                         let columnDefs = dataView.metadata.columns;
                         // convert advanced filter conditions list to HierarchySlicer selected values format
-                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter,childIdentityFields, columnDefs);
+                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter, columnDefs);
                         if (selectedIds.length === 0) {
                             selectedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.filterValuePropertyIdentifier, "").split(",");
                         }
@@ -2177,17 +2176,26 @@ var powerbi;
                     this.viewport = viewPort;
                     this.updateInternal(false);
                 };
-                HierarchySlicer.prototype.convertAdvancedFilterConditionsToSlicerData = function (conditions, childIdentityFields, columnDefs) {
+                HierarchySlicer.prototype.convertAdvancedFilterConditionsToSlicerData = function (conditions, columnDefs) {
                     if (!conditions || !conditions.values) {
                         return [];
                     }
                     
                     let result = [];
+                    let input = [];
+                    let i;
+                    conditions.args.forEach(function(level, index) { if (level.ref === "Level1") { i = index } });
+
                     conditions.values.forEach(function(value) {
                         let res = "";
-                        value.reverse().forEach(function(level, index) {
+                        input = i === 0 ? value : value.reverse();
+                        input.forEach(function(level, index) {
+                            if (level.value===null) {
+                                result.push(res);
+                            }
                             let format = columnDefs[index].format;
                             let labelValue = visuals.valueFormatter.format(level.value, format);
+                            labelValue = labelValue === null ? "(blank)" : labelValue;
                             res += (res === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + index;
                         });
 
