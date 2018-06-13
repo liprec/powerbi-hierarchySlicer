@@ -1889,9 +1889,10 @@ var powerbi;
                         && filter.whereItems[0]
                         && filter.whereItems[0].condition) {
                         let childIdentityFields = dataView.tree.root.childIdentityFields;
-                        let restoredAdvancedFilter = filter.whereItems[0].condition
+                        let restoredAdvancedFilter = filter.whereItems[0].condition;
+                        let columnDefs = dataView.metadata.columns;
                         // convert advanced filter conditions list to HierarchySlicer selected values format
-                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter,childIdentityFields);
+                        selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter,childIdentityFields, columnDefs);
                         if (selectedIds.length === 0) {
                             selectedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.filterValuePropertyIdentifier, "").split(",");
                         }
@@ -1990,8 +1991,9 @@ var powerbi;
                         }
                     }
 
+                    fullTree = dataPoints;
+
                     if (dataPoints.filter(function(d) { return d.isRagged === true }).length > 0) {
-                        fullTree = dataPoints;
                         dataPoints = dataPoints.filter(function(d) { return d.isRagged === false });
                         var filteredParents = dataPoints.filter(function (d) { return d.level === levels; })
                             .map(function(d) { return d.parentId; })
@@ -2004,10 +2006,6 @@ var powerbi;
                             newLeaves.forEach(function(d) { d.isLeaf = true; });
                             filteredParents.concat(newLeaves);
                         }
-                    }
-
-                    if (!defaultSettings.general.singleselect) {
-                        fullTree = dataPoints;
                     }
 
                     if (defaultSettings.general.selfFilterEnabled && searchText) {
@@ -2179,7 +2177,7 @@ var powerbi;
                     this.viewport = viewPort;
                     this.updateInternal(false);
                 };
-                HierarchySlicer.prototype.convertAdvancedFilterConditionsToSlicerData = function (conditions, childIdentityFields) {
+                HierarchySlicer.prototype.convertAdvancedFilterConditionsToSlicerData = function (conditions, childIdentityFields, columnDefs) {
                     if (!conditions || !conditions.values) {
                         return [];
                     }
@@ -2187,9 +2185,10 @@ var powerbi;
                     let result = [];
                     conditions.values.forEach(function(value) {
                         let res = "";
-                        
                         value.reverse().forEach(function(level, index) {
-                            res += (res === "" ? "" : "_") + level.value.replace(/,/g, "") + "-" + index;
+                            let format = columnDefs[index].format;
+                            let labelValue = visuals.valueFormatter.format(level.value, format);
+                            res += (res === "" ? "" : "_") + labelValue.replace(/,/g, "") + "-" + index;
                         });
 
                         result.push(res);
