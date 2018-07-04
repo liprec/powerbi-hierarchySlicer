@@ -1920,8 +1920,8 @@ var powerbi;
                     for (var r = 0; r < rows.length; r++) {
                         var parentId = "";
                         var parentDataPoint = null;
+                        isRagged = false;
                         for (var c = 0; c < hierarchyRows; c++) {
-                            isRagged = false;
                             if ((rows[r][c] === null) && (!defaultSettings.general.emptyLeafs)) {
                                 isRagged = true;
                             }
@@ -1994,16 +1994,11 @@ var powerbi;
 
                     if (dataPoints.filter(function(d) { return d.isRagged === true }).length > 0) {
                         dataPoints = dataPoints.filter(function(d) { return d.isRagged === false });
-                        var filteredParents = dataPoints.filter(function (d) { return d.level === levels; })
-                            .map(function(d) { return d.parentId; })
-                            .filter(function(value, index, self) { return self.indexOf(value) === index }); // Make unique
-                        for (var l = levels - 1; l >= 1; l--) {
-                            var newLeaves = dataPoints.filter(function(d) { return d.level === l && filteredParents.indexOf(d.ownId) === -1; });
-                            if (newLeaves.length === 0) {
-                                break; // No new leaves available
-                            }
-                            newLeaves.forEach(function(d) { d.isLeaf = true; });
-                            filteredParents.concat(newLeaves);
+                        for (var l = 0; l <= levels - 1; l++) {
+                            var parents = dataPoints.filter(function (d) { return d.level === l });
+                            parents.forEach(function (d) { 
+                                d.isLeaf = (dataPoints.filter(function (dp) { return dp.parentId === d.ownId }).length === 0);
+                            });
                         }
                     }
 
