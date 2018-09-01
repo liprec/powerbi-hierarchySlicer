@@ -1444,10 +1444,24 @@ var powerbi;
                                     }
                                 }
                             }
+
                             let fullSelection = selectionDataPoints.filter(function(d) { return d.selected && !d.partialSelected; }).sort(function(d1, d2) { return d1.level-d2.level; });
+                            // Single select
                             if (fullSelection.length>1 && fullSelection[0].level!==fullSelection[1].level) {
-                                if (selectionDataPoints.filter(function(d) { return d.parentId.indexOf(fullSelection[0].ownId) > -1; }).length === fullSelection.length -1) {
+                                if (selectionDataPoints.filter(function(d) { return d.parentId.indexOf(fullSelection[0].ownId) > -1; }).length === fullSelection.length -1) { 
                                     filterLevel = fullSelection[0].level;
+                                }
+                            }
+                            // Same parent select
+                            else {
+                                let topParents = fullSelection.filter(function(d) { return d.parentId === fullSelection[0].parentId })
+                                        .map(function(d) { return d.parentId })
+                                        .filter(function(value, index, self) { return self.indexOf(value) === index });
+                                if (topParents.length === 1) {
+                                    // All children selected
+                                    if (selectionDataPoints.filter(function(d) { return d.parentId.indexOf(topParents[0]) > -1; }).length === selectionDataPoints.filter(function(d) { return d.parentId.indexOf(topParents[0]) > -1 && d.selected; }).length) {
+                                        filterLevel = fullSelection[0].level;
+                                    }
                                 }
                             }
                         }
@@ -1458,10 +1472,16 @@ var powerbi;
                                 var selectDataPoints = [d]; //Self
                                 filterLevel = d.level; // Set filter level to selected item
                                 selectDataPoints = selectDataPoints.concat(selectionDataPoints.filter(function (dp) { return dp.parentId.indexOf(d.ownId) >= 0; })); // Children
-                                selectDataPoints = selectDataPoints.concat(_this.getParentDataPoints(selectionDataPoints, d.parentId)); // Parents
                                 if (selectDataPoints) {
                                     for (var i = 0; i < selectDataPoints.length; i++) {
                                         selectDataPoints[i].selected = true;
+                                    }
+                                }
+                                selectDataPoints = _this.getParentDataPoints(selectionDataPoints, d.parentId); // Parents
+                                if (selectDataPoints) {
+                                    for (var i = 0; i < selectDataPoints.length; i++) {
+                                        selectDataPoints[i].selected = true;
+                                        selectDataPoints[i].partialSelected = true;
                                     }
                                 }
                             } else if (selectionDataPoints.filter(function(dp) { return (dp.parentId === d.parentId) && dp.selected }).length===0) { // Last Child Standing
@@ -1479,6 +1499,7 @@ var powerbi;
                                 }
                             }
                         }
+                        _this.renderSelection(true);
                         _this.applyFilter(selectionDataPoints, filterLevel);
                     });
                     slicerClear.on("click", function (d) {
@@ -1906,15 +1927,18 @@ var powerbi;
                     
                     // get FilterManager
                     let FilterManager = powerbi.visuals.filter.FilterManager;
+                    let legacy = false;
+                    let restoredAdvancedFilter = undefined;
                     if (filter
                         && filter.whereItems
                         && filter.whereItems[0]
                         && filter.whereItems[0].condition) {
-                        let restoredAdvancedFilter = filter.whereItems[0].condition;
+                        restoredAdvancedFilter = filter.whereItems[0].condition;
                         let columnDefs = dataView.metadata.columns;
                         // convert advanced filter conditions list to HierarchySlicer selected values format
                         selectedIds = this.convertAdvancedFilterConditionsToSlicerData(restoredAdvancedFilter, columnDefs);
                         if (selectedIds.length === 0) {
+                            legacy = true;
                             selectedIds = powerbi.DataViewObjects.getValue(objects, HierarchySlicer1458836712039.hierarchySlicerProperties.filterValuePropertyIdentifier, "").split(",");
                         }
                     }
@@ -1943,6 +1967,7 @@ var powerbi;
                     for (var r = 0; r < rows.length; r++) {
                         var parentId = "";
                         var parentDataPoint = null;
+                        let myId = [];
                         isRagged = false;
                         for (var c = 0; c < hierarchyRows; c++) {
                             if ((rows[r][c] === null) && (!defaultSettings.general.emptyLeafs)) {
@@ -1970,6 +1995,22 @@ var powerbi;
                                     value = powerbi.data.SQExprBuilder.text(rows[r][c]);
                                 }
                             }
+                            myId.unshift(value);
+                            let dataPointSelected = false;
+                            if ((restoredAdvancedFilter) && (restoredAdvancedFilter.values) && (restoredAdvancedFilter.values.filter(function(value) {
+                                    if (myId.length < value.length) { // Higher level: no match
+                                        return false;
+                                    }
+                                    let skip = myId.length - value.length;
+                                    return myId.filter(function(level, index) {
+                                        if (index < skip) { // Lower level: no auto match
+                                            return false;
+                                        }
+                                        return value[index - skip].valueEncoded === level.valueEncoded; 
+                                    }).length === value.length;
+                                }).length > 0)) {
+                                dataPointSelected = true;
+                            }
                             if (c <= 0) {
                                 parentId = "";
                                 parentSearchStr = "";
@@ -1981,13 +2022,15 @@ var powerbi;
                                 parentDataPoint: parentDataPoint,
                                 columnExpr: dataView.table.columns[c],
                                 identity: null,
-                                selected: singleSelect ?
-                                    selectedIds.filter(function (d) {
-                                        return ownId.indexOf(d) >= 0
-                                    }).length > 0 :
-                                    selectedIds.filter(function (d) {
-                                        return d === ownId;
-                                    }).length > 0,
+                                selected: legacy ?
+                                    singleSelect
+                                        ? selectedIds.filter(function (d) {
+                                                return ownId.indexOf(d) >= 0
+                                            }).length > 0 :
+                                            selectedIds.filter(function (d) {
+                                                return d === ownId;
+                                            }).length > 0
+                                        : dataPointSelected,
                                 value: labelValue,
                                 tooltip: labelValue,
                                 level: c,
@@ -2008,7 +2051,6 @@ var powerbi;
                             };
 
                             parentDataPoint = dataPoint;
-                            
                             parentId = ownId;
                             parentSearchStr = searchStr;
                             if (identityValues.indexOf(ownId) === -1) {
@@ -2018,8 +2060,29 @@ var powerbi;
                         }
                     }
 
+                    // Determine partiallySelected
+                    for (var l = levels; l >= 1; l--) {
+                        var selectedNodes = dataPoints.filter(function(d) { return d.selected && d.level === l; });
+                        if (selectedNodes.length > 0) {
+                            for (var n = 0; n < selectedNodes.length; n++) {
+                                var parents = dataPoints.filter(function(d) { return d.ownId === selectedNodes[n].parentId; })
+                                                        .filter(function(value, index, self) { return self.indexOf(value) === index }) // Make unique
+                                for (var p = 0; p < parents.length; p++) {
+                                    var children = dataPoints.filter(function(d) { return d.parentId === parents[p].ownId; })
+                                    if (children.length > children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
+                                        parents[p].partialSelected = true;
+                                        parents[p].selected = true;
+                                    }
+                                    if (children.length === children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
+                                        parents[p].selected = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Store fullTree including hidden ragged members
                     fullTree = dataPoints;
-
+                    // New leafs excluding ragged members
                     if (dataPoints.filter(function(d) { return d.isRagged === true }).length > 0) {
                         dataPoints = dataPoints.filter(function(d) { return d.isRagged === false });
                         for (var l = 0; l <= levels - 1; l++) {
@@ -2078,26 +2141,7 @@ var powerbi;
                         }
                         parentRootNodes = parentRootNodesTotal;
                     }
-                    // Determine partiallySelected
-                    for (var l = levels; l >= 1; l--) {
-                        var selectedNodes = dataPoints.filter(function(d) { return d.selected && d.level === l; });
-                        if (selectedNodes.length > 0) {
-                            for (var n = 0; n < selectedNodes.length; n++) {
-                                var parents = dataPoints.filter(function(d) { return d.ownId === selectedNodes[n].parentId; })
-                                                        .filter(function(value, index, self) { return self.indexOf(value) === index }) // Make unique
-                                for (var p = 0; p < parents.length; p++) {
-                                    var children = dataPoints.filter(function(d) { return d.parentId === parents[p].ownId; })
-                                    if (children.length > children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
-                                        parents[p].partialSelected = true;
-                                        parents[p].selected = true;
-                                    }
-                                    if (children.length === children.filter(function(d) { return d.selected && !d.partialSelected; }).length) {
-                                        parents[p].selected = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
+
                     // Select All level
                     if (selectAll) {
                         var selected = dataPoints.filter(function(d) { return d.selected }).length
