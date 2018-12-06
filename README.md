@@ -27,7 +27,8 @@ Replace (now) row 1040:
         "fontFamily"
     ]
 }
-``
+```
+
 ## Support
 
 If you need any support related to this visual, feel free to create an issue and describe what the problem in. If you can add a sample PBIX file with, that would help me a lot.
