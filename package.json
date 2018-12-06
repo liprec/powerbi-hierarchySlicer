@@ -1,11 +1,29 @@
 {
-  "devDependencies": {
-    "del": "^3.0.0",
-    "gulp": "^3.9.1",
-    "gulp-clean-css": "^3.9.3",
-    "gulp-cli": "^2.0.1",
-    "gulp-minify": "^2.1.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-zip": "^4.1.0"
-  }
+    "devDependencies": {
+        "@types/d3": "3.5.36",
+        "@types/jquery": "^2.0.41",
+        "@types/lodash": "4.14.55",
+        "del": "3.0.0",
+        "gulp": "3.9.1",
+        "gulp-clean-css": "3.9.3",
+        "gulp-cli": "2.0.1",
+        "gulp-minify": "2.1.0",
+        "gulp-rename": "1.2.2",
+        "gulp-zip": "4.1.0",
+        "powerbi-visuals-api": "2.3.0",
+        "powerbi-visuals-tools": "3.0.7",
+        "tslint": "5.11.0",
+        "tslint-microsoft-contrib": "5.2.1"
+    },
+    "dependencies": {
+        "d3": "3.5.5",
+        "globalize": "0.1.0-a2",
+        "jquery": "3.1.1",
+        "lodash": "4.16.2",
+        "powerbi-models": "1.0.13",
+        "powerbi-visuals-utils-dataviewutils": "2.1.0",
+        "powerbi-visuals-utils-formattingutils": "4.1.1",
+        "powerbi-visuals-utils-interactivityutils": "5.4.0",
+        "powerbi-visuals-utils-svgutils": "2.1.0"
+    }
 }

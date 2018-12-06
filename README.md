@@ -4,21 +4,31 @@
 
 Home for my Power BI Custom Visual: HierarchySlicer
 
-This visual is still using the legacy API and *not* a good example on how to create custom slicers for Power BI.
-
 ## Build
 
-First run NPM to gather all the needed build packages
+Some changes are needed before this visual can be build:
+
+Changes to `node_modules/powerbi-visuals-api/schema.capablities.json`:
+
 ```
-npm nstall
+Replace row 1018:
+```
+},
+"fontFamily": {
+    "type": "boolean",
+    "description": "Displays a selector to allow the user to font family"
+}
 ```
 
-Then run the following two gulp build commands to generate the `.pbiviz` file:
+Replace (now) row 1040:
 ```
-gulp build
-gulp package
-```
-
+},
+{
+    "required": [
+        "fontFamily"
+    ]
+}
+``
 ## Support
 
 If you need any support related to this visual, feel free to create an issue and describe what the problem in. If you can add a sample PBIX file with, that would help me a lot.

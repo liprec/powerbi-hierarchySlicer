@@ -1,74 +1,24 @@
 {
-    "build": "13.0.1605.283",
-    "version": "1.3.1",
+    "visual": {
+        "name": "hierarchySlicer",
+        "displayName": "HierarchySlicer",
+        "guid": "PBI_CV_B232C01E_3021_4106_B09E_42929DAC879C",
+        "visualClassName": "HierarchySlicer",
+        "version": "2.0.0",
+        "description": "With the hierarchy slicer it is possible to represent a hierarchy as a single slicer. The different levels are shown as a tree.",
+        "supportUrl": "https://azurebi-docs.jppp.org/powerbi-visuals/index.html",
+        "gitHubUrl": "https://github.com/liprec/powerbi-hierarchySlicer"
+    },
+    "apiVersion": "2.3.0",
     "author": {
         "name": "Jan Pieter Posthuma",
         "email": "mail@jppp.org"
     },
-    "licenseTerms": "https://powerbi.microsoft.com/en-us/visuals-gallery-terms",
-    "privacyTerms": "http://azurebi.jppp.org/visualizations-privacy-terms/",
-    "resources": [
-        {
-            "resourceId": "rId0",
-            "sourceType": 5,
-            "file": "resources/HierarchySlicer.ts"
-        },
-        {
-            "resourceId": "rId1",
-            "sourceType": 0,
-            "file": "resources/HierarchySlicer.js"
-        },
-        {
-            "resourceId": "rId2",
-            "sourceType": 1,
-            "file": "resources/HierarchySlicer.css"
-        },
-        {
-            "resourceId": "rId3",
-            "sourceType": 3,
-            "file": "resources/icon.png"
-        },
-        {
-            "resourceId": "rId4",
-            "sourceType": 6,
-            "file": "resources/HierarchySlicer-thumbnail.png"
-        },
-        {
-            "resourceId": "rId5",
-            "sourceType": 2,
-            "file": "resources/HierarchySlicer-screenshot.png"
-        }
-    ],
-    "visual": {
-        "name": "HierarchySlicer",
-        "version": "1.3.1",
-        "displayName": "HierarchySlicer",
-        "guid": "HierarchySlicer1458836712039",
-        "description": "With the hierarchy slicer it is possible to represent a hierarchy as a single slicer. The different levels are shown as a tree.",
-        "supportUrl": "https://azurebi.jppp.org/visualizations/"
+    "assets": {
+        "icon": "assets/icon.png"
     },
-    "images": {
-        "icon": {
-            "resourceId": "rId3"
-        },
-        "screenshots": [
-            {
-                "resourceId": "rId5"
-            }
-        ],
-        "thumbnail": {
-            "resourceId": "rId4"
-        }
-    },
-    "code": {
-        "typeScript": {
-            "resourceId": "rId0"
-        },
-        "javaScript": {
-            "resourceId": "rId1"
-        },
-        "css": {
-            "resourceId": "rId2"
-        }
-    }
+    "externalJS": null,
+    "style": "style/hierarchySlicer.less",
+    "capabilities": "capabilities.json",
+    "stringResources": []
 }
