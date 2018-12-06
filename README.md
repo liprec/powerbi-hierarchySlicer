@@ -10,7 +10,6 @@ Some changes are needed before this visual can be build:
 
 Changes to `node_modules/powerbi-visuals-api/schema.capablities.json`:
 
-```
 Replace row 1018:
 ```
 },
