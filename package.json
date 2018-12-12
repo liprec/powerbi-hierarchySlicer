@@ -4,11 +4,12 @@
         "@types/jquery": "^2.0.51",
         "@types/lodash": "4.14.55",
         "powerbi-visuals-api": "2.3.0",
-        "powerbi-visuals-tools": "^3.0.8",
+        "powerbi-visuals-tools": "^3.0.9",
         "tslint": "5.11.0",
         "tslint-microsoft-contrib": "5.2.1"
     },
     "dependencies": {
+        "@babel/polyfill": "^7.0.0",
         "d3": "3.5.5",
         "globalize": "0.1.0-a2",
         "jquery": "3.1.1",

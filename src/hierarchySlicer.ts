@@ -35,6 +35,7 @@ import * as models from "powerbi-models";
 import * as d3 from "d3";
 import * as _ from "lodash";
 import * as $ from "jquery";
+import "@babel/polyfill";
 
 import "../style/hierarchySlicer.less";
 
