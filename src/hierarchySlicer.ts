@@ -476,6 +476,7 @@ export class HierarchySlicer implements IVisual {
         if (options.viewport.height === this.viewport.height
             && options.viewport.width === this.viewport.width) {
             this.waitingForData = false;
+            this.treeView.updateScrollHeight();
         } else {
             this.viewport = options.viewport;
         }

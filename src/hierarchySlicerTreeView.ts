@@ -118,6 +118,11 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         return this.options.rowHeight || HierarchySlicerTreeView.defaultRowHeight;
     }
 
+    public updateScrollHeight() {
+        const scrollHeight = this.options.scrollEnabled ? Math.min(this.getContainerHeight(), (this.getVisibleRows() * this.options.rowHeight)) : this.getContainerHeight();
+        this.scrollbarInner.style("height", scrollHeight + "px").attr("height", scrollHeight);
+    }
+
     public data(data: any[], getDatumIndex: (d: any) => {}, dataReset: boolean = false): IHierarchySlicerTreeView {
         this._data = data;
         this.getDatumIndex = getDatumIndex;
