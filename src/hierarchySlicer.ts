@@ -33,7 +33,7 @@ import * as svgutils from "powerbi-visuals-utils-svgutils";
 import * as typeutils from "powerbi-visuals-utils-typeutils";
 import * as models from "powerbi-models";
 import * as d3 from "d3";
-import * as _ from "lodash";
+import * as _ from "lodash-es";
 import * as $ from "jquery";
 import "@babel/polyfill";
 
@@ -353,6 +353,28 @@ export class HierarchySlicer implements IVisual {
             dataPoints[0].selected = selected > 0 ? true : false;
             dataPoints[0].partialSelected = (selected === 0) ||
                 dataPoints.filter((d) => d.selected).length === dataPoints.length ? false : true;
+        }
+
+        let sortDirectAsc = true;
+        let firstDataPoint = dataPoints[0].identity.match(/(\|\~.*0)_{0,1}/)[1];
+        let lastDataPoint = dataPoints[dataPoints.length - 1].identity.match(/(\|\~.*0)_{0,1}/)[1];
+        if (firstDataPoint.localeCompare(lastDataPoint) > 0) {
+            sortDirectAsc = false;
+        }
+        dataPoints = dataPoints.sort((a, b) => { 
+            return a.identity.match(/(\|\~.*0)_{0,1}/)[1].localeCompare(b.identity.match(/(\|\~.*0)_{0,1}/)[1]);
+        });
+        if (!sortDirectAsc) {
+            dataPoints = dataPoints.reverse();
+            let rootParents = dataPoints.filter(data => data.identity.match(/\|\~.*\-0$/g)).map( data => data.identity);
+            rootParents.forEach(parent => {
+                let parentIndex = dataPoints.findIndex((data) => data.identity === parent);
+                let parentIndexOriginal = dataPoints.findIndex((data) => data.identity.indexOf(parent) > -1);
+                // swap elements
+                let tmp = dataPoints[parentIndex];
+                dataPoints[parentIndex] = dataPoints[parentIndexOriginal];
+                dataPoints[parentIndexOriginal] = tmp;
+            });
         }
         return {
             dataPoints: dataPoints,
