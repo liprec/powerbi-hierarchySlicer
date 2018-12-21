@@ -33,8 +33,9 @@ import * as svgutils from "powerbi-visuals-utils-svgutils";
 import * as typeutils from "powerbi-visuals-utils-typeutils";
 import * as models from "powerbi-models";
 import * as d3 from "d3";
-import * as _ from "lodash";
-import * as $ from "jquery";
+
+import {isEqual, includes} from "lodash-es";
+
 import "@babel/polyfill";
 
 import "../style/hierarchySlicer.less";
@@ -121,7 +122,7 @@ export class HierarchySlicer implements IVisual {
     };
     private root: HTMLElement;
     private searchHeader: Selection<any>;
-    private searchInput: Selection<any>;
+    private searchInput: Selection<HTMLInputElement>;
     private behavior: HierarchySlicerWebBehavior;
     private viewport: IViewport;
     private hostServices: IVisualHost;
@@ -506,7 +507,7 @@ export class HierarchySlicer implements IVisual {
                     let dv2Identity: DataRepetitionSelector = dv2TableIdentity[i];
 
                     // debugger;
-                    if (!_.isEqual((<any>dv1Identity).scopeId, (<any>dv2Identity).scopeId))
+                    if (!isEqual((<any>dv1Identity).scopeId, (<any>dv2Identity).scopeId))
                         return false;
                 }
 
@@ -520,7 +521,7 @@ export class HierarchySlicer implements IVisual {
     private updateInternal(resetScrollbar: boolean) {
         this.updateSlicerBodyDimensions();
 
-        const data = this.data = this.converter(this.dataView, this.jsonFilters, $(this.searchInput)[0][0].value);
+        const data = this.data = this.converter(this.dataView, this.jsonFilters, (this.searchInput.node() as HTMLInputElement).value);
         this.maxLevels = this.data.levels + 1;
 
         if (data.dataPoints.length === 0) {
@@ -534,8 +535,8 @@ export class HierarchySlicer implements IVisual {
             .viewport(this.getBodyViewport(this.viewport))
             .rowHeight(this.getRowHeight())
             .data(
-                data.dataPoints.filter((d) => !d.isHidden), // Expand/Collapse
-                (d: IHierarchySlicerDataPoint) => $.inArray(d, data.dataPoints),
+                data.dataPoints.filter((d: IHierarchySlicerDataPoint) => !d.isHidden), // Expand/Collapse
+                (d: IHierarchySlicerDataPoint) => data.dataPoints.indexOf(d),
                 resetScrollbar
             )
             .render();
@@ -977,7 +978,7 @@ export class HierarchySlicer implements IVisual {
             })
             .html(this.IconSet.delete)
             .on("click", () => {
-                $(this.searchInput)[0][0].value = "";
+                (this.searchInput.node() as HTMLInputElement).value = "";
                 this.hostServices.persistProperties({
                     merge: [{
                         objectName: "general",
