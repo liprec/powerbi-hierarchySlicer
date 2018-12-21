@@ -245,7 +245,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         // HEADER EVENTS
         slicerCollapse.on("click", (d: IHierarchySlicerDataPoint) => {
             if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
-                // $(".scrollbar-inner").scrollTop(0);
+                (d3.select(".scrollbar-inner").node() as HTMLElement).scrollTo({top: 0});
+
                 this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = false);
                 this.persistExpand(true);
             }
