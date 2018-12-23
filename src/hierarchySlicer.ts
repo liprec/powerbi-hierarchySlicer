@@ -271,6 +271,7 @@ export class HierarchySlicer implements IVisual {
                 parentSearchStr = searchStr;
                 if (identityValues.indexOf(ownId) === -1) {
                     if (c !== levels) {
+                        // Add non leafs to parentIndex
                         let parentIndexLookup;
                         if (parentIndex.indexOf(c) === -1) {
                             parentIndex.push([]);
@@ -279,12 +280,12 @@ export class HierarchySlicer implements IVisual {
                         if (parentIndexLookup.indexOf(parentId) === -1) {
                             parentIndexLookup.push(ownId);
                         }
-                        if (c === 0) {
-                            dataPoint.order = ((30000 * parentIndex[c].indexOf(dataPoint.ownId)) + dataPoint.order);
+                        if (c === 0) { // root level
+                            dataPoint.order = ((this.settings.general.maxDataPoints * parentIndex[c].indexOf(dataPoint.ownId)) + dataPoint.order);
                         }
                     }
-                    if (c > 0) {
-                        dataPoint.order = ((30000 * parentIndex[c - 1].indexOf(dataPoint.parentId)) + dataPoint.order);
+                    if (c > 0) { // non-root levels -> based on parent
+                        dataPoint.order = ((this.settings.general.maxDataPoints * parentIndex[c - 1].indexOf(dataPoint.parentId)) + dataPoint.order);
                     }
 
                     identityValues.push(ownId);

@@ -56,6 +56,7 @@ class GeneralSettings {
     public selfFilterEnabled: boolean = false;
     public filter: string = "";
     public spinnerDelay: number = 250;
+    public maxDataPoints: number = 30000;
 }
 
 class SelectionSettings {
