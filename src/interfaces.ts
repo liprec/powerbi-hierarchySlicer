@@ -27,20 +27,20 @@
 
 "use strict";
 import powerbi from "powerbi-visuals-api";
-import * as interactivityutils from "powerbi-visuals-utils-interactivityutils";
-import * as models from "powerbi-models";
-import {Selection} from "d3-selection";
+import { interactivityBaseService, interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
+import { IFilterTarget } from "powerbi-models";
+import { Selection } from "d3-selection";
 
 import * as settings from "./settings";
 
 import IViewport = powerbi.IViewport;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-import SelectableDataPoint = interactivityutils.interactivitySelectionService.SelectableDataPoint;
-import IInteractivityService = interactivityutils.interactivityBaseService.IInteractivityService;
-import IFilterTarget = models.IFilterTarget;
+import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import IBehaviorOptions = interactivityBaseService.IBehaviorOptions;
+import InteractivityServiceOptions = interactivityBaseService.InteractivityServiceOptions;
+
 import HierarchySlicerSettings = settings.HierarchySlicerSettings;
-import IBehaviorOptions = interactivityutils.interactivityBaseService.IBehaviorOptions;
-import InteractivityServiceOptions = interactivityutils.interactivityBaseService.InteractivityServiceOptions;
 
 export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     value: string;
@@ -51,7 +51,7 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     isSelectAllDataPoint?: boolean;
     selectable?: boolean;
     partialSelected: boolean;
-    id: {}; // SQExpr;
+    id: {};
     isLeaf: boolean;
     isExpand: boolean;
     isHidden: boolean;

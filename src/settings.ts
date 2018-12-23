@@ -28,11 +28,11 @@
 
 "use strict";
 
-import * as dataviewutils from "powerbi-visuals-utils-dataviewutils";
+import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 
 import * as enums from "./enums";
 
-import DataViewObjectsParser = dataviewutils.dataViewObjectsParser.DataViewObjectsParser;
+import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
 import BorderStyle = enums.BorderStyle;
 import FontWeight = enums.FontWeight;

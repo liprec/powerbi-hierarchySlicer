@@ -27,14 +27,14 @@
 
 "use strict";
 import powerbi from "powerbi-visuals-api";
-import * as interactivityutils from "powerbi-visuals-utils-interactivityutils";
-import * as formattingutils from "powerbi-visuals-utils-formattingutils";
-import * as svgutils from "powerbi-visuals-utils-svgutils";
-import * as typeutils from "powerbi-visuals-utils-typeutils";
-import * as models from "powerbi-models";
-import {select, Selection} from "d3-selection";
+import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import { valueFormatter, textMeasurementService} from "powerbi-visuals-utils-formattingutils";
+import { IMargin, CssConstants } from "powerbi-visuals-utils-svgutils";
+import { pixelConverter } from "powerbi-visuals-utils-typeutils";
+import { IFilterTarget } from "powerbi-models";
+import { select, Selection } from "d3-selection";
 
-import {isEqual, includes} from "lodash-es";
+import { isEqual } from "lodash-es";
 
 import "@babel/polyfill";
 
@@ -50,30 +50,24 @@ import DataView = powerbi.DataView;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
 import IViewport = powerbi.IViewport;
 import IFilter = powerbi.IFilter;
-import IFilterTarget = models.IFilterTarget;
-import VisualUpdateType = powerbi.VisualUpdateType;
-import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration;
-import ISQExpr = powerbi.data.ISQExpr;
 import DataRepetitionSelector = powerbi.data.DataRepetitionSelector;
-import ISelectionId = powerbi.extensibility.ISelectionId;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-import IInteractivityService = interactivityutils.interactivityBaseService.IInteractivityService;
-import createInteractivitySelectionService = interactivityutils.interactivitySelectionService.createInteractivitySelectionService;
-import IMargin = svgutils.IMargin;
-import ClassAndSelector = svgutils.CssConstants.ClassAndSelector;
-import createClassAndSelector = svgutils.CssConstants.createClassAndSelector;
-import PixelConverter = typeutils.pixelConverter;
-import valueFormatter = formattingutils.valueFormatter.valueFormatter;
-import TextProperties = formattingutils.textMeasurementService.TextProperties;
-import TextMeasurementService = formattingutils.textMeasurementService.textMeasurementService;
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import createInteractivitySelectionService = interactivitySelectionService.createInteractivitySelectionService;
+import PixelConverter = pixelConverter;
+import ClassAndSelector = CssConstants.ClassAndSelector;
+import createClassAndSelector = CssConstants.createClassAndSelector;
+import ValueFormat = valueFormatter.valueFormatter.format;
+import TextProperties = textMeasurementService.TextProperties;
+import TextMeasurementService = textMeasurementService.textMeasurementService;
 
 import IHierarchySlicerBehaviorOptions = interfaces.IHierarchySlicerBehaviorOptions;
 import IHierarchySlicerTreeView = interfaces.IHierarchySlicerTreeView;
@@ -85,7 +79,6 @@ import HierarchySlicerWebBehavior = webBehavior.HierarchySlicerWebBehavior;
 import HierarchySlicerTreeViewFactory = treeView.HierarchySlicerTreeViewFactory;
 
 import BorderStyle = enums.BorderStyle;
-import FontWeight = enums.FontWeight;
 import FontStyle = enums.FontStyle;
 
 export class HierarchySlicer implements IVisual {
@@ -204,8 +197,8 @@ export class HierarchySlicer implements IVisual {
             } else {
                 selectedIds = (jsonFilters[0] as any).values.map((d) => "|~" + (
                         Array.isArray(d) ?
-                        d.map((dp, i) => valueFormatter.format(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString()).join('_|~')
-                        : valueFormatter.format(d, columns[0].format).replace(/,/g, "") + "-0"));
+                        d.map((dp, i) => ValueFormat(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString()).join('_|~')
+                        : ValueFormat(d, columns[0].format).replace(/,/g, "") + "-0"));
             }
         }
         expandedIds = this.settings.general.expanded.split(",");
@@ -238,9 +231,9 @@ export class HierarchySlicer implements IVisual {
                 if ((rows[r][c] === null) && (!this.settings.selection.emptyLeafs)) {
                     isRagged = true;
                 }
-                let format = columns[c].format;
+                let columnFormat = columns[c].format;
                 let dataType: ValueTypeDescriptor = columns[c].type;
-                let labelValue: string = valueFormatter.format(rows[r][c], format);
+                let labelValue: string = ValueFormat(rows[r][c], columnFormat);
                 labelValue = labelValue === null ? "(blank)" : labelValue;
 
                 let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + c;

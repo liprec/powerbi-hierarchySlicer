@@ -27,23 +27,20 @@
 
 "use strict";
 import powerbi from "powerbi-visuals-api";
-import * as svgutils from "powerbi-visuals-utils-svgutils";
-import * as typeutils from "powerbi-visuals-utils-typeutils";
-import {Selection} from "d3-selection";
+import { manipulation } from "powerbi-visuals-utils-svgutils";
+import { Selection } from "d3-selection";
 
-import {extend} from "lodash-es";
+import { extend } from "lodash-es";
 
 import SimpleBar from 'simplebar';
 
 import * as interfaces from "./interfaces";
 
 import IViewport = powerbi.IViewport;
-import TranslateWithPixels = svgutils.manipulation.translateWithPixels;
-import PixelConverter = typeutils.pixelConverter;
+import TranslateWithPixels = manipulation.translateWithPixels;
 
 import IHierarchySlicerTreeView = interfaces.IHierarchySlicerTreeView;
 import IHierarchySlicerTreeViewOptions = interfaces.IHierarchySlicerTreeViewOptions;
-import IHierarchySlicerDataPoint = interfaces.IHierarchySlicerDataPoint;
 
 export module HierarchySlicerTreeViewFactory {
     export function createListView(options): IHierarchySlicerTreeView {

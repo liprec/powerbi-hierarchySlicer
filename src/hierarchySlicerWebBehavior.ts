@@ -28,15 +28,14 @@
 "use strict";
 
 import powerbi from "powerbi-visuals-api";
-import * as interactivityutils from "powerbi-visuals-utils-interactivityutils";
-import * as typeutils from "powerbi-visuals-utils-typeutils";
-import * as models from "powerbi-models";
-import {select, event, Selection} from "d3-selection";
+import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import { pixelConverter } from "powerbi-visuals-utils-typeutils";
+import { IFilterColumnTarget } from "powerbi-models";
+import { select, event, Selection } from "d3-selection";
 
 import * as interfaces from "./interfaces";
 import * as settings from "./settings";
 
-import IViewport = powerbi.IViewport;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IFilter = powerbi.IFilter;
 import FilterAction = powerbi.FilterAction;
@@ -44,12 +43,10 @@ import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifi
 import DataViewPropertyValue = powerbi.DataViewPropertyValue;
 import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
-import ISelectionHandler = interactivityutils.interactivityBaseService.ISelectionHandler;
-import IInteractivityService = interactivityutils.interactivityBaseService.IInteractivityService;
-import IInteractiveBehavior = interactivityutils.interactivityBaseService.IInteractiveBehavior;
-// import Selection = d3.Selection;
-import PixelConverter = typeutils.pixelConverter;
-import IFilterColumnTarget = models.IFilterColumnTarget;
+import ISelectionHandler = interactivityBaseService.ISelectionHandler;
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import IInteractiveBehavior = interactivityBaseService.IInteractiveBehavior;
+import PixelConverter = pixelConverter;
 
 import IHierarchySlicerBehaviorOptions = interfaces.IHierarchySlicerBehaviorOptions;
 import IHierarchySlicerDataPoint = interfaces.IHierarchySlicerDataPoint;
