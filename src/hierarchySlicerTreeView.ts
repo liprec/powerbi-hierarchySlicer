@@ -132,7 +132,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         this.setTotalRows();
 
         if (dataReset) {
-            (this.scrollbarInner.node() as HTMLElement).scrollTo({top: 0});
+            (this.scrollbarInner.node() as HTMLElement).scrollTop = 0;
         }
 
         return this;
