@@ -24,6 +24,7 @@
         "powerbi-visuals-utils-dataviewutils": "^2.1.0",
         "powerbi-visuals-utils-formattingutils": "^4.1.1",
         "powerbi-visuals-utils-interactivityutils": "^5.4.0",
-        "powerbi-visuals-utils-svgutils": "^2.1.0"
+        "powerbi-visuals-utils-svgutils": "^2.1.0",
+        "simplebar": "^3.1.1"
     }
 }

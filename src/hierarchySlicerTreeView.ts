@@ -33,6 +33,8 @@ import * as d3 from "d3";
 
 import {extend} from "lodash-es";
 
+import SimpleBar from 'simplebar';
+
 import * as interfaces from "./interfaces";
 
 import IViewport = powerbi.IViewport;
@@ -60,6 +62,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private scrollContainer: Selection<any>;
     private scrollbarInner: Selection<any>;
     private renderTimeoutId: number;
+    private scrollBar;
 
     /**
      * The value indicates the percentage of data already shown
@@ -74,12 +77,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
         this.scrollbarInner = options.baseContainer
             .append("div")
-            .classed("scrollbar-inner", true)
-            .on("scroll", () => {
-                this.renderImpl(this.options.rowHeight);
-                const scrollHeight = this.options.scrollEnabled ? Math.min(this.getContainerHeight(), (this.getVisibleRows() * this.options.rowHeight)) : this.getContainerHeight();
-                this.scrollbarInner.style("height", scrollHeight + "px").attr("height", scrollHeight);
-            });
+            .classed("scrollbar-inner", true);
 
         this.scrollContainer = this.scrollbarInner
             .append("div")
@@ -89,9 +87,10 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .append("div")
             .classed("visibleGroup", true);
 
-        // const scrollInner = $(this.scrollbarInner.node());
-        // scrollInner.scrollbar({ignoreOverlay: false, ignoreMobile: false, onDestroy: () => scrollInner.off("scroll")});
-        // $(options.baseContainer.node()).find(".scroll-element").attr("drag-resize-disabled", "true");
+        this.scrollBar = new SimpleBar((this.scrollbarInner.node() as HTMLElement));
+        this.scrollBar.getScrollElement().addEventListener('scroll', () => {
+            this.renderImpl(this.options.rowHeight);
+        });
 
         options.baseContainer.select(".scroll-element").attr("drag-resize-disabled", "true");
 
@@ -122,7 +121,8 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     public updateScrollHeight() {
         const scrollHeight = this.options.scrollEnabled ? Math.min(this.getContainerHeight(), (this.getVisibleRows() * this.options.rowHeight)) : this.getContainerHeight();
 
-        this.scrollbarInner.style("height", scrollHeight + "px").attr("height", scrollHeight);
+        // this.scrollbarInner.style("height", scrollHeight + "px").attr("height", scrollHeight);
+        // this.scrollBar.recalculate();
     }
 
     public data(data: any[], getDatumIndex: (d: any) => {}, dataReset: boolean = false): IHierarchySlicerTreeView {
@@ -132,7 +132,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         this.setTotalRows();
 
         if (dataReset) {
-            (this.scrollbarInner.node() as HTMLElement).scrollTop = 0;
+            this.scrollBar.getScrollElement().scrollTop = 0;
         }
 
         return this;
@@ -160,13 +160,13 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
     private renderImpl(rowHeight: number) {
         const totalHeight = this.options.scrollEnabled ? Math.max(0, (this._totalRows * rowHeight)) : this.getContainerHeight();
-        this.scrollContainer.style("height", totalHeight + "px").attr("height", totalHeight);
+        // this.scrollContainer.style("height", totalHeight + "px").attr("height", totalHeight);
 
         this.defaultScrollToFrame(
             this,
             true /*loadMoreData*/,
             this.options.rowHeight || HierarchySlicerTreeView.defaultRowHeight,
-            (this.scrollbarInner.node() as HTMLElement).scrollTop,
+            this.scrollBar.getScrollElement().scrollTop,
             this._totalRows,
             this.visibleGroupContainer,
             this.options.baseContainer
@@ -192,6 +192,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private performScrollToFrame(position0: number, position1: number, totalRows: number, visibleRows: number, loadMoreData: boolean) {
         const options = this.options;
         const visibleGroupContainer = this.visibleGroupContainer;
+        console.log("d");
         const rowSelection = visibleGroupContainer
             .selectAll(".row")
             .data(<any>this._data.slice(position0, Math.min(position1, totalRows)), <any>this.getDatumIndex);
@@ -244,7 +245,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             this,
             false /*loadMoreData*/,
             this.options.rowHeight || HierarchySlicerTreeView.defaultRowHeight,
-            (this.scrollbarInner.node() as HTMLElement).scrollTop,
+            this.scrollBar.getScrollElement().scrollTop,
             this._totalRows,
             this.visibleGroupContainer,
             this.options.baseContainer
