@@ -31,7 +31,7 @@ import powerbi from "powerbi-visuals-api";
 import * as interactivityutils from "powerbi-visuals-utils-interactivityutils";
 import * as typeutils from "powerbi-visuals-utils-typeutils";
 import * as models from "powerbi-models";
-import * as d3 from "d3";
+import {select, event, Selection} from "d3-selection";
 
 import * as interfaces from "./interfaces";
 import * as settings from "./settings";
@@ -47,7 +47,7 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import ISelectionHandler = interactivityutils.interactivityBaseService.ISelectionHandler;
 import IInteractivityService = interactivityutils.interactivityBaseService.IInteractivityService;
 import IInteractiveBehavior = interactivityutils.interactivityBaseService.IInteractiveBehavior;
-import Selection = d3.Selection;
+// import Selection = d3.Selection;
 import PixelConverter = typeutils.pixelConverter;
 import IFilterColumnTarget = models.IFilterColumnTarget;
 
@@ -67,12 +67,12 @@ let hierarchySlicerProperties = {
 
 export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     private hostServices: IVisualHost;
-    private expanders: Selection<any>;
+    private expanders: Selection<any, any, any, any>;
     private options: IHierarchySlicerBehaviorOptions;
-    private slicers: Selection<any>;
-    private slicerBodySpinner: Selection<any>;
-    private slicerItemLabels: Selection<any>;
-    private slicerItemInputs: Selection<any>;
+    private slicers: Selection<any, any, any, any>;
+    private slicerBodySpinner: Selection<any, any, any, any>;
+    private slicerItemLabels: Selection<any, any, any, any>;
+    private slicerItemInputs: Selection<any, any, any, any>;
     private dataPoints: IHierarchySlicerDataPoint[];
     private fullTree: IHierarchySlicerDataPoint[];
     private dataView: powerbi.DataView;
@@ -89,7 +89,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
     public bindEvents(options: IHierarchySlicerBehaviorOptions, selectionHandler: ISelectionHandler): void {
         let expanders = this.expanders = options.expanders;
-        let slicers: Selection<any> = this.slicers = options.slicerItemContainers;
+        let slicers: Selection<any, any, any, any> = this.slicers = options.slicerItemContainers;
         this.slicerBodySpinner = options.slicerBodySpinner;
         this.slicerItemLabels = options.slicerItemLabels;
         this.slicerItemInputs = options.slicerItemInputs;
@@ -155,7 +155,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         });
 
         slicers.on("click", (d: IHierarchySlicerDataPoint, index: number) => {
-            (d3.event as MouseEvent).preventDefault();
+            (event as MouseEvent).preventDefault();
             if (!d.selectable) {
                 return;
             }
@@ -245,7 +245,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         // HEADER EVENTS
         slicerCollapse.on("click", (d: IHierarchySlicerDataPoint) => {
             if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
-                (d3.select(".simplebar-content").node() as HTMLElement).scrollTop = 0;
+                (select(".simplebar-content").node() as HTMLElement).scrollTop = 0;
 
                 this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = false);
                 this.persistExpand(true);
@@ -281,25 +281,25 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         });
     }
 
-    private addSpinner(expanders: d3.Selection<any>, index: number) {
+    private addSpinner(expanders: Selection<any, any, any, any>, index: number) {
         const currentExpander = expanders.filter((expander, i) => index === i);
-        const currentExpanderHtml = (<HTMLElement>currentExpander[0][0]);
+        const currentExpanderHtml = (currentExpander.node() as HTMLElement);
         const size = Math.min(currentExpanderHtml.clientHeight, currentExpanderHtml.clientWidth);
         const scale = size / 25.0;
         currentExpander.select(".icon").remove();
         const container = currentExpander.select(".spinner-icon").style("display", "inline");
-        const spinner = container.append("div").classed("xsmall", true).classed("powerbi-spinner", true).style({
-            "top": "25%",
-            "right": "50%",
-            "transform": `scale(${scale})`,
-            "margin": "0px;",
-            "padding-left": "5px;",
-            "display": "block;",
-            "margin-right": "-3px",
-            "margin-left": (d) => PixelConverter.toString(this.settings.items.textSize / (2.5)),
-            "margin-bottom": "0px",
-            "float": "right"
-        }).attr("ng-if", "viewModel.showProgressBar")
+        const spinner = container.append("div").classed("xsmall", true).classed("powerbi-spinner", true)
+            .style("top", "25%")
+            .style("right", "50%")
+            .style("transform", `scale(${scale})`)
+            .style("margin", "0px;")
+            .style("padding-left", "5px;")
+            .style("display", "block;")
+            .style("margin-right", "-3px")
+            .style("margin-left", (d) => PixelConverter.toString(this.settings.items.textSize / (2.5)))
+            .style("margin-bottom", "0px")
+            .style("float", "right")
+            .attr("ng-if", "viewModel.showProgressBar")
             .attr("delay", "100")
             .append("div").classed("spinner", true);
         for (let i = 0; i < 5; i++) {
@@ -308,8 +308,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private renderMouseover(): void {
-        this.slicerItemLabels.style({
-            "color": (d: IHierarchySlicerDataPoint) => {
+        this.slicerItemLabels.style("color", (d: IHierarchySlicerDataPoint) => {
                 if (d.mouseOver)
                     return this.settings.items.hoverColor;
                 else if (d.mouseOut) {
@@ -320,10 +319,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 }
                 else
                     return this.settings.items.fontColor; // fallback
-            }
-        });
-        this.expanders.style({
-            "color": (d: IHierarchySlicerDataPoint) => {
+            });
+        this.expanders.style("color", (d: IHierarchySlicerDataPoint) => {
                 if (d.mouseOver)
                     return this.settings.items.hoverColor;
                 else if (d.mouseOut) {
@@ -334,8 +331,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 }
                 else
                     return this.settings.items.fontColor; // fallback
-            }
-        });
+            });
     }
 
     public renderSelection(hasSelection: boolean): void {
@@ -352,7 +348,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         }
     }
 
-    public styleSlicerInputs(slicers: Selection<any>, hasSelection: boolean) {
+    public styleSlicerInputs(slicers: Selection<any, any, any, any>, hasSelection: boolean) {
         let settings = this.settings;
         slicers.each(function (d: IHierarchySlicerDataPoint) {
             let slicerItem: HTMLElement = this.getElementsByTagName("div")[0];

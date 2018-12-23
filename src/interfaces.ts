@@ -29,7 +29,7 @@
 import powerbi from "powerbi-visuals-api";
 import * as interactivityutils from "powerbi-visuals-utils-interactivityutils";
 import * as models from "powerbi-models";
-import * as d3 from "d3";
+import {Selection} from "d3-selection";
 
 import * as settings from "./settings";
 
@@ -38,7 +38,6 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import SelectableDataPoint = interactivityutils.interactivitySelectionService.SelectableDataPoint;
 import IInteractivityService = interactivityutils.interactivityBaseService.IInteractivityService;
 import IFilterTarget = models.IFilterTarget;
-import Selection = d3.Selection;
 import HierarchySlicerSettings = settings.HierarchySlicerSettings;
 import IBehaviorOptions = interactivityutils.interactivityBaseService.IBehaviorOptions;
 import InteractivityServiceOptions = interactivityutils.interactivityBaseService.InteractivityServiceOptions;
@@ -75,16 +74,16 @@ export interface IHierarchySlicerData {
 
 export interface IHierarchySlicerBehaviorOptions extends IBehaviorOptions<IHierarchySlicerDataPoint> {
     hostServices: IVisualHost;
-    expanders: Selection<any>;
-    slicerBodySpinner: Selection<any>;
-    slicerContainer: Selection<any>;
-    slicerItemContainers: Selection<any>;
-    slicerItemLabels: Selection<any>;
-    slicerItemInputs: Selection<any>;
-    slicerClear: Selection<any>;
-    slicerExpand: Selection<any>;
-    slicerCollapse: Selection<any>;
-    slicerHeaderText: Selection<any>;
+    expanders: Selection<any, any, any, any>;
+    slicerBodySpinner: Selection<any, any, any, any>;
+    slicerContainer: Selection<any, any, any, any>;
+    slicerItemContainers: Selection<any, any, any, any>;
+    slicerItemLabels: Selection<any, any, any, any>;
+    slicerItemInputs: Selection<any, any, any, any>;
+    slicerClear: Selection<any, any, any, any>;
+    slicerExpand: Selection<any, any, any, any>;
+    slicerCollapse: Selection<any, any, any, any>;
+    slicerHeaderText: Selection<any, any, any, any>;
     dataPoints: IHierarchySlicerDataPoint[];
     fullTree: IHierarchySlicerDataPoint[];
     interactivityService: IInteractivityService<IHierarchySlicerDataPoint>;
@@ -95,11 +94,11 @@ export interface IHierarchySlicerBehaviorOptions extends IBehaviorOptions<IHiera
 }
 
 export interface IHierarchySlicerTreeViewOptions {
-    enter: (selection: Selection<any>) => void;
-    exit: (selection: Selection<any>) => void;
-    update: (selection: Selection<any>) => void;
+    enter: (selection: Selection<any, any, any, any>) => void;
+    exit: (selection: Selection<any, any, any, any>) => void;
+    update: (selection: Selection<any, any, any, any>) => void;
     loadMoreData: () => void;
-    baseContainer: Selection<any>;
+    baseContainer: Selection<any, any, any, any>;
     rowHeight: number;
     viewport: IViewport;
     scrollEnabled: boolean;

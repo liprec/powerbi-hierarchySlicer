@@ -32,7 +32,7 @@ import * as formattingutils from "powerbi-visuals-utils-formattingutils";
 import * as svgutils from "powerbi-visuals-utils-svgutils";
 import * as typeutils from "powerbi-visuals-utils-typeutils";
 import * as models from "powerbi-models";
-import * as d3 from "d3";
+import {select, Selection} from "d3-selection";
 
 import {isEqual, includes} from "lodash-es";
 
@@ -74,8 +74,6 @@ import PixelConverter = typeutils.pixelConverter;
 import valueFormatter = formattingutils.valueFormatter.valueFormatter;
 import TextProperties = formattingutils.textMeasurementService.TextProperties;
 import TextMeasurementService = formattingutils.textMeasurementService.textMeasurementService;
-import Selection = d3.Selection;
-import UpdateSelection = d3.selection.Update;
 
 import IHierarchySlicerBehaviorOptions = interfaces.IHierarchySlicerBehaviorOptions;
 import IHierarchySlicerTreeView = interfaces.IHierarchySlicerTreeView;
@@ -121,8 +119,8 @@ export class HierarchySlicer implements IVisual {
         </svg>`
     };
     private root: HTMLElement;
-    private searchHeader: Selection<any>;
-    private searchInput: Selection<HTMLInputElement>;
+    private searchHeader: Selection<any, any, any, any>;
+    private searchInput: Selection<HTMLInputElement, any, any, any>;
     private behavior: HierarchySlicerWebBehavior;
     private viewport: IViewport;
     private hostServices: IVisualHost;
@@ -139,14 +137,14 @@ export class HierarchySlicer implements IVisual {
     private rowHeight: number;
     private waitingForData: boolean;
     private isInFocus: boolean;
-    private slicerContainer: Selection<any>;
-    private slicerHeaderContainer: Selection<any>;
-    private slicerHeader: Selection<any>;
-    private slicerBody: Selection<any>;
-    private slicerBodySpinner: Selection<any>;
+    private slicerContainer: Selection<any, any, any, any>;
+    private slicerHeaderContainer: Selection<any, any, any, any>;
+    private slicerHeader: Selection<any, any, any, any>;
+    private slicerBody: Selection<any, any, any, any>;
+    private slicerBodySpinner: Selection<any, any, any, any>;
     private isLandingPageOn: boolean;
     private landingPageRemoved: boolean;
-    private landingPage: d3.Selection<any>;
+    private landingPage: Selection<any, any, any, any>;
 
     public static DefaultFontFamily: string = "Segoe UI, Tahoma, Verdana, Geneva, sans-serif";
     public static DefaultFontSizeInPt: number = 11;
@@ -379,7 +377,7 @@ export class HierarchySlicer implements IVisual {
     private init(options: VisualUpdateOptions): void {
         this.viewport = options.viewport;
 
-        this.slicerContainer = d3.select(this.root)
+        this.slicerContainer = select(this.root)
             .append("div")
             .classed(HierarchySlicer.Container.className, true);
 
@@ -389,20 +387,18 @@ export class HierarchySlicer implements IVisual {
         this.slicerBody = this.slicerContainer
             .append("div")
             .classed(HierarchySlicer.Body.className, true)
-            .style({
-                "height": PixelConverter.toString(bodyViewPort.height),
-                "width": PixelConverter.toString(bodyViewPort.width),
-            });
+            .style("height", PixelConverter.toString(bodyViewPort.height))
+            .style("width", PixelConverter.toString(bodyViewPort.width));
 
-        let rowEnter = (rowSelection: Selection<any>) => {
+        let rowEnter = (rowSelection: Selection<any, any, any, any>) => {
             this.onEnterSelection(rowSelection);
         };
 
-        let rowUpdate = (rowSelection: Selection<any>) => {
+        let rowUpdate = (rowSelection: Selection<any, any, any, any>) => {
             this.onUpdateSelection(rowSelection, this.interactivityService);
         };
 
-        let rowExit = (rowSelection: Selection<any>) => {
+        let rowExit = (rowSelection: Selection<any, any, any, any>) => {
             rowSelection.remove();
         };
 
@@ -423,7 +419,7 @@ export class HierarchySlicer implements IVisual {
         this.treeView = HierarchySlicerTreeViewFactory.createListView(treeViewOptions);
     }
 
-    private renderHeader(rootContainer: Selection<any>): void {
+    private renderHeader(rootContainer: Selection<any, any, any, any>): void {
         const headerButtonData = [
             { title: "Clear", class: HierarchySlicer.Clear.className, icon: this.IconSet.clearAll, level: 0 },
             { title: "Expand all", class: HierarchySlicer.Expand.className, icon: this.IconSet.expandAll, level: 1 },
@@ -586,74 +582,65 @@ export class HierarchySlicer implements IVisual {
     private updateSlicerBodyDimensions(): void {
         let slicerViewport: IViewport = this.getBodyViewport(this.viewport);
         this.slicerBody
-            .style({
-                "height": `${slicerViewport.height}px`,
-                "width": "100%",
-            });
+            .style("height", `${slicerViewport.height}px`)
+            .style("width", "100%");
     }
 
-    private onEnterSelection(rowSelection: Selection<any>): void {
+    private onEnterSelection(rowSelection: Selection<any, any, any, any>): void {
         if (!this.settings) return;
         const _this = this;
-        let treeItemElementParent: UpdateSelection<any> = rowSelection
-            .selectAll("li")
-            .data((d: IHierarchySlicerDataPoint) => [d]);
-
-        treeItemElementParent
-            .exit()
-            .remove();
-
-        treeItemElementParent
-            .style({
-                "background-color": this.settings.items.background,
-                "height": "100%"
-            });
-
-        treeItemElementParent
+        const treeItemElementParent: Selection<any, any, any, any> = rowSelection
+            .selectAll(HierarchySlicer.ItemContainer.selectorName)
+            .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .append("li")
             .classed(HierarchySlicer.ItemContainer.className, true);
 
-        // Expand/collapse
-        let expandCollapse: UpdateSelection<any> = treeItemElementParent
-            .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
-            .data((d: IHierarchySlicerDataPoint) => [d]);
+        treeItemElementParent
+            .style("background-color", this.settings.items.background);
 
-        expandCollapse
+        treeItemElementParent
             .exit()
             .remove();
 
-        expandCollapse
+        // Expand/collapse
+        const expandCollapse: Selection<any, any, any, any> = treeItemElementParent
+            .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
+            .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .insert("div", ":first-child")
-            .classed(HierarchySlicer.ItemContainerExpander.className, true)
-            .append("div")
+            .classed(HierarchySlicer.ItemContainerExpander.className, true);
+
+        expandCollapse
+            .selectAll(".icon")
+            .data((d: IHierarchySlicerDataPoint) => [d])
+            .enter()
+            .insert("div")
             .classed("icon", true)
             .classed("icon-left", true)
-            .style({
-                "visibility": (d) => d.isLeaf ? "hidden" : "visible",
-                "font-size": PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSize)),
-                "margin-left" : (d) => PixelConverter.toString(-this.settings.items.textSize / (2.5)),
-                "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))),
-                "height": PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSize))),
-                "fill": this.settings.items.fontColor,
-            })
+            .style("visibility", (d) => d.isLeaf ? "hidden" : "visible")
+            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSize)))
+            .style("margin-left", (d) => PixelConverter.toString(-this.settings.items.textSize / (2.5)))
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))))
+            .style("height", PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSize))))
+            .style("fill", this.settings.items.fontColor)
             .html((d) => d.isExpand ? this.IconSet.expand : this.IconSet.collapse);
 
         expandCollapse
-            .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
+            .selectAll(".spinner-icon")
             .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .insert("div") // Spinner location
             .classed("spinner-icon", true)
-            .style({
-                "display": "none",
-                "font-size": PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSize)),
-                "margin-left": (d) => PixelConverter.toString(-this.settings.items.textSize / (2.5)),
-                "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))),
-                "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize)))
-            });
+            .style("display", "none")
+            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSize)))
+            .style("margin-left", PixelConverter.toString(-this.settings.items.textSize / (2.5)))
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))))
+            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))));
 
+        expandCollapse
+            .exit()
+            .remove();
 
         const treeItemElement = treeItemElementParent
             .append("div")
@@ -661,37 +648,30 @@ export class HierarchySlicer implements IVisual {
 
         const checkBoxParent = treeItemElement
             .selectAll(HierarchySlicer.Input.selectorName)
-            .data((d: IHierarchySlicerDataPoint) => [d]);
-
-        checkBoxParent
+            .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .append("div")
             .classed(HierarchySlicer.Input.className, true);
 
-        const checkBoxInput: UpdateSelection<any> = checkBoxParent
+        const checkBoxInput: Selection<any, any, any, any> = checkBoxParent
             .selectAll("input")
-            .data((d: IHierarchySlicerDataPoint) => [d]);
-
-        checkBoxInput
+            .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .append("input")
             .attr("type", "checkbox");
 
         const checkBoxSpan = checkBoxParent
             .selectAll(HierarchySlicer.Checkbox.selectorName)
-            .data((d: IHierarchySlicerDataPoint) => [d]);
-
-        checkBoxSpan
+            .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .append("span")
             .classed(HierarchySlicer.Checkbox.className, true);
 
-        checkBoxSpan.style({
-            "width": (.75 * this.settings.items.textSize) + "px",
-            "height": (.75 * this.settings.items.textSize) + "px",
-            "margin-right": PixelConverter.fromPointToPixel(.25 * this.settings.items.textSize) + "px",
-            "margin-bottom": PixelConverter.fromPointToPixel(.25 * this.settings.items.textSize) + "px"
-        });
+        checkBoxSpan
+            .style("width", (.75 * this.settings.items.textSize) + "px")
+            .style("height", (.75 * this.settings.items.textSize) + "px")
+            .style("margin-right", PixelConverter.fromPointToPixel(.25 * this.settings.items.textSize) + "px")
+            .style("margin-bottom", PixelConverter.fromPointToPixel(.25 * this.settings.items.textSize) + "px");
 
         const labelElement = treeItemElement
             .selectAll(HierarchySlicer.LabelText.selectorName)
@@ -702,30 +682,28 @@ export class HierarchySlicer implements IVisual {
             .append("span")
             .classed(HierarchySlicer.LabelText.className, true);
 
-        labelElement.style({
-                "color": this.settings.items.fontColor,
-                "font-size": this.settings.items.textSize + "pt",
-                "font-family": this.settings.items.fontFamily,
-                "font-weight": this.settings.items.fontWeight,
-                "font-style": () => {
+        labelElement
+                .style("color", this.settings.items.fontColor)
+                .style("font-size", this.settings.items.textSize + "pt")
+                .style("font-family", this.settings.items.fontFamily)
+                .style("font-weight", this.settings.items.fontWeight)
+                .style("font-style", () => {
                     switch (this.settings.items.fontStyle) {
                         case FontStyle.Normal:
                             return "normal";
                         case FontStyle.Italic:
                             return "italic";
                     }
-                }
-            });
+                });
 
         const maxLevel = this.maxLevels;
         const mobileScale = this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1;
 
         treeItemElementParent.each(function(d, i) {
-            const item = d3.select(this);
-            item.style({
-                "padding-left": (maxLevel === 1 ? 0 : ((d.level * mobileScale) * _this.settings.items.textSize)) + "px",
-                "margin-left" : maxLevel === 1 ? "-2px" : undefined
-            });
+            const item = select(this);
+            item
+                .style("padding-left", (maxLevel === 1 ? 0 : ((d.level * mobileScale) * _this.settings.items.textSize)) + "px")
+                .style("margin-left" , maxLevel === 1 ? "-2px" : undefined);
         });
     }
 
@@ -753,7 +731,7 @@ export class HierarchySlicer implements IVisual {
         return fullTitle;
     }
 
-    private onUpdateSelection(rowSelection: Selection<any>, interactivityService: IInteractivityService<IHierarchySlicerDataPoint>): void {
+    private onUpdateSelection(rowSelection: Selection<any, any, any, any>, interactivityService: IInteractivityService<IHierarchySlicerDataPoint>): void {
         const _this = this;
         let data = this.data;
         if (data) {
@@ -764,35 +742,31 @@ export class HierarchySlicer implements IVisual {
             }
             this.slicerHeader.select(HierarchySlicer.HeaderText.selectorName)
                 .text(this.getheaderTitle(this.settings.header.title || this.settings.header.defaultTitle))
-                .style({
-                    "color": this.settings.header.fontColor,
-                    "background-color": this.settings.header.background,
-                    "border-style": this.settings.header.outline === BorderStyle.None ? 'none' : "solid",
-                    "border-color": this.settings.header.outlineColor,
-                    "border-width": this.getBorderWidth(this.settings.header.outline, this.settings.header.outlineWeight),
-                    "font-size": this.settings.header.textSize + "pt",
-                    "font-family": this.settings.header.fontFamily,
-                    "font-weight": this.settings.header.fontWeight,
-                    "font-style": () => {
-                        switch (this.settings.header.fontStyle) {
-                            case FontStyle.Normal:
-                                return "normal";
-                            case FontStyle.Italic:
-                                return "italic";
-                        }
+                .style("color", this.settings.header.fontColor)
+                .style("background-color", this.settings.header.background)
+                .style("border-style", this.settings.header.outline === BorderStyle.None ? 'none' : "solid")
+                .style("border-color", this.settings.header.outlineColor)
+                .style("border-width", this.getBorderWidth(this.settings.header.outline, this.settings.header.outlineWeight))
+                .style("font-size", this.settings.header.textSize + "pt")
+                .style("font-family", this.settings.header.fontFamily)
+                .style("font-weight", this.settings.header.fontWeight)
+                .style("font-style", () => {
+                    switch (this.settings.header.fontStyle) {
+                        case FontStyle.Normal:
+                            return "normal";
+                        case FontStyle.Italic:
+                            return "italic";
                     }
                 });
 
             const icons = this.slicerHeader.selectAll(HierarchySlicer.Icon.selectorName);
             icons
                 .classed("hiddenicon", !this.settings.mobile.zoomed)
-                .style({
-                    "height": PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)),
-                    "width": PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)),
-                    "fill": this.settings.header.fontColor,
-                    "background-color": this.settings.header.background
-                })
-                .style("display", (d) => data.levels >= d.level ? " visible" : "none");
+                .style("height", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)))
+                .style("width", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)))
+                .style("fill", this.settings.header.fontColor)
+                .style("background-color", this.settings.header.background)
+                .style("display", (d: any) => data.levels >= d.level ? " visible" : "none");
 
             this.slicerBody
                 .classed("slicerBody", true);
@@ -918,7 +892,7 @@ export class HierarchySlicer implements IVisual {
         }
     }
 
-    private createSearchHeader(container: Selection<any>): void {
+    private createSearchHeader(container: Selection<any, any, any, any>): void {
         this.searchHeader = container
             .append("div")
             .classed(HierarchySlicer.SearchHeader.className, true)
@@ -930,11 +904,9 @@ export class HierarchySlicer implements IVisual {
             .attr("title", "Search")
             .classed(HierarchySlicer.Icon.className, true)
             .classed("search", true)
-            .style({
-                "fill": this.settings.search.iconColor,
-                "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
-                "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
-            })
+            .style("fill", this.settings.search.iconColor)
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
+            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
             .html(this.IconSet.search)
             .on("click", () => {
                 this.hostServices.persistProperties({
@@ -953,10 +925,8 @@ export class HierarchySlicer implements IVisual {
             .attr("type", "text")
             .attr("drag-resize-disabled", "true")
             .classed("searchInput", true)
-            .style({
-                "color": this.settings.search.fontColor,
-                "background-color": this.settings.search.background
-            })
+            .style("color", this.settings.search.fontColor)
+            .style("background-color", this.settings.search.background)
             .on("input", () => {
                 this.hostServices.persistProperties({
                     merge: [{
@@ -973,11 +943,9 @@ export class HierarchySlicer implements IVisual {
             .append("div")
             .classed(HierarchySlicer.Icon.className, true)
             .classed("delete", true)
-            .style({
-                "fill": this.settings.search.iconColor,
-                "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
-                "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
-            })
+            .style("fill", this.settings.search.iconColor)
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
+            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
             .html(this.IconSet.delete)
             .on("click", () => {
                 (this.searchInput.node() as HTMLInputElement).value = "";
@@ -998,18 +966,16 @@ export class HierarchySlicer implements IVisual {
         this.searchHeader.classed("collapsed", !this.settings.general.selfFilterEnabled);
         if (this.settings.general.selfFilterEnabled) {
             let icons = this.searchHeader.selectAll(HierarchySlicer.Icon.selectorName);
-            icons.style({
-                "fill": this.settings.search.iconColor,
-                "width": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
-                "height": PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))),
-            });
+            icons
+                .style("fill", this.settings.search.iconColor)
+                .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
+                .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))));
             let searchInput = this.searchHeader.selectAll(".searchInput");
-            searchInput.style({
-                "color": this.settings.search.fontColor,
-                "background-color": this.settings.search.background,
-                "font-size": this.settings.search.textSize,
-                "font-family": this.settings.items.fontFamily
-            });
+            searchInput
+                .style("color", this.settings.search.fontColor)
+                .style("background-color", this.settings.search.background)
+                .style("font-size", this.settings.search.textSize)
+                .style("font-family", this.settings.items.fontFamily);
         }
     }
 
@@ -1019,7 +985,7 @@ export class HierarchySlicer implements IVisual {
                 this.isLandingPageOn = true;
                 const landingPage: Element = this.createSampleLandingPage();
                 this.root.appendChild(landingPage);
-                this.landingPage = d3.select(landingPage);
+                this.landingPage = select(landingPage);
             }
         } else if (this.isLandingPageOn && !this.landingPageRemoved) {
             this.landingPageRemoved = true;

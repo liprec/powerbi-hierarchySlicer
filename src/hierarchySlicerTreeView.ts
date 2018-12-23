@@ -29,7 +29,7 @@
 import powerbi from "powerbi-visuals-api";
 import * as svgutils from "powerbi-visuals-utils-svgutils";
 import * as typeutils from "powerbi-visuals-utils-typeutils";
-import * as d3 from "d3";
+import {Selection} from "d3-selection";
 
 import {extend} from "lodash-es";
 
@@ -40,7 +40,6 @@ import * as interfaces from "./interfaces";
 import IViewport = powerbi.IViewport;
 import TranslateWithPixels = svgutils.manipulation.translateWithPixels;
 import PixelConverter = typeutils.pixelConverter;
-import Selection = d3.Selection;
 
 import IHierarchySlicerTreeView = interfaces.IHierarchySlicerTreeView;
 import IHierarchySlicerTreeViewOptions = interfaces.IHierarchySlicerTreeViewOptions;
@@ -58,9 +57,9 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private _totalRows: number;
 
     private options: IHierarchySlicerTreeViewOptions;
-    private visibleGroupContainer: Selection<any>;
-    private scrollContainer: Selection<any>;
-    private scrollbarInner: Selection<any>;
+    private visibleGroupContainer: Selection<any, any, any, any>;
+    private scrollContainer: Selection<any, any, any, any>;
+    private scrollbarInner: Selection<any, any, any, any>;
     private renderTimeoutId: number;
     private scrollBar;
 
@@ -165,15 +164,14 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         );
     }
 
-    private defaultScrollToFrame(treeView: HierarchySlicerTreeView, loadMoreData: boolean, rowHeight: number, scrollTop: number, totalElements: number, visibleGroupContainer: Selection<any>, baseContainer: Selection<any>) {
+    private defaultScrollToFrame(treeView: HierarchySlicerTreeView, loadMoreData: boolean, rowHeight: number, scrollTop: number, totalElements: number, visibleGroupContainer: Selection<any, any, any, any>, baseContainer: Selection<any, any, any, any>) {
         const visibleRows = this.getVisibleRows();
         const scrollPosition = (scrollTop === 0) ? 0 : Math.floor(scrollTop / rowHeight);
         const transformAttr = TranslateWithPixels(0, scrollPosition * rowHeight);
-        visibleGroupContainer.style({
+        visibleGroupContainer
             // order matters for proper overriding
-            "transform": (d) => transformAttr,
-            "-webkit-transform": transformAttr
-        });
+            .style("transform", (d) => transformAttr)
+            .style("-webkit-transform", transformAttr);
         const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 1)),
               position1 = position0 + visibleRows;
 
@@ -183,7 +181,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private performScrollToFrame(position0: number, position1: number, totalRows: number, visibleRows: number, loadMoreData: boolean) {
         const options = this.options;
         const visibleGroupContainer = this.visibleGroupContainer;
-        console.log("d");
+
         const rowSelection = visibleGroupContainer
             .selectAll(".row")
             .data(<any>this._data.slice(position0, Math.min(position1, totalRows)), <any>this.getDatumIndex);
@@ -256,7 +254,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             const requestAnimationFrameId = window.requestAnimationFrame((() => {
                 // Measure row height. Take non empty rows to measure the row height because if the first row is empty, it returns incorrect height
                 // which causes scrolling issues.
-                let rows = treeView.visibleGroupContainer.selectAll(".row").filter((function () { return this.textContent !== ""; }));
+                let rows = treeView.visibleGroupContainer.selectAll(".row").filter((function () { return (this as HTMLElement).textContent !== ""; }));
                 // For image slicer, the text content will be empty. Hence just select the rows for that and then we use the first row height
                 if (rows.empty()) {
                     rows = treeView.visibleGroupContainer.select(".row");
@@ -268,7 +266,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
                     // outerHeight doesn"t report the correct height for the parent in this case, but it does measure the child properly.
                     // Fix for #7497261 Measures both and take the max to work around this issue.
 
-                    const rowHeight = Math.max(HierarchySlicerTreeView.outerHeight(firstRow as HTMLElement), HierarchySlicerTreeView.outerHeight(firstRow.firstChild as HTMLElement));
+                    const rowHeight = Math.max(HierarchySlicerTreeView.outerHeight(firstRow as HTMLElement), HierarchySlicerTreeView.outerHeight((firstRow as HTMLHtmlElement).firstChild as HTMLElement));
 
                     treeView.rowHeight(rowHeight);
                     return resolve(rowHeight);
