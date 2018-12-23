@@ -477,7 +477,6 @@ export class HierarchySlicer implements IVisual {
         if (options.viewport.height === this.viewport.height
             && options.viewport.width === this.viewport.width) {
             this.waitingForData = false;
-            this.treeView.updateScrollHeight();
         } else {
             this.viewport = options.viewport;
         }
@@ -868,8 +867,11 @@ export class HierarchySlicer implements IVisual {
     }
 
     private getHeaderHeight(): number {
+        const searchHeight: number = this.settings.general.selfFilterEnabled
+            ? TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.search.textSize)) + 2
+            : 0;
         return TextMeasurementService.estimateSvgTextHeight(
-            HierarchySlicer.getTextProperties(+this.settings.header.textSize));
+            HierarchySlicer.getTextProperties(+this.settings.header.textSize)) + searchHeight;
     }
 
     private getRowHeight(): number {

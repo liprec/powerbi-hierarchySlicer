@@ -113,5 +113,4 @@ export interface IHierarchySlicerTreeView {
     render(): void;
     empty(): void;
     getRealRowHeight(): number;
-    updateScrollHeight(): void;
 }

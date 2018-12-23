@@ -118,13 +118,6 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         return this.options.rowHeight || HierarchySlicerTreeView.defaultRowHeight;
     }
 
-    public updateScrollHeight() {
-        const scrollHeight = this.options.scrollEnabled ? Math.min(this.getContainerHeight(), (this.getVisibleRows() * this.options.rowHeight)) : this.getContainerHeight();
-
-        // this.scrollbarInner.style("height", scrollHeight + "px").attr("height", scrollHeight);
-        // this.scrollBar.recalculate();
-    }
-
     public data(data: any[], getDatumIndex: (d: any) => {}, dataReset: boolean = false): IHierarchySlicerTreeView {
         this._data = data;
         this.getDatumIndex = getDatumIndex;
@@ -160,7 +153,6 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
     private renderImpl(rowHeight: number) {
         const totalHeight = this.options.scrollEnabled ? Math.max(0, (this._totalRows * rowHeight)) : this.getContainerHeight();
-        // this.scrollContainer.style("height", totalHeight + "px").attr("height", totalHeight);
 
         this.defaultScrollToFrame(
             this,
@@ -185,7 +177,6 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 1)),
               position1 = position0 + visibleRows;
 
-        this.updateScrollHeight();
         this.performScrollToFrame(position0, position1, totalElements, visibleRows, loadMoreData);
     }
 
