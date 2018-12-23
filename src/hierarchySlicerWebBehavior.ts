@@ -32,8 +32,6 @@ import * as interactivityutils from "powerbi-visuals-utils-interactivityutils";
 import * as typeutils from "powerbi-visuals-utils-typeutils";
 import * as models from "powerbi-models";
 import * as d3 from "d3";
-import * as $ from "jquery";
-import * as _ from "lodash";
 
 import * as interfaces from "./interfaces";
 import * as settings from "./settings";
@@ -115,7 +113,9 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
         expanders.on("click", (d: IHierarchySlicerDataPoint, index: number) => {
             d.isExpand = !d.isExpand;
-            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
+            if (this.spinnerTimeoutId) {
+                window.clearTimeout(this.spinnerTimeoutId);
+            }
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             this.persistExpand(false);
         });
@@ -245,7 +245,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         // HEADER EVENTS
         slicerCollapse.on("click", (d: IHierarchySlicerDataPoint) => {
             if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
-                $(".scrollbar-inner").scrollTop(0);
+                (d3.select(".scrollbar-inner").node() as HTMLElement).scrollTo({top: 0});
+
                 this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = false);
                 this.persistExpand(true);
             }
