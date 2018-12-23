@@ -190,6 +190,7 @@ export class HierarchySlicer implements IVisual {
         let expandedIds = [];
         let order = 0;
         let isRagged = false;
+        let parentIndex = [];
 
         if (jsonFilters && (jsonFilters.length > 0)) {
             if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
@@ -244,6 +245,7 @@ export class HierarchySlicer implements IVisual {
                     column: columns[c].displayName
                 };
                 const selected = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
+
                 let dataPoint: IHierarchySlicerDataPoint = {
                     filterTarget: filterTarget,
                     identity: ownId, // Some unique value to 'trick' the interactivityService with overrideSelectionFromData
@@ -268,11 +270,30 @@ export class HierarchySlicer implements IVisual {
                 parentId = ownId;
                 parentSearchStr = searchStr;
                 if (identityValues.indexOf(ownId) === -1) {
+                    if (c !== levels) {
+                        let parentIndexLookup;
+                        if (parentIndex.indexOf(c) === -1) {
+                            parentIndex.push([]);
+                        }
+                        parentIndexLookup = parentIndex[c];
+                        if (parentIndexLookup.indexOf(parentId) === -1) {
+                            parentIndexLookup.push(ownId);
+                        }
+                        if (c === 0) {
+                            dataPoint.order = ((30000 * parentIndex[c].indexOf(dataPoint.ownId)) + dataPoint.order);
+                        }
+                    }
+                    if (c > 0) {
+                        dataPoint.order = ((30000 * parentIndex[c - 1].indexOf(dataPoint.parentId)) + dataPoint.order);
+                    }
+
                     identityValues.push(ownId);
                     dataPoints.push(dataPoint);
                 }
             }
         }
+
+        dataPoints.sort((d1, d2) => d1.order - d2.order);
 
         // Determine partiallySelected
         for (let l = levels; l >= 1; l--) {
@@ -759,7 +780,7 @@ export class HierarchySlicer implements IVisual {
                 .style("width", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)))
                 .style("fill", this.settings.header.fontColor)
                 .style("background-color", this.settings.header.background)
-                .style("display", (d: any) => data.levels >= d.level ? " visible" : "none");
+                .style("opacity", (d: any) => data.levels >= d.level ? "1" : "0" );
 
             this.slicerBody
                 .classed("slicerBody", true);
