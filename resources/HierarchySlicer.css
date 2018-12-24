@@ -1292,6 +1292,10 @@
     vertical-align: bottom;
 }
 
+.visual-HierarchySlicer1458836712039 .slicerContainer .slicerItemContainer .slicerCheckbox {
+    display: inline-block;
+}  
+
 .visual-HierarchySlicer1458836712039 .icon {
     float: right;
     cursor: pointer;
