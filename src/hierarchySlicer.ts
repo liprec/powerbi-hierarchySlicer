@@ -690,9 +690,7 @@ export class HierarchySlicer implements IVisual {
 
         const labelElement = treeItemElement
             .selectAll(HierarchySlicer.LabelText.selectorName)
-            .data((d: IHierarchySlicerDataPoint) => [d]);
-
-        labelElement
+            .data((d: IHierarchySlicerDataPoint) => [d])
             .enter()
             .append("span")
             .classed(HierarchySlicer.LabelText.className, true);
