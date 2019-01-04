@@ -464,6 +464,14 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private persistFilter(filter: IFilter | IFilter[], action: FilterAction = FilterAction.merge) {
+        const instance = {
+            objectName: "general",
+            selector: undefined,
+            properties: {
+                filterValues: ""
+            },
+        };
+        this.hostServices.persistProperties({ remove: [ instance ] });
         this.hostServices.applyJsonFilter(filter,
             hierarchySlicerProperties.filterPropertyIdentifier.objectName,
             hierarchySlicerProperties.filterPropertyIdentifier.propertyName,

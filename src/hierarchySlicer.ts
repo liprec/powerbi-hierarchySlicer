@@ -192,14 +192,14 @@ export class HierarchySlicer implements IVisual {
         let isRagged = false;
         let parentIndex = [];
 
-        if (jsonFilters && (jsonFilters.length > 0)) {
-            if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
-                selectedIds = this.settings.general.filterValues.split(",");
-            } else {
+        if (jsonFilters) {
+            if (jsonFilters.length > 0) {
                 selectedIds = (jsonFilters[0] as any).values.map((d) => "|~" + (
                         Array.isArray(d) ?
                         d.map((dp, i) => ValueFormat(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString()).join('_|~')
                         : ValueFormat(d, columns[0].format).replace(/,/g, "") + "-0"));
+            } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
+                selectedIds = this.settings.general.filterValues.split(",");
             }
         }
         expandedIds = this.settings.general.expanded.split(",");
