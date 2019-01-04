@@ -234,7 +234,13 @@ export class HierarchySlicer implements IVisual {
                 }
                 let columnFormat = columns[c].format;
                 let dataType: ValueTypeDescriptor = columns[c].type;
-                let labelValue: string = ValueFormat(rows[r][c], columnFormat);
+                let rowValue;
+                if (dataType.dateTime) {
+                    rowValue = new Date(rows[r][c] as Date);
+                } else {
+                    rowValue = rows[r][c] as string;
+                }
+                let labelValue: string = ValueFormat(rowValue, columnFormat);
                 labelValue = labelValue === null ? "(blank)" : labelValue;
 
                 let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + c;
