@@ -60,6 +60,7 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     parentId: string;
     searchStr: string;
     isSearch: boolean;
+    orderArray: any[];
     order: number;
     filterTarget: IFilterTarget;
 }

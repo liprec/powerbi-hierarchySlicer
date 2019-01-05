@@ -186,6 +186,7 @@ export class HierarchySlicer implements IVisual {
         let dataPoints = [];
         let fullTree = [];
         let identityValues = [];
+        let iValues = [];
         let selectedIds = [];
         let expandedIds = [];
         let order = 0;
@@ -221,14 +222,19 @@ export class HierarchySlicer implements IVisual {
                 id: "selectAll",
                 ownId: "selectAll",
                 parentId: "none",
-                order: order++,
+                orderArray: [0, 0, -1],
+                order: -1,
                 filterTarget: undefined
             });
         }
         for (let r = 0; r < rows.length; r++) {
             let parentId: string = "";
             let parentSearchStr: string = "";
+            isRagged = false;
             for (let c = 0; c < rows[r].length; c++) {
+                if (r === 0) {
+                    iValues.push([]);
+                }
                 if ((rows[r][c] === null) && (!this.settings.selection.emptyLeafs)) {
                     isRagged = true;
                 }
@@ -240,10 +246,11 @@ export class HierarchySlicer implements IVisual {
                 } else {
                     rowValue = rows[r][c] as string;
                 }
-                let labelValue: string = ValueFormat(rowValue, columnFormat);
-                labelValue = labelValue === null ? "(blank)" : labelValue;
+                console.log("f");
+                let labelValue: string = (rowValue === null ? (this.settings.selection.emptyLeafLabel || this.settings.selection.emptyLeafLabelDefault) : ValueFormat(rowValue, columnFormat));
+                let labelValueDefault = (labelValue === null ? this.settings.selection.emptyLeafLabelDefault : ValueFormat(rowValue, columnFormat));
 
-                let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + c;
+                let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValueDefault.replace(/,/g, "") + "-" + c;
                 let searchStr = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf = c === levels;
                 const filterTarget: IFilterTarget = {
@@ -270,37 +277,27 @@ export class HierarchySlicer implements IVisual {
                     parentId: parentId,
                     searchStr: searchStr,
                     isSearch: this.settings.search.addSelection ? selected : false,
-                    order: order++,
+                    orderArray: [],
+                    order: null,
                 };
 
                 parentId = ownId;
                 parentSearchStr = searchStr;
                 if (identityValues.indexOf(ownId) === -1) {
-                    if (c !== levels) {
-                        // Add non leafs to parentIndex
-                        let parentIndexLookup;
-                        if (parentIndex.indexOf(c) === -1) {
-                            parentIndex.push([]);
-                        }
-                        parentIndexLookup = parentIndex[c];
-                        if (parentIndexLookup.indexOf(parentId) === -1) {
-                            parentIndexLookup.push(ownId);
-                        }
-                        if (c === 0) { // root level
-                            dataPoint.order = ((this.settings.general.maxDataPoints * parentIndex[c].indexOf(dataPoint.ownId)) + dataPoint.order);
-                        }
+                    if (iValues[c].indexOf(ownId)) {
+                        iValues[c].push(ownId);
                     }
-                    if (c > 0) { // non-root levels -> based on parent
-                        dataPoint.order = ((this.settings.general.maxDataPoints * parentIndex[c - 1].indexOf(dataPoint.parentId)) + dataPoint.order);
-                    }
-
+                    dataPoint.orderArray = ownId.split('_')
+                                                .map((d, i, t) => 1 + iValues[i].indexOf(t.slice(0, i + 1).join('_'))) // Lookup indexes of ownIds
+                                                .concat(Array.from({length: levels - c}, () => 0)); // Stuff array to zero's
                     identityValues.push(ownId);
                     dataPoints.push(dataPoint);
                 }
             }
         }
-
+        dataPoints.forEach((d) => { d.order = d.orderArray.reduce((t, c, i) => (t * iValues[i].length) + c, 0); } );
         dataPoints.sort((d1, d2) => d1.order - d2.order);
+        console.log(iValues);
 
         // Determine partiallySelected
         for (let l = levels; l >= 1; l--) {
@@ -1038,6 +1035,9 @@ export class HierarchySlicer implements IVisual {
                     // Select all: only available with multiselect
                     this.removeEnumerateObject(instanceEnumeration, "selectAll");
                     this.removeEnumerateObject(instanceEnumeration, "selectAllLabel");
+                }
+                if (!this.settings.selection.emptyLeafs) {
+                    this.removeEnumerateObject(instanceEnumeration, "emptyLeafLabel");
                 }
                 break;
             case "search":

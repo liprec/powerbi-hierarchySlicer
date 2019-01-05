@@ -62,6 +62,8 @@ class GeneralSettings {
 class SelectionSettings {
     public singleSelect: boolean = true;
     public emptyLeafs: boolean = true;
+    public emptyLeafLabel: string = "";
+    public emptyLeafLabelDefault: string = "(Blank)";
     public selectAll: boolean = false;
     public selectAllLabel: string = "Select All";
 }

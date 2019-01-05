@@ -92,6 +92,13 @@
                         "bool": true
                     }
                 },
+                "emptyLeafLabel": {
+                    "displayName": "Empty leaf label",
+                    "placeHolderText": "(Blank)",
+                    "type": {
+                        "text": true
+                    }
+                },
                 "selectAll": {
                     "displayName": "Select All",
                     "description": "Show the 'Select All' member",
