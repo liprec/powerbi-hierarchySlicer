@@ -1031,9 +1031,7 @@ export class HierarchySlicer implements IVisual {
                 // ignore rendering general settings ( it include only hidden properties )
                 return;
             case "selection":
-                if (this.settings.selection.singleSelect) {
-                    // Select all: only available with multiselect
-                    this.removeEnumerateObject(instanceEnumeration, "selectAll");
+                if (!this.settings.selection.selectAll) {
                     this.removeEnumerateObject(instanceEnumeration, "selectAllLabel");
                 }
                 if (!this.settings.selection.emptyLeafs) {
@@ -1073,11 +1071,6 @@ export class HierarchySlicer implements IVisual {
 
     private static parseSettings(dataView: DataView): HierarchySlicerSettings {
         const settings: HierarchySlicerSettings = HierarchySlicerSettings.parse<HierarchySlicerSettings>(dataView);
-
-        // Override settings regarding 'Select All' and single select
-        if (settings.selection.singleSelect) {
-            settings.selection.selectAll = false;
-        }
 
         return settings;
         }
