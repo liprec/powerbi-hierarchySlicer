@@ -49,3 +49,9 @@ export enum FontStyle {
     Normal,
     Italic
 }
+
+export enum HideMembers {
+    Never,
+    Empty,
+    ParentName
+}

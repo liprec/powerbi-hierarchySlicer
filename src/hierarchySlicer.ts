@@ -80,6 +80,7 @@ import HierarchySlicerTreeViewFactory = treeView.HierarchySlicerTreeViewFactory;
 
 import BorderStyle = enums.BorderStyle;
 import FontStyle = enums.FontStyle;
+import HideMembers = enums.HideMembers;
 
 export class HierarchySlicer implements IVisual {
     // MDL icons
@@ -230,27 +231,42 @@ export class HierarchySlicer implements IVisual {
         for (let r = 0; r < rows.length; r++) {
             let parentId: string = "";
             let parentSearchStr: string = "";
+            let rowValuePrev = undefined;
             isRagged = false;
             for (let c = 0; c < rows[r].length; c++) {
                 if (r === 0) {
                     iValues.push([]);
                 }
-                if ((rows[r][c] === null) && (!this.settings.selection.emptyLeafs)) {
-                    isRagged = true;
-                }
+
                 let columnFormat = columns[c].format;
                 let dataType: ValueTypeDescriptor = columns[c].type;
                 let rowValue;
+                let labelValue: string;
                 if (dataType.dateTime) {
                     rowValue = new Date(rows[r][c] as Date);
                 } else {
                     rowValue = rows[r][c] as string;
                 }
                 console.log("f");
-                let labelValue: string = (rowValue === null ? (this.settings.selection.emptyLeafLabel || this.settings.selection.emptyLeafLabelDefault) : ValueFormat(rowValue, columnFormat));
-                let labelValueDefault = (labelValue === null ? this.settings.selection.emptyLeafLabelDefault : ValueFormat(rowValue, columnFormat));
+                switch (this.settings.selection.hideMembers) {
+                    case HideMembers.Empty:
+                        isRagged = rowValue === null;
+                        labelValue = ValueFormat(rowValue, columnFormat);
+                        break;
+                    case HideMembers.ParentName:
+                        isRagged = rowValue === rowValuePrev;
+                        labelValue = ValueFormat(rowValue, columnFormat);
+                        rowValuePrev = rowValue;
+                        break;
+                    case HideMembers.Never:
+                    default:
+                        labelValue = (rowValue === null ? (this.settings.selection.emptyLeafLabel || this.settings.selection.emptyLeafLabelDefault) : ValueFormat(rowValue, columnFormat));
+                }
 
-                let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValueDefault.replace(/,/g, "") + "-" + c;
+                // let labelValue: string = ((rowValue === null && this.settings.selection.hideMembers === HideMembers.Never) ? (this.settings.selection.emptyLeafLabel || this.settings.selection.emptyLeafLabelDefault) : ValueFormat(rowValue, columnFormat));
+                let labelValueId = ValueFormat(rowValue, columnFormat);
+
+                let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValueId.replace(/,/g, "") + "-" + c;
                 let searchStr = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf = c === levels;
                 const filterTarget: IFilterTarget = {
@@ -1034,7 +1050,7 @@ export class HierarchySlicer implements IVisual {
                 if (!this.settings.selection.selectAll) {
                     this.removeEnumerateObject(instanceEnumeration, "selectAllLabel");
                 }
-                if (!this.settings.selection.emptyLeafs) {
+                if (this.settings.selection.hideMembers !== HideMembers.Never) {
                     this.removeEnumerateObject(instanceEnumeration, "emptyLeafLabel");
                 }
                 break;
@@ -1071,6 +1087,16 @@ export class HierarchySlicer implements IVisual {
 
     private static parseSettings(dataView: DataView): HierarchySlicerSettings {
         const settings: HierarchySlicerSettings = HierarchySlicerSettings.parse<HierarchySlicerSettings>(dataView);
+
+        // Backwards compability => convert to new values
+        if (settings.selection.emptyLeafs !== undefined) {
+            if (settings.selection.emptyLeafs) {
+                settings.selection.hideMembers = HideMembers.Never;
+            } else {
+                settings.selection.hideMembers = HideMembers.Empty;
+            }
+            settings.selection.emptyLeafs = undefined;
+        }
 
         return settings;
         }

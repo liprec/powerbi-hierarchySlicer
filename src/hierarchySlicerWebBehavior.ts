@@ -35,6 +35,7 @@ import { select, event, Selection } from "d3-selection";
 
 import * as interfaces from "./interfaces";
 import * as settings from "./settings";
+import * as enums from "./enums";
 
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IFilter = powerbi.IFilter;
@@ -51,6 +52,8 @@ import PixelConverter = pixelConverter;
 import IHierarchySlicerBehaviorOptions = interfaces.IHierarchySlicerBehaviorOptions;
 import IHierarchySlicerDataPoint = interfaces.IHierarchySlicerDataPoint;
 import HierarchySlicerSettings = settings.HierarchySlicerSettings;
+
+import HideMembers = enums.HideMembers;
 
 let hierarchySlicerProperties = {
     expandedValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "expanded" },
@@ -161,7 +164,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             let selected = d.partialSelected ? !d.selected : d.selected;
             let selectionDataPoints = [];
-            if ((!(this.settings.selection.singleSelect) && this.settings.search.addSelection) || (!this.settings.selection.emptyLeafs)) {
+            if ((!(this.settings.selection.singleSelect) && this.settings.search.addSelection) || (this.settings.selection.hideMembers !== HideMembers.Never)) {
                 selectionDataPoints = this.fullTree;
             } else {
                 selectionDataPoints = this.dataPoints;

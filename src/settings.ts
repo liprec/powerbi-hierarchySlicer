@@ -37,6 +37,7 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 import BorderStyle = enums.BorderStyle;
 import FontWeight = enums.FontWeight;
 import FontStyle = enums.FontStyle;
+import HideMembers = enums.HideMembers;
 
 const fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif";
 
@@ -61,7 +62,8 @@ class GeneralSettings {
 
 class SelectionSettings {
     public singleSelect: boolean = true;
-    public emptyLeafs: boolean = true;
+    public emptyLeafs: boolean;
+    public hideMembers: HideMembers = HideMembers.Never;
     public emptyLeafLabel: string = "";
     public emptyLeafLabelDefault: string = "(Blank)";
     public selectAll: boolean = false;

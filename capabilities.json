@@ -85,9 +85,27 @@
                         "bool": true
                     }
                 },
+                "hideMembers": {
+                    "displayName": "Hide Members",
+                    "description": "Ragged/unbalanced hierarchies can be enabled by hidding members",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Never",
+                                "value": "0"
+                            },
+                            {
+                                "displayName": "Empty",
+                                "value": "1"
+                            },
+                            {
+                                "displayName": "Parent Name",
+                                "value": "2"
+                            }
+                        ]
+                    }
+                },
                 "emptyLeafs": {
-                    "displayName": "Empty Leaves",
-                    "description": "Show empty leaves as (Blank)",
                     "type": {
                         "bool": true
                     }
