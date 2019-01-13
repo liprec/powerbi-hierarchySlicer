@@ -50,6 +50,7 @@ import DataView = powerbi.DataView;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
 import IViewport = powerbi.IViewport;
 import IFilter = powerbi.IFilter;
+import PrimitiveValue = powerbi.PrimitiveValue;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
@@ -81,6 +82,7 @@ import HierarchySlicerTreeViewFactory = treeView.HierarchySlicerTreeViewFactory;
 import BorderStyle = enums.BorderStyle;
 import FontStyle = enums.FontStyle;
 import HideMembers = enums.HideMembers;
+import { ValueType } from "powerbi-visuals-utils-typeutils/lib/valueType";
 
 export class HierarchySlicer implements IVisual {
     // MDL icons
@@ -178,6 +180,16 @@ export class HierarchySlicer implements IVisual {
             };
         }
 
+        let convertRawValue = (rawValue: PrimitiveValue, dataType: ValueTypeDescriptor) => {
+            if (dataType.dateTime) {
+                return new Date(rawValue as Date);
+            } else if (dataType.numeric) {
+                return rawValue as number;
+            } else {
+                return rawValue as string;
+            }
+        };
+
         const hierarchyRows = dataView.metadata.columns.filter((c) => c.roles["Fields"]); // Filter out 'Values' level
         const hierarchyRowIndex = hierarchyRows.map((c) => c.index);
         const rows = dataView.table.rows.map((r) => hierarchyRowIndex.map((i) => r[i]));
@@ -212,6 +224,7 @@ export class HierarchySlicer implements IVisual {
                 identity: "selectAll",
                 selected: false,
                 value: this.settings.selection.selectAllLabel,
+                label: this.settings.selection.selectAllLabel,
                 tooltip: this.settings.selection.selectAllLabel,
                 level: 0,
                 selectable: true,
@@ -240,13 +253,9 @@ export class HierarchySlicer implements IVisual {
 
                 let columnFormat = columns[c].format;
                 let dataType: ValueTypeDescriptor = columns[c].type;
-                let rowValue;
+                let rowValue = convertRawValue(rows[r][c], dataType);
                 let labelValue: string;
-                if (dataType.dateTime) {
-                    rowValue = new Date(rows[r][c] as Date);
-                } else {
-                    rowValue = rows[r][c] as string;
-                }
+
                 switch (this.settings.selection.hideMembers) {
                     case HideMembers.Empty:
                         isRagged = rowValue === null;
@@ -278,7 +287,8 @@ export class HierarchySlicer implements IVisual {
                     filterTarget: filterTarget,
                     identity: ownId, // Some unique value to 'trick' the interactivityService with overrideSelectionFromData
                     selected: selected,
-                    value: labelValue,
+                    value: labelValueId,
+                    label: labelValue,
                     tooltip: labelValue,
                     level: c,
                     selectable: true,
@@ -802,7 +812,7 @@ export class HierarchySlicer implements IVisual {
 
             let slicerText = rowSelection.selectAll(HierarchySlicer.LabelText.selectorName);
 
-            slicerText.text((d: IHierarchySlicerDataPoint) => d.value);
+            slicerText.text((d: IHierarchySlicerDataPoint) => d.label);
 
             if (interactivityService && this.slicerBody) {
                 const body = this.slicerBody.attr("width", this.viewport.width);
