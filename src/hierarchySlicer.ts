@@ -247,7 +247,6 @@ export class HierarchySlicer implements IVisual {
                 } else {
                     rowValue = rows[r][c] as string;
                 }
-                console.log("f");
                 switch (this.settings.selection.hideMembers) {
                     case HideMembers.Empty:
                         isRagged = rowValue === null;
@@ -313,7 +312,6 @@ export class HierarchySlicer implements IVisual {
         }
         dataPoints.forEach((d) => { d.order = d.orderArray.reduce((t, c, i) => (t * iValues[i].length) + c, 0); } );
         dataPoints.sort((d1, d2) => d1.order - d2.order);
-        console.log(iValues);
 
         // Determine partiallySelected
         for (let l = levels; l >= 1; l--) {
@@ -405,7 +403,6 @@ export class HierarchySlicer implements IVisual {
 
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
-
     }
 
     private init(options: VisualUpdateOptions): void {

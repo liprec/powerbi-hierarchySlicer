@@ -118,6 +118,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             }
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             this.persistExpand(false);
+            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
         expanders.on("mouseover", (d: IHierarchySlicerDataPoint, i: number) => {
@@ -240,6 +241,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             this.renderSelection(true);
             this.persistSelectAll(selectionDataPoints.filter((d) => d.selected).length === selectionDataPoints.length);
             this.applyFilter(filterLevel);
+            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
         // HEADER EVENTS
@@ -266,6 +268,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             this.selectionHandler.handleClearSelection();
             this.persistSelectAll(false);
             this.persistFilter(null);
+            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
         slicerHeaderText.on("click", (d) => {
@@ -320,7 +323,19 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 else
                     return this.settings.items.fontColor; // fallback
             });
-        this.expanders.style("color", (d: IHierarchySlicerDataPoint) => {
+        this.slicerItemInputs.selectAll("span").style("border-color", (d: IHierarchySlicerDataPoint) => {
+                if (d.mouseOver)
+                    return this.settings.items.hoverColor;
+                else if (d.mouseOut) {
+                    if (d.selected)
+                        return this.settings.items.fontColor;
+                    else
+                        return this.settings.items.fontColor;
+                }
+                else
+                    return this.settings.items.fontColor; // fallback
+            });
+        this.expanders.selectAll(".icon").style("fill", (d: IHierarchySlicerDataPoint) => {
                 if (d.mouseOver)
                     return this.settings.items.hoverColor;
                 else if (d.mouseOut) {
