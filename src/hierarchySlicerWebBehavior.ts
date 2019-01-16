@@ -180,63 +180,50 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 this.persistFilter(null, 1);
                 return;
             }
-            if (!this.settings.selection.singleSelect) { // multi select value
-                d.selected = !selected; // Toggle selection
-                d.partialSelected = false; // Current member: never partialSelected
-                if (!selected) { // Select member logic
-                    selectionDataPoints
-                        .filter((dp) => dp.parentId.indexOf(d.ownId) > -1) // All children
-                        .forEach((dp) => dp.selected = true );
-                    HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId)
-                        .forEach((dp) => {
-                            if (!dp.selected) {
-                                dp.selected = true;
-                            }
-                            const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
-                            if (children.length === children.filter((c) => c.selected).length) { // All children selected?
-                                dp.partialSelected = false;
-                            } else {
-                                dp.partialSelected = true;
-                            }
-                        });
-                } else if (!d.isLeaf) {
-                    selectionDataPoints
-                        .filter((dp) => dp.parentId.indexOf(d.ownId) >= 0)
-                        .forEach((dp) => dp.selected = (selected === dp.selected) ? !selected : dp.selected);
-                }
-                if (selected) { // Deselect member logic
-                    selectionDataPoints
-                        .filter((dp) => dp.parentId.indexOf(d.ownId) > -1)
-                        .forEach((dp) => dp.selected = false);
-                    HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId)
-                        .forEach((dp) => {
-                            const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
-                            if (children.filter((c) => c.selected).length === 0) { // All children deselected?
-                                dp.selected = false;
-                                dp.partialSelected = false;
-                            } else {
-                                dp.selected = true;
-                                dp.partialSelected = true;
-                            }
-                    });
-                }
-                filterLevel = selectionDataPoints.filter((d) => d.partialSelected)
-                        .reduce((s, d) => Math.max(d.level, s), -1) + 1;
-            }
-            else { // single select value
+            if (this.settings.selection.singleSelect) { // single select value -> start with empty selection tree
                 selectionDataPoints.forEach((dp) => dp.selected = false);
-                const parents = HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId);
-                let selectDataPoints = [d]; // Self
-                filterLevel = d.level; // Set filter level to selected item
-                selectDataPoints
-                    .concat(selectionDataPoints.filter((dp) => dp.parentId.indexOf(d.ownId) >= 0)) // Children
-                    .map((dp) => dp.selected = !selected);
-                parents // Parents
-                    .map((dp) => {
-                        dp.selected = !selected;
-                        dp.partialSelected = !selected;
-                    });
             }
+            d.selected = !selected; // Toggle selection
+            d.partialSelected = false; // Current member: never partialSelected
+            if (!selected) { // Select member logic
+                selectionDataPoints
+                    .filter((dp) => dp.parentId.indexOf(d.ownId) > -1) // All children
+                    .forEach((dp) => dp.selected = true );
+                HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId)
+                    .forEach((dp) => {
+                        if (!dp.selected) {
+                            dp.selected = true;
+                        }
+                        const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
+                        if (children.length === children.filter((c) => c.selected).length) { // All children selected?
+                            dp.partialSelected = false;
+                        } else {
+                            dp.partialSelected = true;
+                        }
+                    });
+            } else if (!d.isLeaf) {
+                selectionDataPoints
+                    .filter((dp) => dp.parentId.indexOf(d.ownId) >= 0)
+                    .forEach((dp) => dp.selected = (selected === dp.selected) ? !selected : dp.selected);
+            }
+            if (selected) { // Deselect member logic
+                selectionDataPoints
+                    .filter((dp) => dp.parentId.indexOf(d.ownId) > -1)
+                    .forEach((dp) => dp.selected = false);
+                HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId)
+                    .forEach((dp) => {
+                        const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
+                        if (children.filter((c) => c.selected).length === 0) { // All children deselected?
+                            dp.selected = false;
+                            dp.partialSelected = false;
+                        } else {
+                            dp.selected = true;
+                            dp.partialSelected = true;
+                        }
+                });
+            }
+            filterLevel = selectionDataPoints.filter((d) => d.partialSelected)
+                    .reduce((s, d) => Math.max(d.level, s), -1) + 1;
 
             this.renderSelection(true);
             this.persistSelectAll(selectionDataPoints.filter((d) => d.selected).length === selectionDataPoints.length);
