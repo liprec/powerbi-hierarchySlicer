@@ -180,9 +180,9 @@ export class HierarchySlicer implements IVisual {
             };
         }
 
-        let convertRawValue = (rawValue: PrimitiveValue, dataType: ValueTypeDescriptor) => {
-            if (dataType.dateTime) {
-                return new Date(rawValue as Date);
+        let convertRawValue = (rawValue: PrimitiveValue, dataType: ValueTypeDescriptor, full: boolean = false) => {
+            if ((dataType.dateTime) && (full)) {
+               return new Date(rawValue as Date);
             } else if (dataType.numeric) {
                 return rawValue as number;
             } else {
@@ -253,7 +253,8 @@ export class HierarchySlicer implements IVisual {
 
                 let columnFormat = columns[c].format;
                 let dataType: ValueTypeDescriptor = columns[c].type;
-                let rowValue = convertRawValue(rows[r][c], dataType);
+                let rowValue = convertRawValue(rows[r][c], dataType, true);
+                let labelValueId = ValueFormat(convertRawValue(rows[r][c], dataType), columnFormat);
                 let labelValue: string;
 
                 switch (this.settings.selection.hideMembers) {
@@ -270,9 +271,6 @@ export class HierarchySlicer implements IVisual {
                     default:
                         labelValue = (rowValue === null ? (this.settings.selection.emptyLeafLabel || this.settings.selection.emptyLeafLabelDefault) : ValueFormat(rowValue, columnFormat));
                 }
-
-                // let labelValue: string = ((rowValue === null && this.settings.selection.hideMembers === HideMembers.Never) ? (this.settings.selection.emptyLeafLabel || this.settings.selection.emptyLeafLabelDefault) : ValueFormat(rowValue, columnFormat));
-                let labelValueId = ValueFormat(rowValue, columnFormat);
 
                 let ownId = parentId + (parentId === "" ? "" : "_") + "|~" + labelValueId.replace(/,/g, "") + "-" + c;
                 let searchStr = parentSearchStr + labelValue.replace(/,/g, "");
