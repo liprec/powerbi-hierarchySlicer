@@ -62,7 +62,7 @@ class GeneralSettings {
 
 class SelectionSettings {
     public singleSelect: boolean = true;
-    public emptyLeafs: boolean;
+    public emptyLeafs: boolean = undefined;
     public hideMembers: HideMembers = HideMembers.Never;
     public emptyLeafLabel: string = "";
     public emptyLeafLabelDefault: string = "(Blank)";

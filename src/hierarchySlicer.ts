@@ -1020,7 +1020,7 @@ export class HierarchySlicer implements IVisual {
         if (!options.dataViews || !options.dataViews.length) {
             if (!this.isLandingPageOn) {
                 this.isLandingPageOn = true;
-                const landingPage: Element = this.createSampleLandingPage();
+                const landingPage: Element = this.createLandingPage();
                 this.root.appendChild(landingPage);
                 this.landingPage = select(landingPage);
             }
@@ -1032,7 +1032,7 @@ export class HierarchySlicer implements IVisual {
 
 
 
-    private createSampleLandingPage(): Element {
+    private createLandingPage(): Element {
         const div = document.createElement("div");
 
         div.classList.add("watermark");

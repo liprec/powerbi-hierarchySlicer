@@ -58,3 +58,6 @@ dist
 
 # webpack.statistics
 webpack.statistics.*
+
+# Coverage files
+/coverage
