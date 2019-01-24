@@ -56,7 +56,6 @@ import HierarchySlicerSettings = settings.HierarchySlicerSettings;
 import HideMembers = enums.HideMembers;
 
 let hierarchySlicerProperties = {
-    expandedValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "expanded" },
     selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
     filterPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filter" },
     filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" },
@@ -236,7 +235,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
                 (select(".simplebar-content").node() as HTMLElement).scrollTop = 0;
 
-                this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = false);
+                this.dataPoints.forEach((d) => d.isExpand = false);
                 this.persistExpand(true);
             }
         });
@@ -485,19 +484,17 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private persistExpand(updateScrollbar: boolean) {
-        let properties: { [propertyName: string]: DataViewPropertyValue } = {};
-        properties[hierarchySlicerProperties.expandedValuePropertyIdentifier.propertyName] = this.dataPoints.filter((d) => d.isExpand).map((d) => d.ownId).join(",");
+        const expanded = this.dataPoints.filter((d) => d.isExpand).map((d) => d.ownId).join(",");
 
-        let objects: VisualObjectInstancesToPersist = {
-            merge: [
-                <VisualObjectInstance>{
-                    objectName: hierarchySlicerProperties.expandedValuePropertyIdentifier.objectName,
-                    selector: undefined,
-                    properties: properties,
-                }]
+        const instance = {
+            objectName: "general",
+            selector: undefined,
+            properties: {
+                expanded: expanded
+            },
         };
 
-        this.hostServices.persistProperties(objects);
+        this.hostServices.persistProperties(expanded !== "" ? { merge: [ instance ] } : { remove: [ instance ] });
     }
 
     private persistSelectAll(selectAll: boolean) {
