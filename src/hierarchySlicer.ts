@@ -310,8 +310,8 @@ export class HierarchySlicer implements IVisual {
                     if (iValues[c].indexOf(ownId)) {
                         iValues[c].push(ownId);
                     }
-                    dataPoint.orderArray = ownId.split('_')
-                                                .map((d, i, t) => 1 + iValues[i].indexOf(t.slice(0, i + 1).join('_'))) // Lookup indexes of ownIds
+                    dataPoint.orderArray = ownId.split('_|~')
+                                                .map((d, i, t) => 1 + iValues[i].indexOf(t.slice(0, i + 1).join('_|~'))) // Lookup indexes of ownIds
                                                 .concat(Array.from({length: levels - c}, () => 0)); // Stuff array to zero's
                     identityValues.push(ownId);
                     dataPoints.push(dataPoint);
