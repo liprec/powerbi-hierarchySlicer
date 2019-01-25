@@ -24,8 +24,8 @@ steps:
     mergeTestResults: true
 
 - task: PublishCodeCoverageResults@1
- inputs:
-   codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
-   summaryFileLocation: '**/*-coverage.xml'
-   reportDirectory: '**/html-report'
-   failIfCoverageEmpty: true
+  inputs:
+    codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
+    summaryFileLocation: '**/*-coverage.xml'
+    reportDirectory: '**/html-report'
+    failIfCoverageEmpty: true
