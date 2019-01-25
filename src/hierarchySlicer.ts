@@ -318,7 +318,7 @@ export class HierarchySlicer implements IVisual {
                 }
             }
         }
-        dataPoints.forEach((d) => { d.order = d.order === -1 ? -1 : d.orderArray.reduce((t, c, i) => (t * iValues[i].length) + c, 0); } );
+        dataPoints.forEach((d) => { d.order = d.order === -1 ? -1 : d.orderArray.reduce((t, c, i) => (t * (iValues[i].length + 1)) + c, 0); } );
         dataPoints.sort((d1, d2) => d1.order - d2.order);
 
         // Determine partiallySelected
