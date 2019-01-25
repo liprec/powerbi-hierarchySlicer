@@ -25,6 +25,7 @@
  *  THE SOFTWARE.
  */
 
+ // powerbi
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
 
@@ -37,27 +38,52 @@ import TestDataViewBuilderColumnOptions = testDataViewBuilder.TestDataViewBuilde
 import { valueType } from "powerbi-visuals-utils-typeutils";
 import ValueType = valueType.ValueType;
 
+// powerbi.extensibility.utils.formatting
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import ValueFormat = valueFormatter.valueFormatter.format;
 
-export class HierarchyData extends TestDataViewBuilder {
+export interface FullExpanded {
+    expanded: string[];
+    length: number;
+}
+
+export interface ExpandTest {
+    expanded: string;
+    number: number;
+    hideMembersOffset: number[];
+}
+
+export abstract class HierarchyData extends TestDataViewBuilder {
     public tableName: string = "Hierarchy";
-    public columnNames: string[] =
-        ["Level 1", "Level 2", "Level 3", "Value"];
-    public tableValues: any[][] = [
-        [     "L1",      null,      null,      1],
-        [     "L1",     "L11",    "L111",      2],
-        [     "L1",     "L11",    "L112",      3],
-        [     "L1",     "L12",      null,      4],
-        [     "L1",     "L12",    "L123",      5],
-    ];
-    public columnTypes: any[] = [
-        ValueType.fromDescriptor({ text: true }),
-        ValueType.fromDescriptor({ text: true }),
-        ValueType.fromDescriptor({ text: true }),
-        ValueType.fromDescriptor({ numeric: true })
-    ];
-    public columnFormat: any[] = [
-        undefined, undefined, undefined, "0"
-    ];
+    public tableValues: any[][];
+
+    public columnNames: string[];
+    public columnTypes: any[];
+    public columnFormat: any[];
+
+    public abstract getExpandedTests(): ExpandTest[];
+
+    public getFullExpanded(): FullExpanded {
+        const columnLength = this.columnNames.length;
+        const encodeValues = this.tableValues.map((row) => row.map((value, i) => "|~" + ValueFormat(value, this.columnFormat[i]).replace(/,/g, "") + "-" + i));
+        const encodeExpandValues = encodeValues.map((row) => row.map((value, index, row) => row.slice(0, index + 1).join("_")));
+        const expanded = Array.from({length: columnLength - 1}).map((col, i) => encodeExpandValues.map(row => row[i]))
+            .map((row) => row.filter((value, index, self) => self.indexOf(value) === index))    // Make unique
+            .join(",").split(",");
+        const length = Array.from({length: columnLength}).map((col, i) => encodeExpandValues.map(row => row[i]))  // Transpose matrix
+            .map((row) => row.filter((value, index, self) => self.indexOf(value) === index))    // Make unique
+            .join(",").split(",").length;
+        return <FullExpanded>{
+            expanded: expanded,
+            length: length
+        };
+    }
+
+    public getLevelCount(level: number): number {
+        return this.tableValues.map((row) => { return row[level - 1]; })
+            .filter((value, index, self) => self.indexOf(value) === index)
+            .length;
+    }
 
     public getDataView(columnNames?: string[], emptyValues: boolean = false): DataView {
         const columns = this.columnNames.map((field, index) => {
@@ -101,28 +127,103 @@ export class HierarchyData extends TestDataViewBuilder {
         };
         return dataView;
     }
+}
 
-    public static totalExpandedTests: number = 2;
-    public static getExpandedString(testNumber: number) {
-        switch (testNumber) {
-            case 1:
-                return {
-                    expanded: "|~L1-0",
-                    number: 4,
-                    hideMembersOffset: [0, -1, 0]
-                };
-            case 2:
-                return {
-                    expanded: "|~L1-0,|~L1-0_|~L11-1",
-                    number: 6,
-                    hideMembersOffset: [0, -1, 0]
-                };
-            case 3:
-                return {
-                    expanded: "|~L1-0,|~L1-0_|~(Blank)-1,|~L1-0_|~L11-1",
-                    number: 7,
-                    hideMembersOffset: [0, -2, -1]
-                };
-        }
+export class HierarchyDataSet1 extends HierarchyData {
+    public columnNames: string[] =
+        ["Level 1", "Level 2", "Level 3", "Value"];
+    public tableValues: any[][] = [
+        [     "L1",      null,      null,      1],
+        [     "L1",     "L11",    "L111",      2],
+        [     "L1",     "L11",    "L112",      3],
+        [     "L1",     "L12",      null,      4],
+        [     "L1",     "L12",    "L123",      5],
+    ];
+    public columnTypes: any[] = [
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ numeric: true })
+    ];
+    public columnFormat: any[] = [
+        undefined, undefined, undefined, "0"
+    ];
+
+    public getExpandedTests(): ExpandTest[] {
+        return [
+            {
+                expanded: "|~L1-0",
+                number: 4,
+                hideMembersOffset: [0, -1, 0]
+            },
+            {
+                expanded: "|~L1-0,|~L1-0_|~(Blank)-1,|~L1-0_|~L11-1",
+                number: 7,
+                hideMembersOffset: [0, -2, -1]
+            },
+            {
+                expanded: "|~L1-0,|~L1-0_|~L11-1",
+                number: 6,
+                hideMembersOffset: [0, -1, 0]
+            }
+        ];
+    }
+}
+
+export class HierarchyDataSet2 extends HierarchyData {
+    public tableName: string = "Hierarchy";
+    public columnNames: string[] =
+        ["Level 1", "Level 2"];
+    public tableValues: any[][] = [
+        [     "L1",      null],
+        [     "L1",     "L11"],
+        [     "L1",     "L11"],
+        [     "L_2",    "L12"],
+        [     "L1",     "L12"],
+    ];
+    public columnTypes: any[] = [
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ text: true })
+    ];
+    public columnFormat: any[] = [
+        undefined, undefined
+    ];
+
+    public getExpandedTests(): ExpandTest[] {
+        return [
+            {
+                expanded: "|~L1-0",
+                number: 5,
+                hideMembersOffset: [0, -1, 0]
+            },
+            {
+                expanded: "|~L1-0,|~L_2-0",
+                number: 6,
+                hideMembersOffset: [0, -1, 0]
+            }
+        ];
+    }
+}
+
+export class HierarchyDataSet3 extends HierarchyData {
+    public tableName: string = "Hierarchy";
+    public columnNames: string[] =
+        ["Date"];
+    public tableValues: any[][] = [
+        ["2018-01-01T00:00:00.000Z"],
+        ["2018-01-02T00:00:00.000Z"],
+        ["2018-01-03T00:00:00.000Z"],
+        ["2018-01-04T00:00:00.000Z"],
+        ["2018-01-05T00:00:00.000Z"],
+    ];
+    public columnTypes: any[] = [
+        ValueType.fromDescriptor({ dateTime: true })
+    ];
+    public columnFormat: any[] = [
+        "dd MMM, yyyy"
+    ];
+
+    public getExpandedTests(): ExpandTest[] {
+        return [];
     }
 }

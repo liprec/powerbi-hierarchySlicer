@@ -28,6 +28,7 @@
 // powerbi
 import powerbi from "powerbi-visuals-api";
 import ISelectionId = powerbi.visuals.ISelectionId;
+import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
 
 // powerbi.extensibility
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -40,15 +41,18 @@ import { HierarchySlicer } from "../src/hierarchySlicer";
 
 export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
     public selectionManager: SelectionManagerWithBookmarks;
+    public properties: VisualObjectInstancesToPersist;
 
     constructor(width: number, height: number) {
         super(width, height, "HierarchySlicer1458836712039");
     }
 
     protected build(options: VisualConstructorOptions): HierarchySlicer {
+        options.host.persistProperties = (changes: VisualObjectInstancesToPersist) => {
+            this.properties = changes;
+        };
         options.host.createSelectionManager = () => {
             this.selectionManager = new SelectionManagerWithBookmarks();
-            // this.visualHost = new SimulatedVisualHost();
             return this.selectionManager;
         };
 
@@ -79,5 +83,7 @@ export class SelectionManagerWithBookmarks extends MockISelectionManager {
 }
 
 export class SimulatedVisualHost extends MockIVisualHost {
-
+    public persistProperties(changes: VisualObjectInstancesToPersist) {
+        console.log(changes);
+    }
 }
