@@ -45,6 +45,7 @@ import HierarchySlicerSettings = settings.HierarchySlicerSettings;
 export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     value: string;
     label: string;
+    isEmpty: boolean;
     tooltip: string;
     level: number;
     mouseOver?: boolean;

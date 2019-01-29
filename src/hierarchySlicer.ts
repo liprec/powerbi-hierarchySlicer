@@ -287,6 +287,7 @@ export class HierarchySlicer implements IVisual {
                     selected: selected,
                     value: labelValueId,
                     label: labelValue,
+                    isEmpty: rows[r][c] === null,
                     tooltip: labelValue,
                     level: c,
                     selectable: true,
