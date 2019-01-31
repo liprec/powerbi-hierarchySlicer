@@ -169,16 +169,15 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             } else {
                 selectionDataPoints = this.dataPoints;
             }
-            selectionDataPoints = selectionDataPoints.filter((d) => d.ownId !== "selectAll");
             if (d.ownId === "selectAll") {
                 selectionDataPoints.forEach(function(dp) { dp.selected = !selected; });
-                d.selected =  !selected;
                 this.renderSelection(true);
                 this.persistSelectAll(!selected);
                 // this.persistFilter([], FilterAction.remove);
                 this.persistFilter(null, 1);
                 return;
             }
+            selectionDataPoints = selectionDataPoints.filter((d) => d.ownId !== "selectAll");
             if (this.settings.selection.singleSelect) { // single select value -> start with empty selection tree
                 selectionDataPoints.forEach((dp) => dp.selected = false);
             }
