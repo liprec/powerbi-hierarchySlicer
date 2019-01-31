@@ -73,11 +73,11 @@ class SelectionSettings {
 
 class HeaderSettings {
     public show: boolean = true;
-    public title: string = undefined;
+    public title: string = "";
     public defaultTitle: string = "";
     public restatement: boolean = false;
     public fontColor: string = "#666666";
-    public background: string = undefined;
+    public background: string = "";
     public outline: BorderStyle = BorderStyle.None;
     public textSize: number = 10;
     public fontFamily: string = fontFamily;
@@ -92,18 +92,18 @@ class SlicerTextSettings {
     public fontColor: string = "#666666";
     public hoverColor: string = "#212121";
     public selectedColor: string = "#444444";
+    public background: string = "";
     public textSize: number = 10;
     public fontFamily: string = fontFamily;
     public fontStyle: number = FontStyle.Normal;
     public fontWeight: number = FontWeight.Normal;
-    public background: string = undefined;
 }
 
 class SearchSettings {
     public addSelection: boolean = true;
     public fontColor: string = "#808080";
     public iconColor: string = "#666666";
-    public background: string = undefined;
+    public background: string = "";
     public textSize: number = 10;
 }
 
