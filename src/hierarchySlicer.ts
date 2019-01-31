@@ -752,7 +752,7 @@ export class HierarchySlicer implements IVisual {
     private getheaderTitle(title: string) {
         let fullTitle = title.trim();
         if (this.settings.header.restatement) {
-            let statement = " ";
+            let statement = ": ";
             let len = this.data.dataPoints.length;
             let selected = this.data.dataPoints
                 .filter((d) => d.selected && !d.partialSelected)
