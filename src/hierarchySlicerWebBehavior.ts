@@ -163,12 +163,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             let selected = d.partialSelected ? !d.selected : d.selected;
-            let selectionDataPoints = [];
-            if ((!(this.settings.selection.singleSelect) && this.settings.search.addSelection) || (this.settings.selection.hideMembers !== HideMembers.Never)) {
-                selectionDataPoints = this.fullTree;
-            } else {
-                selectionDataPoints = this.dataPoints;
-            }
+            let selectionDataPoints = this.fullTree;
             if (d.ownId === "selectAll") {
                 selectionDataPoints.forEach(function(dp) { dp.selected = !selected; });
                 this.renderSelection(true);
@@ -179,7 +174,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             }
             selectionDataPoints = selectionDataPoints.filter((d) => d.ownId !== "selectAll");
             if (this.settings.selection.singleSelect) { // single select value -> start with empty selection tree
-                selectionDataPoints.forEach((dp) => dp.selected = false);
+                selectionDataPoints.forEach((dp) => { dp.selected = false; dp.partialSelected = false; });
             }
             d.selected = !selected; // Toggle selection
             d.partialSelected = false; // Current member: never partialSelected
@@ -194,7 +189,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                         }
                         const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
                         if (children.length === children.filter((c) => c.selected).length) { // All children selected?
-                            dp.partialSelected = false;
+                            dp.partialSelected = this.settings.general.searching;
                         } else {
                             dp.partialSelected = true;
                         }

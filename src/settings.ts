@@ -55,6 +55,7 @@ class GeneralSettings {
     public filterValues: string = undefined;
     public expanded: string = "";
     public selfFilterEnabled: boolean = false;
+    public searching: boolean = false;
     public filter: string = "";
     public spinnerDelay: number = 250;
     public maxDataPoints: number = 30000;

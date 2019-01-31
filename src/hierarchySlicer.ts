@@ -233,6 +233,7 @@ export class HierarchySlicer implements IVisual {
                 isExpand: false,
                 isHidden: false,
                 isRagged: false,
+                isSearch: false,
                 id: "selectAll",
                 ownId: "selectAll",
                 parentId: "none",
@@ -354,21 +355,6 @@ export class HierarchySlicer implements IVisual {
             }
         }
 
-        if (this.settings.general.selfFilterEnabled && searchText && searchText.length > 2) {
-            searchText = searchText.toLowerCase();
-            dataPoints
-                .filter((d) => d.searchStr.toLowerCase().indexOf(searchText) >= 0)
-                .map((d) => d.isSearch = true);
-            dataPoints
-                .filter((d) => d.isSearch)
-                .forEach((d) => HierarchySlicerWebBehavior.getParentDataPoints(dataPoints, d.parentId).map((dp) => dp.isSearch = true));
-            dataPoints = dataPoints
-                .filter((d) => d.isSearch)
-                .filter((value, index, self) => self.indexOf(value) === index)
-                .sort((d1, d2) => d1.order - d2.order);
-            dataPoints.forEach((d) => d.isLeaf = (dataPoints.map((dp) => dp.parentId === d.ownId).length === 0));
-        }
-
         // Set isHidden property
         let parentRootNodes = [];
         let parentRootNodesTemp = [];
@@ -387,8 +373,26 @@ export class HierarchySlicer implements IVisual {
             parentRootNodes = parentRootNodesTotal;
         }
 
+        if (this.settings.general.selfFilterEnabled && searchText && searchText.length > 2) {
+            this.settings.general.searching = true;
+            searchText = searchText.toLowerCase();
+            dataPoints
+                .filter((d) => d.ownId !== "selectAll")
+                .filter((d) => d.searchStr.toLowerCase().indexOf(searchText) >= 0)
+                .map((d) => d.isSearch = true);
+            dataPoints
+                .filter((d) => d.isSearch)
+                .forEach((d) => HierarchySlicerWebBehavior.getParentDataPoints(dataPoints, d.parentId).map((dp) => dp.isSearch = true));
+            dataPoints = dataPoints
+                .filter((d) => d.isSearch)
+                .filter((value, index, self) => self.indexOf(value) === index)
+                .sort((d1, d2) => d1.order - d2.order);
+        } else {
+            this.settings.general.searching = false;
+        }
+
         // Select All level
-        if (this.settings.selection.selectAll) {
+        if ((this.settings.selection.selectAll) && (!this.settings.general.searching)) {
             const selected = dataPoints.filter((d) => d.selected).length;
             dataPoints[0].selected = selected > 0 ? true : false;
             dataPoints[0].partialSelected = (selected === 0) ||
