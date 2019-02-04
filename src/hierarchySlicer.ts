@@ -967,6 +967,7 @@ export class HierarchySlicer implements IVisual {
             .attr("type", "text")
             .attr("drag-resize-disabled", "true")
             .classed("searchInput", true)
+            .style("font-size", `${this.settings.search.textSize}pt`)
             .style("color", this.settings.search.fontColor)
             .style("background-color", this.settings.search.background)
             .on("input", () => {
@@ -1015,6 +1016,7 @@ export class HierarchySlicer implements IVisual {
             let searchInput = this.searchHeader.selectAll(".searchInput");
             searchInput
                 .style("color", this.settings.search.fontColor)
+                .style("font-size", `${this.settings.search.textSize}pt`)
                 .style("background-color", this.settings.search.background)
                 .style("font-size", this.settings.search.textSize)
                 .style("font-family", this.settings.items.fontFamily);
@@ -1065,6 +1067,8 @@ export class HierarchySlicer implements IVisual {
                 }
                 break;
             case "search":
+                if (!this.settings.general.selfFilterEnabled) return;
+
                 if (this.settings.selection.singleSelect) {
                     this.removeEnumerateObject(instanceEnumeration, "addSelection");
                 }
