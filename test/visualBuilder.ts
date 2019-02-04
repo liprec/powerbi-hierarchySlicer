@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2018 Jan Pieter Posthuma / DataScenarios
+ * Copyright (c) 2019 Jan Pieter Posthuma / DataScenarios
  *
  * All rights reserved.
  *
@@ -35,25 +35,25 @@ import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructor
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 
 // powerbi.extensibility.utils.test
-import { VisualBuilderBase, MockISelectionManager, MockIVisualHost } from "powerbi-visuals-utils-testutils";
+import { VisualBuilderBase, MockIColorPalette } from "powerbi-visuals-utils-testutils";
 
 import { HierarchySlicer } from "../src/hierarchySlicer";
 
 export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
-    public selectionManager: SelectionManagerWithBookmarks;
-    public properties: VisualObjectInstancesToPersist;
+    public properties: VisualObjectInstancesToPersist[] = [];
+    public filter: powerbi.IFilter | powerbi.IFilter[];
+    public filterAction: powerbi.FilterAction;
 
     constructor(width: number, height: number) {
         super(width, height, "HierarchySlicer1458836712039");
     }
 
     protected build(options: VisualConstructorOptions): HierarchySlicer {
-        options.host.persistProperties = (changes: VisualObjectInstancesToPersist) => {
-            this.properties = changes;
+        options.host.applyJsonFilter = (filter: powerbi.IFilter | powerbi.IFilter[], objectName: string, propertyName: string, action: powerbi.FilterAction) => {
+            this.filter = filter;
         };
-        options.host.createSelectionManager = () => {
-            this.selectionManager = new SelectionManagerWithBookmarks();
-            return this.selectionManager;
+        options.host.persistProperties = (changes: VisualObjectInstancesToPersist) => {
+            this.properties.push(changes);
         };
 
         return new HierarchySlicer(options);
@@ -61,29 +61,5 @@ export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
 
     public get instance(): HierarchySlicer {
         return this.visual;
-    }
-}
-
-export class SelectionManagerWithBookmarks extends MockISelectionManager {
-    private selectionCallback: (ids: ISelectionId[]) => void;
-    private selectedSelectionIds: ISelectionId[] = [];
-
-    public registerOnSelectCallback(callback: (ids: ISelectionId[]) => void): void {
-        this.selectionCallback = callback;
-    }
-
-    public sendSelectionToCallback(selectionIds: ISelectionId[]): void {
-        this.selectedSelectionIds = selectionIds;
-        this.selectionCallback(selectionIds);
-    }
-
-    public getSelectionIds(): ISelectionId[] {
-        return this.selectedSelectionIds as ISelectionId[];
-    }
-}
-
-export class SimulatedVisualHost extends MockIVisualHost {
-    public persistProperties(changes: VisualObjectInstancesToPersist) {
-        console.log(changes);
     }
 }
