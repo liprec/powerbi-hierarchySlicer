@@ -425,7 +425,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             return parents.map( dataPoint => {
                 return <any>{ // ITupleElementValue
                     // need to pass correct value type
-                    value: dataPoint.isEmpty ? null : (isNaN(Number(dataPoint.value)) ? dataPoint.value : Number(dataPoint.value))
+                    value: dataPoint.isEmpty ? null : (dataPoint.dataType.numeric ? Number(dataPoint.value) : dataPoint.value)
                 };
             });
         });

@@ -288,6 +288,7 @@ export class HierarchySlicer implements IVisual {
                     selected: selected,
                     value: labelValueId,
                     label: labelValue,
+                    dataType: dataType,
                     isEmpty: rows[r][c] === null,
                     tooltip: labelValue,
                     level: c,
@@ -1074,7 +1075,7 @@ export class HierarchySlicer implements IVisual {
                 }
                 break;
             case "mobile":
-                this.removeEnumerateObject(instanceEnumeration, "focus"); // new API => no detection of focus mode 
+                this.removeEnumerateObject(instanceEnumeration, "focus"); // new API => no detection of focus mode
                 break;
             break;
         }

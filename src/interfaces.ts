@@ -34,6 +34,7 @@ import { Selection } from "d3-selection";
 import * as settings from "./settings";
 
 import IViewport = powerbi.IViewport;
+import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
@@ -46,6 +47,7 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     value: string;
     label: string;
     isEmpty: boolean;
+    dataType: ValueTypeDescriptor;
     tooltip: string;
     level: number;
     mouseOver?: boolean;
