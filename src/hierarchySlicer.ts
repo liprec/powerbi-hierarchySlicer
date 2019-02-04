@@ -1073,6 +1073,9 @@ export class HierarchySlicer implements IVisual {
                     this.removeEnumerateObject(instanceEnumeration, "addSelection");
                 }
                 break;
+            case "mobile":
+                this.removeEnumerateObject(instanceEnumeration, "focus"); // new API => no detection of focus mode 
+                break;
             break;
         }
 
