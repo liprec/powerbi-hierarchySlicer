@@ -96,9 +96,10 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private getContainerHeight(): number {
         return (this.options.baseContainer.node() as HTMLElement).offsetHeight;
     }
-    private getContainerWidth(): number {
-        return (this.options.baseContainer.node() as HTMLElement).offsetWidth;
-    }
+
+    // private getContainerWidth(): number {
+    //     return (this.options.baseContainer.node() as HTMLElement).offsetWidth;
+    // }
 
     private static SetDefaultOptions(options: IHierarchySlicerTreeViewOptions) {
         options.rowHeight = options.rowHeight || HierarchySlicerTreeView.defaultRowHeight;

@@ -586,6 +586,7 @@ export class HierarchySlicer implements IVisual {
     }
 
     private updateSettings(): void {
+        this.isHighContrast = this.colorPalette.isHighContrast; // additional assignment for testing purpose
         this.updateMobileSettings();
         this.updateSelectionStyle();
         this.updateFontStyle();
