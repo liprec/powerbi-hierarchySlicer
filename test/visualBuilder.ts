@@ -27,7 +27,11 @@
 
 // powerbi
 import powerbi from "powerbi-visuals-api";
-import ISelectionId = powerbi.visuals.ISelectionId;
+import DataView = powerbi.DataView;
+import VisualUpdateType = powerbi.VisualUpdateType;
+import ViewMode = powerbi.ViewMode;
+import IFilter = powerbi.IFilter;
+import FilterAction = powerbi.FilterAction;
 import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
 
 // powerbi.extensibility
@@ -35,21 +39,23 @@ import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructor
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 
 // powerbi.extensibility.utils.test
-import { VisualBuilderBase, MockIColorPalette } from "powerbi-visuals-utils-testutils";
+import { VisualBuilderBase, renderTimeout } from "powerbi-visuals-utils-testutils";
+
+import { isArray } from "lodash-es";
 
 import { HierarchySlicer } from "../src/hierarchySlicer";
 
 export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
     public properties: VisualObjectInstancesToPersist[] = [];
-    public filter: powerbi.IFilter | powerbi.IFilter[];
-    public filterAction: powerbi.FilterAction;
+    public filter: IFilter | IFilter[];
+    public filterAction: FilterAction;
 
     constructor(width: number, height: number) {
         super(width, height, "HierarchySlicer1458836712039");
     }
 
     protected build(options: VisualConstructorOptions): HierarchySlicer {
-        options.host.applyJsonFilter = (filter: powerbi.IFilter | powerbi.IFilter[], objectName: string, propertyName: string, action: powerbi.FilterAction) => {
+        options.host.applyJsonFilter = (filter: IFilter | IFilter[], objectName: string, propertyName: string, action: FilterAction) => {
             this.filter = filter;
         };
         options.host.persistProperties = (changes: VisualObjectInstancesToPersist) => {
@@ -61,5 +67,18 @@ export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
 
     public get instance(): HierarchySlicer {
         return this.visual;
+    }
+
+    public update(dataView: DataView[] | DataView, jsonFilters?: IFilter[]): void {
+        this.visual.update({
+            dataViews: isArray(dataView) ? dataView : [dataView],
+            viewport: this.viewport,
+            jsonFilters: jsonFilters
+        } as VisualUpdateOptions);
+    }
+
+    public updateRenderTimeoutWithCustomFilter(dataViews: DataView[] | DataView, fn: Function, jsonFilters?: IFilter[], timeout?: number): number {
+        this.update(dataViews, jsonFilters);
+        return renderTimeout(fn, timeout);
     }
 }

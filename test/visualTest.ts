@@ -44,7 +44,7 @@ import { HierarchySlicer } from "../src/hierarchySlicer";
 import { HierarchySlicerBuilder } from "./visualBuilder";
 import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5 } from "./visualData";
 import { HierarchySlicerSettings } from "../src/settings";
-import { IFilter } from "powerbi-models";
+import { IFilter, TupleFilter } from "powerbi-models";
 import { FontStyle, FontWeight, BorderStyle } from "../src/enums";
 import { assignWith, filter, forEach } from "lodash-es";
 
@@ -1481,92 +1481,307 @@ describe("HierachySlicer =>", () => {
             });
 
             describe(`Bookmarks [dataset: ${index + 1}] =>`, () => {
-                // Not possible yet to set the options.jsonFilters
-                // testData.getSelectedTests().forEach((selectedTest: SelectTest, testIndex: number) => {
-                //     it(`Set filter for test: ${testIndex}`, (done) => {
-                //         const selector = HierarchySlicer.ItemContainerChild.selectorName;
-                //         const dataViewTest = testData.getDataView();
-                //         const expandedToBe = testData.getFullExpanded();
-                //         const allItemsCnt = testData.getOwnIds().length;
-                //         const selectedItemsCnt = selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
-                //         const filter = {
-                //             target: selectedTest.target,
-                //             operator: "In",
-                //             values: selectedTest.values,
-                //             $schema: "http://powerbi.com/product/schema#tuple",
-                //             filterType: 6
-                //         };
-                //         dataViewTest.metadata.objects = {
-                //             selection: {
-                //                 singleSelect: selectedTest.clickedDataPoints.length === 1
-                //             }
-                //         };
-                //         // set options.jsonFilters ??
-                //         visualBuilder.updateRenderTimeout(dataViewTest, () => {
+                testData.getSelectedTests().forEach((selectedTest: SelectTest, testIndex: number) => {
+                    it(`Set filter for test: ${testIndex}`, (done) => {
+                        const selector = HierarchySlicer.ItemContainerChild.selectorName;
+                        const dataViewTest = testData.getDataView();
+                        const expandedToBe = testData.getFullExpanded();
+                        const allItemsCnt = testData.getOwnIds().length;
+                        const selectedItemsCnt = selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
+                        const filter = [{
+                            target: selectedTest.target,
+                            operator: "In",
+                            values: selectedTest.values,
+                            $schema: "http://powerbi.com/product/schema#tuple",
+                            filterType: 6
+                        }];
+                        dataViewTest.metadata.objects = {
+                            selection: {
+                                singleSelect: selectedTest.clickedDataPoints.length === 1
+                            },
+                            general: {
+                                expanded: expandedToBe.expanded.join(",")
+                            }
+                        };
 
-                //             const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
+                        visualBuilder.updateRenderTimeoutWithCustomFilter(dataViewTest, () => {
 
-                //             selectedTest.selectedDataPoints.forEach((datePoint) => {
-                //                 expect(itemCheckBoxes[datePoint]).toHaveClass("selected");
-                //             });
+                            const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
 
-                //             selectedTest.partialDataPoints.forEach((datePoint) => {
-                //                 expect(itemCheckBoxes[datePoint]).toHaveClass("partiallySelected");
-                //             });
+                            selectedTest.selectedDataPoints.forEach((datePoint) => {
+                                expect(itemCheckBoxes[datePoint]).toHaveClass("selected");
+                            });
 
-                //             expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
-                //                 .toBe(selectedTest.selectedDataPoints.length);
+                            selectedTest.partialDataPoints.forEach((datePoint) => {
+                                expect(itemCheckBoxes[datePoint]).toHaveClass("partiallySelected");
+                            });
 
-                //             expect(itemCheckBoxes.filter((element) => element.classList.contains("partiallySelected")).length)
-                //                 .toBe(selectedTest.partialDataPoints.length);
+                            expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
+                                .toBe(selectedTest.selectedDataPoints.length);
 
-                //             expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
-                //                 .toBe(allItemsCnt - selectedItemsCnt);
+                            expect(itemCheckBoxes.filter((element) => element.classList.contains("partiallySelected")).length)
+                                .toBe(selectedTest.partialDataPoints.length);
 
-                //             done();
-                //         });
-                //     });
-                // });
+                            expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
+                                .toBe(allItemsCnt - selectedItemsCnt);
+
+                            done();
+                        }, filter);
+                    });
+                });
             });
         });
     });
 });
 
-// describe('HierarchySlicer in high constrast mode =>', () => {
-//     const highConstrastBackgroundColor: string = "#000000";
-//     const highConstrastForegroundColor: string = "#333333";
+describe('HierarchySlicer in high constrast mode =>', () => {
+    const highConstrastBackgroundColor: string = "#000000";
+    const highConstrastForegroundColor: string = "#00FF00";
+    const highConstrastForegroundSelectedColor: string = "#FFFF00";
 
-//     let visualBuilder: HierarchySlicerBuilder,
-//         testData: HierarchyData,
-//         defaultSettings: HierarchySlicerSettings;
+    let visualBuilder: HierarchySlicerBuilder,
+        testData: HierarchyData,
+        defaultSettings: HierarchySlicerSettings;
 
-//     beforeEach(() => {
-//         visualBuilder = new HierarchySlicerBuilder(1000, 500);
-//         visualBuilder.element.find(".slicerContainer").addClass("hasSelection"); // Select visual
-//         defaultSettings = new HierarchySlicerSettings();
+    beforeEach(() => {
+        visualBuilder = new HierarchySlicerBuilder(1000, 500);
+        visualBuilder.element.find(".slicerContainer").addClass("hasSelection"); // Select visual
+        defaultSettings = new HierarchySlicerSettings();
 
-//         testData = new HierarchyDataSet1();
-//     });
+        testData = new HierarchyDataSet1();
 
+        visualBuilder.visualHost.colorPalette.isHighContrast = true;
+        visualBuilder.visualHost.colorPalette.background = { value: highConstrastBackgroundColor };
+        visualBuilder.visualHost.colorPalette.foreground = { value: highConstrastForegroundColor };
+        visualBuilder.visualHost.colorPalette.foregroundSelected = { value: highConstrastForegroundSelectedColor };
+    });
 
-//     it (`Slicer header - fontColor`, (done) => {
-//         const dataViewTest = testData.getDataView();
-//         const fontColor = "#FFFFFF";
-//         dataViewTest.metadata.objects = {
-//             header: {
-//                 fontColor: fontColor
-//             }
-//         };
+    it (`Slicer header - fontColor`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const fontColor = "#FFFFFF";
+        dataViewTest.metadata.objects = {
+            header: {
+                fontColor: fontColor
+            }
+        };
 
-//         visualBuilder.updateRenderTimeout(dataViewTest, () => {
-//             const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-//             expect(headerTextStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+            expect(headerTextStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
 
-//             done();
-//         });
-//     });
-// });
+            done();
+        });
+    });
+
+    it (`Slicer header - backGround`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const background = "#FFFFFF";
+        dataViewTest.metadata.objects = {
+            header: {
+                background: background
+            }
+        };
+
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+
+            expect(headerTextStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
+
+            done();
+        });
+    });
+
+    it(`Item formatting - fontcolor`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const fontColor = "#FFFFFF";
+        dataViewTest.metadata.objects = {
+            items: {
+                fontColor: fontColor
+            }
+        };
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+
+            itemContainers.forEach((itemContainer) => {
+                if (testData.columnNames.length > 1) {
+                    const itemExpander = itemContainer.firstChild;
+
+                    // Expanded icon styling
+                    const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                }
+
+                const itemContainerChild = itemContainer.lastChild;
+
+                // Checkbox styling
+                const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+
+                // // Span (label) styling
+                const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+            });
+
+            done();
+        });
+    });
+
+    it(`Item formatting - fontcolor after hover`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const hoverColor = "#FF0000";
+        const fontColor = "#FFFFFF";
+        dataViewTest.metadata.objects = {
+            items: {
+                fontColor: fontColor,
+                hoverColor: hoverColor
+            }
+        };
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+
+            itemContainers.forEach((itemContainer, index) => {
+                if (testData.columnNames.length > 1) {
+                    let itemExpander = itemContainer.firstChild;
+                    // Mouseover event
+                    itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                    itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+
+                    // Expanded icon styling
+                    let itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+
+                    // Mouseout event
+                    itemExpander.dispatchEvent(new MouseEvent('mouseout'));
+                    itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                    // Expanded icon styling
+                    itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                }
+
+                let itemContainerChild = itemContainer.lastChild;
+                // Mouseover event
+                itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+
+                // Checkbox styling
+                let checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+
+                let labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+
+                // Mouseout event
+                itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
+                itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+
+                // Checkbox styling
+                checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+
+                labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+            });
+
+            done();
+        });
+    });
+
+    it(`Item formatting - hoverColor`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const hoverColor = "#FF0000";
+        dataViewTest.metadata.objects = {
+            items: {
+                hoverColor: hoverColor
+            }
+        };
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+
+            itemContainers.forEach((itemContainer, index) => {
+                if (testData.columnNames.length > 1) {
+                    let itemExpander = itemContainer.firstChild;
+                    itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+
+                    itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+
+                    // Expanded icon styling
+                    const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                }
+
+                let itemContainerChild = itemContainer.lastChild;
+                itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+
+                itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+
+                // // Checkbox styling
+                const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+
+                const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+            });
+
+            done();
+        });
+    });
+
+    it(`Item formatting - selectColor`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const selectedColor = "#0000FF";
+        dataViewTest.metadata.objects = {
+            general: {
+                selectAll: true
+            },
+            selection: {
+                selectAll: true
+            },
+            items: {
+                selectedColor: selectedColor
+            }
+        };
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+
+            itemContainers.forEach((itemContainer) => {
+                const itemContainerChild = itemContainer.lastChild;
+
+                // Checkbox styling
+                const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                expect(checkboxStyle.backgroundColor).toBe(hexToRgb(highConstrastForegroundSelectedColor));
+            });
+
+            done();
+        });
+    });
+
+    it(`Item formatting - background`, (done) => {
+        const dataViewTest = testData.getDataView();
+        const background = "#0000FF";
+        dataViewTest.metadata.objects = {
+            general: {
+                selectAll: true
+            },
+            selection: {
+                selectAll: true
+            },
+            items: {
+                background: background
+            }
+        };
+        visualBuilder.updateRenderTimeout(dataViewTest, () => {
+            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+
+            itemContainers.forEach((itemContainer) => {
+                const containerStyle = (itemContainer as HTMLElement).style;
+                expect(containerStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
+            });
+
+            done();
+        });
+    });
+});
 
 function hexToRgb(hex: string): string {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
