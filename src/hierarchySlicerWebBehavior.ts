@@ -30,7 +30,7 @@
 import powerbi from "powerbi-visuals-api";
 import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
-import { IFilterColumnTarget } from "powerbi-models";
+import { IFilterColumnTarget, ITupleFilter, FilterType } from "powerbi-models";
 import { select, event, Selection } from "d3-selection";
 
 import * as interfaces from "./interfaces";
@@ -54,6 +54,7 @@ import IHierarchySlicerDataPoint = interfaces.IHierarchySlicerDataPoint;
 import HierarchySlicerSettings = settings.HierarchySlicerSettings;
 
 import HideMembers = enums.HideMembers;
+import { HierarchySlicer } from "./hierarchySlicer";
 
 let hierarchySlicerProperties = {
     selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
@@ -462,14 +463,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private persistFilter(filter: IFilter | IFilter[], action: FilterAction = FilterAction.merge) {
-        const instance = {
-            objectName: "general",
-            selector: undefined,
-            properties: {
-                filterValues: ""
-            },
-        };
-        this.hostServices.persistProperties({ remove: [ instance ] });
+        // duplicate the column names if filter contains only one column to prevent converting tuple filter into basic filter
+        HierarchySlicer.setDuplicatedColumns(filter as ITupleFilter);
         this.hostServices.applyJsonFilter(filter,
             hierarchySlicerProperties.filterPropertyIdentifier.objectName,
             hierarchySlicerProperties.filterPropertyIdentifier.propertyName,

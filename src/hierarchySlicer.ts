@@ -31,10 +31,10 @@ import { interactivitySelectionService, interactivityBaseService } from "powerbi
 import { valueFormatter, textMeasurementService} from "powerbi-visuals-utils-formattingutils";
 import { IMargin, CssConstants } from "powerbi-visuals-utils-svgutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
-import { IFilterTarget } from "powerbi-models";
+import { IFilterTarget, TupleFilter, FilterType, ITupleFilterTarget, IFilterColumnTarget, ITupleFilter } from "powerbi-models";
 import { select, Selection } from "d3-selection";
 
-import { isEqual } from "lodash-es";
+import { isEqual, uniqWith } from "lodash-es";
 
 import "@babel/polyfill";
 import "./matchesPolyfill";
@@ -166,6 +166,27 @@ export class HierarchySlicer implements IVisual {
     public static HeaderSpinner: ClassAndSelector = createClassAndSelector("headerSpinner");
     public static Input: ClassAndSelector = createClassAndSelector("slicerCheckbox");
 
+    public static setDuplicatedColumns(tupleFilter: ITupleFilter) {
+        if (tupleFilter && tupleFilter.filterType === FilterType.Tuple && tupleFilter.target.length === 1) {
+            tupleFilter.target.push(tupleFilter.target[0]);
+            for (let conditionsIndex = 0; conditionsIndex < tupleFilter.values.length; conditionsIndex++) {
+                tupleFilter.values[conditionsIndex].push(tupleFilter.values[conditionsIndex][0]);
+            }
+        }
+    }
+    public static setUniqueFilterConditions(tupleFilter: ITupleFilter) {
+        tupleFilter.target = uniqWith(tupleFilter.target as IFilterTarget[], (a: IFilterTarget, b: IFilterTarget) => {
+            return (a as IFilterColumnTarget).table === (b as IFilterColumnTarget).table &&
+            (a as IFilterColumnTarget).column === (b as IFilterColumnTarget).column;
+        });
+        for (let conditionsIndex = 0; conditionsIndex < tupleFilter.values.length; conditionsIndex++) {
+            tupleFilter.values[conditionsIndex] = uniqWith(tupleFilter.values[conditionsIndex], (a, b) => {
+                return a.value === b.value;
+            });
+        }
+
+        return tupleFilter;
+    }
     public converter(dataView: DataView, jsonFilters: IFilter[], searchText: string): IHierarchySlicerData {
         if (!dataView ||
             !dataView.table ||
@@ -209,6 +230,12 @@ export class HierarchySlicer implements IVisual {
 
         if (jsonFilters) {
             if (jsonFilters.length > 0) {
+                let tupleFilter = jsonFilters[0] as ITupleFilter;
+                // if tuple filter had duplicated columns need to remove them
+                // because there is no real second colum to extract formatting options
+                if (tupleFilter.filterType === FilterType.Tuple) {
+                    HierarchySlicer.setUniqueFilterConditions(tupleFilter as ITupleFilter);
+                }
                 selectedIds = (jsonFilters[0] as any).values.map((d) => "|~" + (
                         Array.isArray(d) ?
                         d.map((dp, i) => ValueFormat(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString()).join('_|~')
