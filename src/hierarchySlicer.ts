@@ -175,10 +175,12 @@ export class HierarchySlicer implements IVisual {
         }
     }
     public static setUniqueFilterConditions(tupleFilter: ITupleFilter) {
+        const targetLength: number = tupleFilter.target.length;
         tupleFilter.target = uniqWith(tupleFilter.target as IFilterTarget[], (a: IFilterTarget, b: IFilterTarget) => {
             return (a as IFilterColumnTarget).table === (b as IFilterColumnTarget).table &&
             (a as IFilterColumnTarget).column === (b as IFilterColumnTarget).column;
         });
+        if (targetLength === tupleFilter.target.length) return; // No deduplication needed
         for (let conditionsIndex = 0; conditionsIndex < tupleFilter.values.length; conditionsIndex++) {
             tupleFilter.values[conditionsIndex] = uniqWith(tupleFilter.values[conditionsIndex], (a, b) => {
                 return a.value === b.value;

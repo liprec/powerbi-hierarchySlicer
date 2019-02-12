@@ -463,6 +463,15 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private persistFilter(filter: IFilter | IFilter[], action: FilterAction = FilterAction.merge) {
+        // make sure that the old method of storing the filter is deleted
+        const instance = {
+            objectName: "general",
+            selector: undefined,
+            properties: {
+                filterValues: ""
+            },
+        };
+        this.hostServices.persistProperties({ remove: [ instance ] });
         // duplicate the column names if filter contains only one column to prevent converting tuple filter into basic filter
         HierarchySlicer.setDuplicatedColumns(filter as ITupleFilter);
         this.hostServices.applyJsonFilter(filter,
