@@ -229,10 +229,15 @@ export class HierarchyDataSet1 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -350,10 +355,15 @@ export class HierarchyDataSet2 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -367,13 +377,19 @@ export class HierarchyDataSet2 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ],
                     [
+                        { value: this.getValue(3, 0) },
                         { value: this.getValue(3, 0) }
                     ]
                 ],
@@ -432,10 +448,15 @@ export class HierarchyDataSet3 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -449,13 +470,19 @@ export class HierarchyDataSet3 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ],
                     [
+                        { value: this.getValue(1, 0) },
                         { value: this.getValue(1, 0) }
                     ]
                 ],
@@ -527,10 +554,15 @@ export class HierarchyDataSet4 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -619,10 +651,15 @@ export class HierarchyDataSet5 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableName
                     }
                 ],
                 values: [
                     [
+                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -630,7 +667,7 @@ export class HierarchyDataSet5 extends HierarchyData {
                 partialDataPoints: []
             },
             {
-                description: `${this.getValue(0, 0)} and ${this.getValue(1, 1)}`,
+                description: `'${this.getValue(0, 0)}' and ${this.getValue(1, 1)}`,
                 clickedDataPoints: [ 0, 4 ],
                 target: [
                     {

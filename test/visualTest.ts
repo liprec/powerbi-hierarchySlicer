@@ -1482,7 +1482,7 @@ describe("HierachySlicer =>", () => {
 
             describe(`Bookmarks [dataset: ${index + 1}] =>`, () => {
                 testData.getSelectedTests().forEach((selectedTest: SelectTest, testIndex: number) => {
-                    it(`Set filter for test: ${testIndex}`, (done) => {
+                    it(`Set filter for test: ${selectedTest.description || (selectedTest.clickedDataPoints[0] + 1)}`, (done) => {
                         const selector = HierarchySlicer.ItemContainerChild.selectorName;
                         const dataViewTest = testData.getDataView();
                         const expandedToBe = testData.getFullExpanded();
