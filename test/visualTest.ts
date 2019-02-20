@@ -1380,8 +1380,10 @@ describe("HierachySlicer =>", () => {
 
                             const filter: any = (visualBuilder.filter as any);
 
-                            expect(filter.target).toEqual(selectedTest.target);
-                            expect(filter.values).toEqual(selectedTest.values);
+                            if (!selectedTest.isSwitched) {
+                                expect(filter.target).toEqual(selectedTest.target);
+                                expect(filter.values).toEqual(selectedTest.values);
+                            }
 
                             const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
 

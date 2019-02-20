@@ -238,9 +238,13 @@ export class HierarchySlicer implements IVisual {
                 if (tupleFilter.filterType === FilterType.Tuple) {
                     HierarchySlicer.setUniqueFilterConditions(tupleFilter as ITupleFilter);
                 }
-                selectedIds = (jsonFilters[0] as any).values.map((d) => "|~" + (
+                const jFilter = jsonFilters[0] as any;
+                selectedIds = jFilter.values.map((d) => "|~" + (
                         Array.isArray(d) ?
-                        d.map((dp, i) => ValueFormat(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString()).join('_|~')
+                        d.map((dp, i) => {
+                            const index = dataView.metadata.columns.filter((c) => c.queryName === jFilter.target[i].table + '.' + jFilter.target[i].column)[0].index;
+                            return { value: ValueFormat(dp.value, columns[index].format).replace(/,/g, "") + "-" + index.toString(), index: index };
+                        }).sort((dp1, dp2) => dp1.index - dp2.index).map((dp) => dp.value).join('_|~')
                         : ValueFormat(d, columns[0].format).replace(/,/g, "") + "-0"));
             } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
                 selectedIds = this.settings.general.filterValues.split(",");
