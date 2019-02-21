@@ -110,8 +110,16 @@
                         "bool": true
                     }
                 },
+                "emptyString": {
+                    "displayName": "'' strings are empty",
+                    "description": "An 'blank' string is threated as an empty value",
+                    "type": {
+                        "bool": true
+                    }
+                },
                 "emptyLeafLabel": {
                     "displayName": "Empty leaf label",
+                    "description": "Replacement text for empty values",
                     "placeHolderText": "(Blank)",
                     "type": {
                         "text": true

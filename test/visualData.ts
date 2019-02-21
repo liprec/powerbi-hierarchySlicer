@@ -109,8 +109,12 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         }
     }
 
-    public getItemLabels(): string[] {
-        return this.columnNames.map((col, index) => ValueFormat(this.convertRawValue(this.tableValues[0][index], this.columnTypes[index], true), this.columnFormat[index]));
+    public getItemLabels(emptyString: boolean = true, label: string = null): string[] {
+        return this.columnNames.map((col, index) => {
+            const rawValue = this.convertRawValue(this.tableValues[0][index], this.columnTypes[index], true);
+            const formatValue = ((rawValue === null || (emptyString && rawValue === ""))) ? label || "(Blank)" : ValueFormat(rawValue, this.columnFormat[index]);
+            return formatValue === "" ? String.fromCharCode(160) : formatValue;
+        });
     }
 
     public getOwnIds(length: number = undefined): string[] {
@@ -665,12 +669,12 @@ export class HierarchyDataSet5 extends HierarchyData {
             {
                 expanded: [ "|~-0" ],
                 number: 5,
-                hideMembersOffset: [0, 0, 0]
+                hideMembersOffset: [0, -3, 0]
             },
             {
                 expanded: [ "|~1-0" ],
                 number: 5,
-                hideMembersOffset: [0, 0, -1]
+                hideMembersOffset: [0, -1, -1]
             }
         ];
     }

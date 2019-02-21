@@ -66,6 +66,7 @@ class SelectionSettings {
     public emptyLeafs: boolean = undefined;
     public hideMembers: HideMembers = HideMembers.Never;
     public emptyLeafLabel: string = "";
+    public emptyString: boolean = true;
     public emptyLeafLabelDefault: string = "(Blank)";
     public selectAll: boolean = false;
     public selectAllLabel: string = "Select All";

@@ -167,7 +167,7 @@ describe("HierachySlicer =>", () => {
                 });
             });
 
-            it(`default item formatting [dataset: ${index + 1}]`, (done) => {
+            it(`default item labels [dataset: ${index + 1}]`, (done) => {
                 const dataViewTest = testData.getDataView();
                 const expandedToBe: FullExpanded = testData.getFullExpanded();
                 dataViewTest.metadata.objects = {
@@ -403,6 +403,55 @@ describe("HierachySlicer =>", () => {
                 visualBuilder.updateRenderTimeout(dataViewTest, () => {
                     expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                         .toBe(testValue.number + testValue.hideMembersOffset[0]);
+                    done();
+                });
+            });
+
+            it(`Empty leaf label: xxxxxxx, '' strings are empty: true [dataset: ${index + 1}]`, (done) => {
+                const dataViewTest = testData.getDataView();
+                const expandedToBe: FullExpanded = testData.getFullExpanded();
+                const emptyLeafLabel = "xxxxxxx";
+                dataViewTest.metadata.objects = {
+                    general: {
+                        expanded: expandedToBe.expanded.join(",")
+                    },
+                    selection: {
+                        emptyLeafLabel: emptyLeafLabel,
+                        emptyString: true,
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataViewTest, () => {
+                    testData.getItemLabels(true, emptyLeafLabel).forEach((label, index) => {
+                        const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                        expect(item).toHaveText(label);
+                        expect(item).not.toHaveText("(Blank)");
+                    });
+
+                    done();
+                });
+            });
+
+            it(`Empty leaf label: xxxxxxx, '' strings are empty: false [dataset: ${index + 1}]`, (done) => {
+                const dataViewTest = testData.getDataView();
+                const expandedToBe: FullExpanded = testData.getFullExpanded();
+                const emptyLeafLabel = "xxxxxxx";
+                dataViewTest.metadata.objects = {
+                    general: {
+                        expanded: expandedToBe.expanded.join(",")
+                    },
+                    selection: {
+                        emptyLeafLabel: emptyLeafLabel,
+                        emptyString: false,
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataViewTest, () => {
+                    testData.getItemLabels(false, emptyLeafLabel).forEach((label, index) => {
+                        const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                        expect(item).toHaveText(label);
+                    });
+
                     done();
                 });
             });

@@ -292,6 +292,7 @@ export class HierarchySlicer implements IVisual {
                 let labelValueId = ValueFormat(convertRawValue(rows[r][c], dataType), columnFormat);
                 let labelValue: string;
 
+                rowValue = (this.settings.selection.emptyString && rowValue === "") ? null : rowValue;
                 switch (this.settings.selection.hideMembers) {
                     case HideMembers.Empty:
                         isRagged = rowValue === null;
@@ -851,7 +852,7 @@ export class HierarchySlicer implements IVisual {
 
             let slicerText = rowSelection.selectAll(HierarchySlicer.LabelText.selectorName);
 
-            slicerText.text((d: IHierarchySlicerDataPoint) => d.label);
+            slicerText.text((d: IHierarchySlicerDataPoint) => d.label === "" ? String.fromCharCode(160) : d.label);
 
             if (interactivityService && this.slicerBody) {
                 const body = this.slicerBody.attr("width", this.viewport.width);
