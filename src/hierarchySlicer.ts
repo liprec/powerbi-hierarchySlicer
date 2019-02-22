@@ -638,14 +638,14 @@ export class HierarchySlicer implements IVisual {
         this.settings.items.selectedColor = this.isHighContrast ? this.colorPalette.foregroundSelected.value : this.settings.items.selectedColor;
         this.settings.items.background = this.isHighContrast ? this.colorPalette.background.value : this.settings.items.background;
         this.settings.items.hoverColor = this.isHighContrast ? this.colorPalette.foreground.value : this.settings.items.hoverColor;
-        this.settings.items.textSize = this.settings.items.textSize * (this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1);
+        this.settings.items.textSizeZoomed = this.settings.items.textSize * (this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1);
     }
 
     private updateHeaderStyle(): void {
         // Used setting values -> High Contrast
         this.settings.header.fontColor = this.isHighContrast ? this.colorPalette.foreground.value : this.settings.header.fontColor;
         this.settings.header.background = this.isHighContrast ? this.colorPalette.background.value : this.settings.header.background;
-        this.settings.header.textSize = this.settings.header.textSize * (this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1);
+        this.settings.header.textSizeZoomed = this.settings.header.textSize * (this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1);
     }
 
     private updateSearchStyle(): void {
@@ -653,7 +653,7 @@ export class HierarchySlicer implements IVisual {
         this.settings.search.fontColor = this.isHighContrast ? this.colorPalette.foreground.value : this.settings.search.fontColor;
         this.settings.search.iconColor = this.isHighContrast ? this.colorPalette.foreground.value : this.settings.search.iconColor;
         this.settings.search.background = this.isHighContrast ? this.colorPalette.background.value : this.settings.search.background;
-        this.settings.search.textSize = this.settings.search.textSize * (this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1);
+        this.settings.search.textSizeZoomed = this.settings.search.textSize * (this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1);
     }
 
     private updateMobileSettings(): void {
@@ -700,10 +700,10 @@ export class HierarchySlicer implements IVisual {
             .classed("icon", true)
             .classed("icon-left", true)
             .style("visibility", (d) => d.isLeaf ? "hidden" : "visible")
-            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSize)))
-            .style("margin-left", (d) => PixelConverter.toString(-this.settings.items.textSize / (2.5)))
-            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))))
-            .style("height", PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSize))))
+            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed)))
+            .style("margin-left", (d) => PixelConverter.toString(-this.settings.items.textSizeZoomed / (2.5)))
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
+            .style("height", PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
             .style("fill", this.settings.items.fontColor)
             .html((d) => d.isExpand ? this.IconSet.expand : this.IconSet.collapse);
 
@@ -714,10 +714,10 @@ export class HierarchySlicer implements IVisual {
             .insert("div") // Spinner location
             .classed("spinner-icon", true)
             .style("display", "none")
-            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSize)))
-            .style("margin-left", PixelConverter.toString(-this.settings.items.textSize / (2.5)))
-            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))))
-            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSize))));
+            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed)))
+            .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / (2.5)))
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
+            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))));
 
         expandCollapse
             .exit()
@@ -749,10 +749,10 @@ export class HierarchySlicer implements IVisual {
             .classed(HierarchySlicer.Checkbox.className, true);
 
         checkBoxSpan
-            .style("width", (.75 * this.settings.items.textSize) + "px")
-            .style("height", (.75 * this.settings.items.textSize) + "px")
-            .style("margin-right", PixelConverter.fromPointToPixel(.25 * this.settings.items.textSize) + "px")
-            .style("margin-bottom", PixelConverter.fromPointToPixel(.25 * this.settings.items.textSize) + "px");
+            .style("width", (.75 * this.settings.items.textSizeZoomed) + "px")
+            .style("height", (.75 * this.settings.items.textSizeZoomed) + "px")
+            .style("margin-right", PixelConverter.fromPointToPixel(.25 * this.settings.items.textSizeZoomed) + "px")
+            .style("margin-bottom", PixelConverter.fromPointToPixel(.25 * this.settings.items.textSizeZoomed) + "px");
 
         const labelElement = treeItemElement
             .selectAll(HierarchySlicer.LabelText.selectorName)
@@ -763,7 +763,7 @@ export class HierarchySlicer implements IVisual {
 
         labelElement
                 .style("color", this.settings.items.fontColor)
-                .style("font-size", this.settings.items.textSize + "pt")
+                .style("font-size", this.settings.items.textSizeZoomed + "pt")
                 .style("font-family", this.settings.items.fontFamily)
                 .style("font-weight", this.settings.items.fontWeight)
                 .style("font-style", () => {
@@ -781,7 +781,7 @@ export class HierarchySlicer implements IVisual {
         treeItemElementParent.each(function(d, i) {
             const item = select(this);
             item
-                .style("padding-left", (maxLevel === 1 ? 0 : ((d.level * mobileScale) * _this.settings.items.textSize)) + "px")
+                .style("padding-left", (maxLevel === 1 ? 0 : ((d.level * mobileScale) * _this.settings.items.textSizeZoomed)) + "px")
                 .style("margin-left" , maxLevel === 1 ? "-2px" : undefined);
         });
     }
@@ -826,7 +826,7 @@ export class HierarchySlicer implements IVisual {
                 .style("border-style", this.settings.header.outline === BorderStyle.None ? 'none' : "solid")
                 .style("border-color", this.settings.header.outlineColor)
                 .style("border-width", this.getBorderWidth(this.settings.header.outline, this.settings.header.outlineWeight))
-                .style("font-size", this.settings.header.textSize + "pt")
+                .style("font-size", this.settings.header.textSizeZoomed + "pt")
                 .style("font-family", this.settings.header.fontFamily)
                 .style("font-weight", this.settings.header.fontWeight)
                 .style("font-style", () => {
@@ -841,8 +841,8 @@ export class HierarchySlicer implements IVisual {
             const icons = this.slicerHeader.selectAll(HierarchySlicer.Icon.selectorName);
             icons
                 .classed("hiddenicon", !this.settings.mobile.zoomed)
-                .style("height", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)))
-                .style("width", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSize)))
+                .style("height", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSizeZoomed)))
+                .style("width", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.header.textSizeZoomed)))
                 .style("fill", this.settings.header.fontColor)
                 .style("background-color", this.settings.header.background)
                 .style("opacity", (d: any) => data.levels >= d.level ? "1" : "0" );
@@ -921,15 +921,15 @@ export class HierarchySlicer implements IVisual {
 
     private getHeaderHeight(): number {
         const searchHeight: number = this.settings.general.selfFilterEnabled
-            ? TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.search.textSize)) + 2
+            ? TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.search.textSizeZoomed)) + 2
             : 0;
         return TextMeasurementService.estimateSvgTextHeight(
-            HierarchySlicer.getTextProperties(+this.settings.header.textSize)) + searchHeight;
+            HierarchySlicer.getTextProperties(+this.settings.header.textSizeZoomed)) + searchHeight;
     }
 
     private getRowHeight(): number {
         return this.rowHeight || TextMeasurementService.estimateSvgTextHeight(
-            HierarchySlicer.getTextProperties(this.settings.items.textSize));
+            HierarchySlicer.getTextProperties(this.settings.items.textSizeZoomed));
     }
 
     private getBodyViewport(currentViewport: IViewport): IViewport {
@@ -984,8 +984,8 @@ export class HierarchySlicer implements IVisual {
             .classed(HierarchySlicer.Icon.className, true)
             .classed("search", true)
             .style("fill", this.settings.search.iconColor)
-            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
-            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))))
+            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))))
             .html(this.IconSet.search)
             .on("click", () => {
                 this.hostServices.persistProperties({
@@ -1004,7 +1004,7 @@ export class HierarchySlicer implements IVisual {
             .attr("type", "text")
             .attr("drag-resize-disabled", "true")
             .classed("searchInput", true)
-            .style("font-size", `${this.settings.search.textSize}pt`)
+            .style("font-size", `${this.settings.search.textSizeZoomed}pt`)
             .style("color", this.settings.search.fontColor)
             .style("background-color", this.settings.search.background)
             .on("input", () => {
@@ -1024,8 +1024,8 @@ export class HierarchySlicer implements IVisual {
             .classed(HierarchySlicer.Icon.className, true)
             .classed("delete", true)
             .style("fill", this.settings.search.iconColor)
-            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
-            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
+            .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))))
+            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))))
             .html(this.IconSet.delete)
             .on("click", () => {
                 (this.searchInput.node() as HTMLInputElement).value = "";
@@ -1048,14 +1048,14 @@ export class HierarchySlicer implements IVisual {
             let icons = this.searchHeader.selectAll(HierarchySlicer.Icon.selectorName);
             icons
                 .style("fill", this.settings.search.iconColor)
-                .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))))
-                .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSize))));
+                .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))))
+                .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))));
             let searchInput = this.searchHeader.selectAll(".searchInput");
             searchInput
                 .style("color", this.settings.search.fontColor)
-                .style("font-size", `${this.settings.search.textSize}pt`)
+                .style("font-size", `${this.settings.search.textSizeZoomed}pt`)
                 .style("background-color", this.settings.search.background)
-                .style("font-size", this.settings.search.textSize)
+                .style("font-size", this.settings.search.textSizeZoomed)
                 .style("font-family", this.settings.items.fontFamily);
         }
     }

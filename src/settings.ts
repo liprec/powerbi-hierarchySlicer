@@ -30,14 +30,9 @@
 
 import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 
-import * as enums from "./enums";
-
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
-import BorderStyle = enums.BorderStyle;
-import FontWeight = enums.FontWeight;
-import FontStyle = enums.FontStyle;
-import HideMembers = enums.HideMembers;
+import { BorderStyle, FontStyle, FontWeight, HideMembers, Zoomed } from "./enums";
 
 const fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif";
 
@@ -87,6 +82,7 @@ class HeaderSettings {
     public borderBottomWidth: number = 1;
     public outlineWeight: number = 1;
     public outlineColor: string = "#A6A6A6";
+    public textSizeZoomed: number = 10;
 }
 
 class SlicerTextSettings {
@@ -98,6 +94,7 @@ class SlicerTextSettings {
     public fontFamily: string = fontFamily;
     public fontStyle: number = FontStyle.Normal;
     public fontWeight: number = FontWeight.Normal;
+    public textSizeZoomed: number = 10;
 }
 
 class SearchSettings {
@@ -106,12 +103,13 @@ class SearchSettings {
     public iconColor: string = "#666666";
     public background: string = "";
     public textSize: number = 10;
+    public textSizeZoomed: number = 10;
 }
 
 class MobileSettings {
     public enable: boolean = false;
     public title: boolean = true;
     public focus: boolean = true;
-    public enLarge: number = 50;
+    public enLarge: number = Zoomed.Normal;
     public zoomed: boolean = false;
 }

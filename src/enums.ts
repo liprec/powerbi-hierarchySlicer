@@ -55,3 +55,9 @@ export enum HideMembers {
     Empty,
     ParentName
 }
+
+export enum Zoomed {
+    Small = 25,
+    Normal = 50,
+    Large = 100,
+}

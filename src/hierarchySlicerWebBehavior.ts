@@ -280,7 +280,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             .style("padding-left", "5px;")
             .style("display", "block;")
             .style("margin-right", "-3px")
-            .style("margin-left", (d) => PixelConverter.toString(this.settings.items.textSize / (2.5)))
+            .style("margin-left", (d) => PixelConverter.toString(this.settings.items.textSizeZoomed / (2.5)))
             .style("margin-bottom", "0px")
             .style("float", "right")
             .attr("ng-if", "viewModel.showProgressBar")

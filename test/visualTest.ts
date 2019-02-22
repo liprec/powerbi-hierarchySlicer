@@ -45,7 +45,7 @@ import { HierarchySlicerBuilder } from "./visualBuilder";
 import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5 } from "./visualData";
 import { HierarchySlicerSettings } from "../src/settings";
 import { IFilter, TupleFilter } from "powerbi-models";
-import { FontStyle, FontWeight, BorderStyle } from "../src/enums";
+import { FontStyle, FontWeight, BorderStyle, Zoomed } from "../src/enums";
 import { assignWith, filter, forEach } from "lodash-es";
 
 const hideMembers: number[] = [0, 1, 2];
@@ -1156,7 +1156,7 @@ describe("HierachySlicer =>", () => {
         describe(`Zoom mode settings [dataset: ${index + 1}] =>`, () => {
             it(`Enlarge setting - textSize + 50% [dataset: ${index + 1}]`, (done) => {
                 const dataViewTest = testData.getDataView();
-                const enLarge = 50;
+                const enLarge = Zoomed.Normal;
                 const textSize = defaultSettings.items.textSize * (1 + (enLarge /  100));
                 dataViewTest.metadata.objects = {
                     mobile: {
