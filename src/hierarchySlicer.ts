@@ -166,29 +166,6 @@ export class HierarchySlicer implements IVisual {
     public static HeaderSpinner: ClassAndSelector = createClassAndSelector("headerSpinner");
     public static Input: ClassAndSelector = createClassAndSelector("slicerCheckbox");
 
-    public static setDuplicatedColumns(tupleFilter: ITupleFilter) {
-        if (tupleFilter && tupleFilter.filterType === FilterType.Tuple && tupleFilter.target.length === 1) {
-            tupleFilter.target.push(tupleFilter.target[0]);
-            for (let conditionsIndex = 0; conditionsIndex < tupleFilter.values.length; conditionsIndex++) {
-                tupleFilter.values[conditionsIndex].push(tupleFilter.values[conditionsIndex][0]);
-            }
-        }
-    }
-    public static setUniqueFilterConditions(tupleFilter: ITupleFilter) {
-        const targetLength: number = tupleFilter.target.length;
-        tupleFilter.target = uniqWith(tupleFilter.target as IFilterTarget[], (a: IFilterTarget, b: IFilterTarget) => {
-            return (a as IFilterColumnTarget).table === (b as IFilterColumnTarget).table &&
-            (a as IFilterColumnTarget).column === (b as IFilterColumnTarget).column;
-        });
-        if (targetLength === tupleFilter.target.length) return; // No deduplication needed
-        for (let conditionsIndex = 0; conditionsIndex < tupleFilter.values.length; conditionsIndex++) {
-            tupleFilter.values[conditionsIndex] = uniqWith(tupleFilter.values[conditionsIndex], (a, b) => {
-                return a.value === b.value;
-            });
-        }
-
-        return tupleFilter;
-    }
     public converter(dataView: DataView, jsonFilters: IFilter[], searchText: string): IHierarchySlicerData {
         if (!dataView ||
             !dataView.table ||
@@ -232,18 +209,11 @@ export class HierarchySlicer implements IVisual {
 
         if (jsonFilters) {
             if (jsonFilters.length > 0) {
-                let tupleFilter = jsonFilters[0] as ITupleFilter;
-                // if tuple filter had duplicated columns need to remove them
-                // because there is no real second colum to extract formatting options
-                if (tupleFilter.filterType === FilterType.Tuple) {
-                    HierarchySlicer.setUniqueFilterConditions(tupleFilter as ITupleFilter);
-                }
                 const jFilter = jsonFilters[0] as any;
                 selectedIds = jFilter.values.map((d) => "|~" + (
                         Array.isArray(d) ?
                         d.map((dp, i) => {
-                            const index = dataView.metadata.columns.filter((c) => c.queryName === jFilter.target[i].table + '.' + jFilter.target[i].column)[0].index;
-                            return { value: ValueFormat(dp.value, columns[index].format).replace(/,/g, "") + "-" + index.toString(), index: index };
+                            return { value: ValueFormat(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString(), index: i };
                         }).sort((dp1, dp2) => dp1.index - dp2.index).map((dp) => dp.value).join('_|~')
                         : ValueFormat(d, columns[0].format).replace(/,/g, "") + "-0"));
             } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {

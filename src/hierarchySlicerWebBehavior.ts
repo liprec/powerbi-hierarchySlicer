@@ -472,8 +472,6 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             },
         };
         this.hostServices.persistProperties({ remove: [ instance ] });
-        // duplicate the column names if filter contains only one column to prevent converting tuple filter into basic filter
-        HierarchySlicer.setDuplicatedColumns(filter as ITupleFilter);
         this.hostServices.applyJsonFilter(filter,
             hierarchySlicerProperties.filterPropertyIdentifier.objectName,
             hierarchySlicerProperties.filterPropertyIdentifier.propertyName,

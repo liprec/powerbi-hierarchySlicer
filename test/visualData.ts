@@ -235,15 +235,10 @@ export class HierarchyDataSet1 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -361,15 +356,10 @@ export class HierarchyDataSet2 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -383,19 +373,13 @@ export class HierarchyDataSet2 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ],
                     [
-                        { value: this.getValue(3, 0) },
                         { value: this.getValue(3, 0) }
                     ]
                 ],
@@ -454,15 +438,10 @@ export class HierarchyDataSet3 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -476,19 +455,13 @@ export class HierarchyDataSet3 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ],
                     [
-                        { value: this.getValue(1, 0) },
                         { value: this.getValue(1, 0) }
                     ]
                 ],
@@ -560,15 +533,10 @@ export class HierarchyDataSet4 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
@@ -606,31 +574,31 @@ export class HierarchyDataSet4 extends HierarchyData {
                 partialDataPoints: [ 3 ]
             },
             {
-                description: `${this.getValue(0, 0)} and ${this.getValue(1, 1)} (columns/values switched)`,
+                description: `${this.getValue(0, 0)} and ${this.getValue(1, 1)}`,
                 isSwitched: true,
                 clickedDataPoints: [ 0, 4 ],
                 target: [
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[0],
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[1],
                         table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 1) },
-                        { value: this.getValue(0, 0) }
+                        { value: this.getValue(0, 0) },
+                        { value: this.getValue(0, 1) }
                     ],
                     [
-                        { value: this.getValue(5, 1) },
-                        { value: this.getValue(0, 0) }
+                        { value: this.getValue(0, 0) },
+                        { value: this.getValue(5, 1) }
                     ],
                     [
-                        { value: this.getValue(1, 1) },
-                        { value: this.getValue(1, 0) }
+                        { value: this.getValue(1, 0) },
+                        { value: this.getValue(1, 1) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 4 ],
@@ -688,15 +656,10 @@ export class HierarchyDataSet5 extends HierarchyData {
                     {
                         column: this.columnNames[0],
                         table: this.tableName
-                    },
-                    {
-                        column: this.columnNames[0],
-                        table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
                         { value: this.getValue(0, 0) }
                     ]
                 ],
