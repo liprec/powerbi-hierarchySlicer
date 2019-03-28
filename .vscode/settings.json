@@ -35,5 +35,14 @@
   ],
   "cSpell.words": [
     "tooltips"
-  ]
+  ],
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#f2c811",
+    "titleBar.inactiveBackground": "#f2c81199",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveForeground": "#15202b99",
+    "statusBar.background": "#f2c811",
+    "statusBarItem.hoverBackground": "#c5a20b",
+    "statusBar.foreground": "#15202b"
+  }
 }

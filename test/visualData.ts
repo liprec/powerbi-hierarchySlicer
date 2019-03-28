@@ -574,31 +574,31 @@ export class HierarchyDataSet4 extends HierarchyData {
                 partialDataPoints: [ 3 ]
             },
             {
-                description: `${this.getValue(0, 0)} and ${this.getValue(1, 1)}`,
+                description: `${this.getValue(0, 0)} and ${this.getValue(1, 1)} (columns/values switched)`,
                 isSwitched: true,
                 clickedDataPoints: [ 0, 4 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[1],
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[0],
                         table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(0, 1) }
+                        { value: this.getValue(0, 1) },
+                        { value: this.getValue(0, 0) }
                     ],
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(5, 1) }
+                        { value: this.getValue(5, 1) },
+                        { value: this.getValue(0, 0) }
                     ],
                     [
-                        { value: this.getValue(1, 0) },
-                        { value: this.getValue(1, 1) }
+                        { value: this.getValue(1, 1) },
+                        { value: this.getValue(1, 0) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 4 ],

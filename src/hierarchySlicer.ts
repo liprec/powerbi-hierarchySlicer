@@ -213,7 +213,8 @@ export class HierarchySlicer implements IVisual {
                 selectedIds = jFilter.values.map((d) => "|~" + (
                         Array.isArray(d) ?
                         d.map((dp, i) => {
-                            return { value: ValueFormat(dp.value, columns[i].format).replace(/,/g, "") + "-" + i.toString(), index: i };
+                            const index = columns.findIndex((c) => c.queryName === jFilter.target[i].table + '.' + jFilter.target[i].column);
+                            return { value: ValueFormat(dp.value, columns[index].format).replace(/,/g, "") + "-" + index.toString(), index: index };
                         }).sort((dp1, dp2) => dp1.index - dp2.index).map((dp) => dp.value).join('_|~')
                         : ValueFormat(d, columns[0].format).replace(/,/g, "") + "-0"));
             } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
@@ -640,6 +641,7 @@ export class HierarchySlicer implements IVisual {
     private onEnterSelection(rowSelection: Selection<any, any, any, any>): void {
         if (!this.settings) return;
         const _this = this;
+        const maxLevel = this.maxLevels;
         const treeItemElementParent: Selection<any, any, any, any> = rowSelection
             .selectAll(HierarchySlicer.ItemContainer.selectorName)
             .data((d: IHierarchySlicerDataPoint) => [d])
@@ -664,7 +666,7 @@ export class HierarchySlicer implements IVisual {
 
         expandCollapse
             .selectAll(".icon")
-            .data((d: IHierarchySlicerDataPoint) => [d])
+            .data((d: IHierarchySlicerDataPoint) => maxLevel === 1 ? [] : [d])
             .enter()
             .insert("div")
             .classed("icon", true)
@@ -745,7 +747,6 @@ export class HierarchySlicer implements IVisual {
                     }
                 });
 
-        const maxLevel = this.maxLevels;
         const mobileScale = this.settings.mobile.zoomed ? (1 + (this.settings.mobile.enLarge / 100.)) : 1;
 
         treeItemElementParent.each(function(d, i) {
