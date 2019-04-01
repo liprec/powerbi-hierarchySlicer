@@ -59,6 +59,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private scrollbarInner: Selection<any, any, any, any>;
     private renderTimeoutId: number;
     private scrollBar;
+    private mouseClick: boolean = false;
 
     /**
      * The value indicates the percentage of data already shown
@@ -86,6 +87,21 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         this.scrollBar = new SimpleBar((this.scrollbarInner.node() as HTMLElement));
         this.scrollBar.getScrollElement().addEventListener('scroll', () => {
             this.renderImpl(this.options.rowHeight);
+        });
+
+        document.addEventListener("mouseleave", (event) => {
+            if (event.buttons === 1) {
+                this.mouseClick = true;
+            }
+        });
+
+        document.addEventListener("mouseenter", (event) => {
+            if ((this.mouseClick) && (event.buttons === 0)) {
+                const newEvent = document.createEvent('MouseEvent');
+                newEvent.initEvent('mouseup', false, true);
+                document.dispatchEvent(newEvent);
+                this.mouseClick = false;
+            }
         });
 
         options.baseContainer.select(".scroll-element").attr("drag-resize-disabled", "true");
@@ -145,7 +161,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         this.renderTimeoutId = window.setTimeout(() => {
             this.getRowHeight().then((rowHeight: number) => this.renderImpl(rowHeight));
             this.renderTimeoutId = undefined;
-        }, 0);
+        }, 100);
     }
 
     private renderImpl(rowHeight: number) {
@@ -171,7 +187,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .style("transform", (d) => transformAttr)
             .style("-webkit-transform", transformAttr);
         const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 1)),
-              position1 = position0 + visibleRows;
+              position1 = position0 + visibleRows + 10;
 
         this.performScrollToFrame(position0, position1, totalElements, visibleRows, loadMoreData);
     }
