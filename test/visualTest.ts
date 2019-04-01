@@ -49,6 +49,7 @@ import { FontStyle, FontWeight, BorderStyle, Zoomed } from "../src/enums";
 import { assignWith, filter, forEach } from "lodash-es";
 
 const hideMembers: number[] = [0, 1, 2];
+const renderTimeout: number = 125;
 
 describe("HierachySlicer =>", () => {
     let visualBuilder: HierarchySlicerBuilder,
@@ -80,7 +81,7 @@ describe("HierachySlicer =>", () => {
                     expect(data.dataPoints.map((dataPoint) => dataPoint.ownId)).toEqual(testOwnIds);
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -97,7 +98,7 @@ describe("HierachySlicer =>", () => {
                         .toBe(0); // No row items
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`default settings [dataset: ${index + 1}]`, (done) => {
@@ -123,7 +124,7 @@ describe("HierachySlicer =>", () => {
                         .toBe(visualBuilder.viewport.width.toString());
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`default item formatting [dataset: ${index + 1}]`, (done) => {
@@ -164,7 +165,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`default item labels [dataset: ${index + 1}]`, (done) => {
@@ -183,7 +184,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -216,7 +217,7 @@ describe("HierachySlicer =>", () => {
                         .toBe(`${slicerBodyHeightToBe.toString()}px`);
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             testData.getSearchTests().forEach((searchTest, index) => {
@@ -258,8 +259,8 @@ describe("HierachySlicer =>", () => {
                                 expect(itemCheckBoxes[datePoint]).toHaveClass("partiallySelected");
                             });
                             done();
-                        });
-                    });
+                        }, renderTimeout);
+                    }, renderTimeout);
                 });
             });
 
@@ -290,8 +291,8 @@ describe("HierachySlicer =>", () => {
                                 .toBe(searchTest.results + (searchTest.searchString.length < 3 ? 1 : 0));
 
                             done();
-                        });
-                    });
+                        }, renderTimeout);
+                    }, renderTimeout);
                 });
             });
         });
@@ -311,7 +312,7 @@ describe("HierachySlicer =>", () => {
                                 .toBe(expandedTest.number);
 
                             done();
-                        });
+                        }, renderTimeout);
                     });
                 });
 
@@ -331,7 +332,7 @@ describe("HierachySlicer =>", () => {
                                 .toBe(expandedTest.number + 1);
 
                             done();
-                        });
+                        }, renderTimeout);
                     });
                 });
             });
@@ -354,7 +355,7 @@ describe("HierachySlicer =>", () => {
                             expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                                 .toBe(expandedTest.number + expandedTest.hideMembersOffset[hideMember]);
                             done();
-                        });
+                        }, renderTimeout);
                     });
                 });
             });
@@ -380,7 +381,7 @@ describe("HierachySlicer =>", () => {
                     expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                         .toBe(testValue.number + testValue.hideMembersOffset[1]);
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Restore expanded, old settings (emptyLeafs: true) [dataset: ${index + 1}]`, (done) => {
@@ -404,7 +405,7 @@ describe("HierachySlicer =>", () => {
                     expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                         .toBe(testValue.number + testValue.hideMembersOffset[0]);
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Empty leaf label: xxxxxxx, '' strings are empty: true [dataset: ${index + 1}]`, (done) => {
@@ -429,7 +430,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Empty leaf label: xxxxxxx, '' strings are empty: false [dataset: ${index + 1}]`, (done) => {
@@ -453,7 +454,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Single select: false [dataset: ${index + 1}]`, (done) => {
@@ -476,7 +477,7 @@ describe("HierachySlicer =>", () => {
                     expect(slicerContainer).toHaveClass("isMultiSelectEnabled");
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Single select: true [dataset: ${index + 1}]`, (done) => {
@@ -499,7 +500,7 @@ describe("HierachySlicer =>", () => {
                     expect(slicerContainer).not.toHaveClass("isMultiSelectEnabled");
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Select All label 'xxxxxxx' [dataset: ${index + 1}]`, (done) => {
@@ -518,7 +519,7 @@ describe("HierachySlicer =>", () => {
                     expect(selectAllLabelItem).toHaveText(selectAllLabel);
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -540,7 +541,7 @@ describe("HierachySlicer =>", () => {
                         .toBe(`${slicerBodyHeightToBe.toString()}px`);
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - default label [dataset: ${index + 1}]`, (done) => {
@@ -556,7 +557,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle).toContainText(testData.columnNames[0]);
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - 'xxxxxxxxxx' [dataset: ${index + 1}]`, (done) => {
@@ -574,7 +575,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle).toContainText(title);
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - Show summary - none selected [dataset: ${index + 1}]`, (done) => {
@@ -591,7 +592,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle).toContainText(`${testData.columnNames[0]}: All`);
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             // it (`Slicer header - Show summary - 1 item selected [dataset: ${index + 1}]`, (done) => {
@@ -650,7 +651,7 @@ describe("HierachySlicer =>", () => {
                         expect(headerTextStyle.borderWidth).toBe(borderStyle.result);
 
                         done();
-                    });
+                    }, renderTimeout);
                 });
             });
 
@@ -669,7 +670,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle.color).toBe(hexToRgb(fontColor));
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - background [dataset: ${index + 1}]`, (done) => {
@@ -689,7 +690,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - textSize [dataset: ${index + 1}]`, (done) => {
@@ -706,7 +707,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle.fontSize).toBe(measurePixelString(textSize, "pt"));
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - fontFamily [dataset: ${index + 1}]`, (done) => {
@@ -723,7 +724,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle.fontFamily).toBe(fontFamilyString(fontFamily));
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - fontStyle [dataset: ${index + 1}]`, (done) => {
@@ -740,7 +741,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle.fontStyle).toBe(fontStyleString(fontStyle));
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it (`Slicer header - fontWeight [dataset: ${index + 1}]`, (done) => {
@@ -757,7 +758,7 @@ describe("HierachySlicer =>", () => {
                     expect(headerTextStyle.fontWeight).toBe(fontWeight.toString());
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -794,7 +795,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - fontcolor after hover [dataset: ${index + 1}]`, (done) => {
@@ -854,7 +855,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - hoverColor [dataset: ${index + 1}]`, (done) => {
@@ -894,7 +895,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - selectColor [dataset: ${index + 1}]`, (done) => {
@@ -923,7 +924,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - background [dataset: ${index + 1}]`, (done) => {
@@ -949,7 +950,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - textSize [dataset: ${index + 1}]`, (done) => {
@@ -987,7 +988,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - fontFamily [dataset: ${index + 1}]`, (done) => {
@@ -1009,7 +1010,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - fontStyle [dataset: ${index + 1}]`, (done) => {
@@ -1031,7 +1032,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Item formatting - fontWeight [dataset: ${index + 1}]`, (done) => {
@@ -1053,7 +1054,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -1076,7 +1077,7 @@ describe("HierachySlicer =>", () => {
                     expect(inputStyle.color).toBe(hexToRgb(fontColor));
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Search formatting - iconColor [dataset: ${index + 1}]`, (done) => {
@@ -1100,7 +1101,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Search formatting - background [dataset: ${index + 1}]`, (done) => {
@@ -1121,7 +1122,7 @@ describe("HierachySlicer =>", () => {
                     expect(inputStyle.backgroundColor).toBe(hexToRgb(background));
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Search formatting - textSize [dataset: ${index + 1}]`, (done) => {
@@ -1149,7 +1150,7 @@ describe("HierachySlicer =>", () => {
                     expect(inputStyle.fontSize).toBe(fontSizeString(textSize));
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -1191,7 +1192,7 @@ describe("HierachySlicer =>", () => {
                     });
 
                     done();
-                });
+                }, renderTimeout);
             });
 
             it(`Double click title -> enable zoom [dataset: ${index + 1}]`, (done) => {
@@ -1207,7 +1208,7 @@ describe("HierachySlicer =>", () => {
                     expect(enableZoom).toBe(true);
 
                     done();
-                });
+                }, renderTimeout);
             });
         });
 
@@ -1235,13 +1236,13 @@ describe("HierachySlicer =>", () => {
                                 expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                                     .toBe(expandedToBe.length);
                                 done();
-                            });
+                            }, renderTimeout);
                         } else {
                             expect(expandAllButton).toHaveCss({ opacity: "0" });
 
                             done();
                         }
-                    });
+                    }, renderTimeout);
                 });
 
                 it(`Click 'Collapse All' [dataset: ${index + 1}]`, (done) => {
@@ -1257,13 +1258,13 @@ describe("HierachySlicer =>", () => {
                                 expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                                     .toBe(collapseLength);
                                 done();
-                            });
+                            }, renderTimeout);
                         } else {
                             expect(collapseAllButton).toHaveCss({ opacity: "0" });
 
                             done();
                         }
-                    });
+                    }, renderTimeout);
                 });
 
                 it(`Click 'Expand All -> 'Collapse All' [dataset: ${index + 1}]`, (done) => {
@@ -1303,15 +1304,15 @@ describe("HierachySlicer =>", () => {
                                     expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                                         .toBe(collapseLength);
                                     done();
-                                });
-                            });
+                                }, renderTimeout);
+                            }, renderTimeout);
                         } else {
                             expect(expandAllButton).toHaveCss({ opacity: "0" });
                             expect(collapseAllButton).toHaveCss({ opacity: "0" });
 
                             done();
                         }
-                    });
+                    }, renderTimeout);
                 });
 
                 it(`Click 'Clear All' with no selection [dataset: ${index + 1}]`, (done) => {
@@ -1324,7 +1325,7 @@ describe("HierachySlicer =>", () => {
                         expect(visualBuilder.properties.length).toBe(0);
 
                         done();
-                    });
+                    }, renderTimeout);
                 });
 
                 it(`Click 'Clear All' with all item selected [dataset: ${index + 1}]`, (done) => {
@@ -1352,7 +1353,7 @@ describe("HierachySlicer =>", () => {
                         expect(filter).toBe(null);
 
                         done();
-                    });
+                    }, renderTimeout);
                 });
             });
 
@@ -1396,9 +1397,9 @@ describe("HierachySlicer =>", () => {
                                 expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
                                     .toBe(collapseLength);
                                 done();
-                            });
-                        });
-                    });
+                            }, renderTimeout);
+                        }, renderTimeout);
+                    }, renderTimeout);
                 });
             });
 
@@ -1454,7 +1455,7 @@ describe("HierachySlicer =>", () => {
                                 .toBe(allItemsCnt - selectedItemsCnt);
 
                             done();
-                        });
+                        }, renderTimeout);
                     });
                 });
 
@@ -1526,8 +1527,8 @@ describe("HierachySlicer =>", () => {
                                 .toBe(allItemsCnt + 1);
 
                             done();
-                        });
-                    });
+                        }, renderTimeout);
+                    }, renderTimeout);
                 });
             });
 
@@ -1577,7 +1578,7 @@ describe("HierachySlicer =>", () => {
                                 .toBe(allItemsCnt - selectedItemsCnt);
 
                             done();
-                        }, filter);
+                        }, filter, renderTimeout);
                     });
                 });
             });
@@ -1622,7 +1623,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             expect(headerTextStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
 
             done();
-        });
+        }, renderTimeout);
     });
 
     it (`Slicer header - backGround`, (done) => {
@@ -1640,7 +1641,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             expect(headerTextStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
 
             done();
-        });
+        }, renderTimeout);
     });
 
     it(`Item formatting - fontcolor`, (done) => {
@@ -1675,7 +1676,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             });
 
             done();
-        });
+        }, renderTimeout);
     });
 
     it(`Item formatting - fontcolor after hover`, (done) => {
@@ -1735,7 +1736,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             });
 
             done();
-        });
+        }, renderTimeout);
     });
 
     it(`Item formatting - hoverColor`, (done) => {
@@ -1775,7 +1776,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             });
 
             done();
-        });
+        }, renderTimeout);
     });
 
     it(`Item formatting - selectColor`, (done) => {
@@ -1804,7 +1805,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             });
 
             done();
-        });
+        }, renderTimeout);
     });
 
     it(`Item formatting - background`, (done) => {
@@ -1830,7 +1831,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             });
 
             done();
-        });
+        }, renderTimeout);
     });
 });
 
