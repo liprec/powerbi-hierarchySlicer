@@ -35,6 +35,8 @@ import * as settings from "./settings";
 
 import IViewport = powerbi.IViewport;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
+import ISelectionId = powerbi.visuals.ISelectionId;
+import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
@@ -48,7 +50,7 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     label: string;
     isEmpty: boolean;
     dataType: ValueTypeDescriptor;
-    tooltip: string;
+    tooltip: VisualTooltipDataItem[];
     level: number;
     mouseOver?: boolean;
     mouseOut?: boolean;
@@ -67,6 +69,7 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     orderArray: any[];
     order: number;
     filterTarget: IFilterTarget;
+    selectionId: ISelectionId;
 }
 
 export interface IHierarchySlicerData {

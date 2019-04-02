@@ -1,13 +1,16 @@
 {
-    "dataRoles": [{
-        "name": "Fields",
-        "kind": "Grouping",
-        "displayName": "Fields"
-    }, {
-        "name": "Values",
-        "kind": "Measure",
-        "displayName": "Values"
-    }],
+    "dataRoles": [
+        {
+            "name": "Fields",
+            "kind": "Grouping",
+            "displayName": "Fields"
+        },
+        {
+            "name": "Values",
+            "kind": "Measure",
+            "displayName": "Values"
+        }
+    ],
     "dataViewMappings": [{
         "conditions": [{
             "Values": {
@@ -489,6 +492,11 @@
                     }
                 }
             }
+        }
+    },
+    "tooltips": {
+        "supportedTypes": {
+            "default": true
         }
     },
     "supportsHighlight": true,

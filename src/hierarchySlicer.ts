@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2018 Jan Pieter Posthuma / DataScenarios
+ * Copyright (c) 2019 Jan Pieter Posthuma / DataScenarios
  *
  * All rights reserved.
  *
@@ -31,6 +31,7 @@ import { interactivitySelectionService, interactivityBaseService } from "powerbi
 import { valueFormatter, textMeasurementService} from "powerbi-visuals-utils-formattingutils";
 import { IMargin, CssConstants } from "powerbi-visuals-utils-svgutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
+import { ITooltipServiceWrapper, createTooltipServiceWrapper, TooltipEventArgs } from "powerbi-visuals-utils-tooltiputils";
 import { IFilterTarget, TupleFilter, FilterType, ITupleFilterTarget, IFilterColumnTarget, ITupleFilter } from "powerbi-models";
 import { select, Selection } from "d3-selection";
 
@@ -83,7 +84,6 @@ import HierarchySlicerTreeViewFactory = treeView.HierarchySlicerTreeViewFactory;
 import BorderStyle = enums.BorderStyle;
 import FontStyle = enums.FontStyle;
 import HideMembers = enums.HideMembers;
-import { ValueType } from "powerbi-visuals-utils-typeutils/lib/valueType";
 
 export class HierarchySlicer implements IVisual {
     // MDL icons
@@ -142,6 +142,7 @@ export class HierarchySlicer implements IVisual {
     private isLandingPageOn: boolean;
     private landingPageRemoved: boolean;
     private landingPage: Selection<any, any, any, any>;
+    private tooltipServiceWrapper: ITooltipServiceWrapper;
 
     public static DefaultFontFamily: string = "Segoe UI, Tahoma, Verdana, Geneva, sans-serif";
     public static DefaultFontSizeInPt: number = 11;
@@ -230,7 +231,7 @@ export class HierarchySlicer implements IVisual {
                 selected: false,
                 value: this.settings.selection.selectAllLabel,
                 label: this.settings.selection.selectAllLabel,
-                tooltip: this.settings.selection.selectAllLabel,
+                tooltip: null,
                 level: 0,
                 selectable: true,
                 partialSelected: false,
@@ -244,13 +245,15 @@ export class HierarchySlicer implements IVisual {
                 parentId: "none",
                 orderArray: [0, 0, -1],
                 order: -1,
-                filterTarget: undefined
+                filterTarget: undefined,
+                selectionId: null
             });
         }
         for (let r = 0; r < rows.length; r++) {
             let parentId: string = "";
             let parentSearchStr: string = "";
             let rowValuePrev = undefined;
+            let toolTip = [];
             isRagged = false;
             for (let c = 0; c < rows[r].length; c++) {
                 if (r === 0) {
@@ -287,6 +290,9 @@ export class HierarchySlicer implements IVisual {
                     column: columns[c].displayName
                 };
                 const selected = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
+                toolTip = toolTip.concat([{ displayName: columns[c].displayName, value: labelValue }]);
+
+                const selectionId = null;
 
                 let dataPoint: IHierarchySlicerDataPoint = {
                     filterTarget: filterTarget,
@@ -296,7 +302,7 @@ export class HierarchySlicer implements IVisual {
                     label: labelValue,
                     dataType: dataType,
                     isEmpty: rows[r][c] === null,
-                    tooltip: labelValue,
+                    tooltip: toolTip,
                     level: c,
                     selectable: true,
                     partialSelected: false,
@@ -311,6 +317,7 @@ export class HierarchySlicer implements IVisual {
                     isSearch: this.settings.search.addSelection ? selected : false,
                     orderArray: [],
                     order: null,
+                    selectionId: selectionId,
                 };
 
                 parentId = ownId;
@@ -420,6 +427,7 @@ export class HierarchySlicer implements IVisual {
 
         this.behavior = new HierarchySlicerWebBehavior();
         this.interactivityService = createInteractivitySelectionService(options.host);
+        this.tooltipServiceWrapper = createTooltipServiceWrapper(this.hostServices.tooltipService, this.root);
 
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
@@ -755,6 +763,10 @@ export class HierarchySlicer implements IVisual {
                 .style("padding-left", (maxLevel === 1 ? 0 : ((d.level * mobileScale) * _this.settings.items.textSizeZoomed)) + "px")
                 .style("margin-left" , maxLevel === 1 ? "-2px" : undefined);
         });
+
+        this.tooltipServiceWrapper.addTooltip(this.slicerBody.selectAll(".row"),
+            (tooltipEvent: TooltipEventArgs<any>) => tooltipEvent.data && tooltipEvent.data.tooltip,
+            (tooltipEvent: TooltipEventArgs<any>) => tooltipEvent.data && tooltipEvent.data.selectedId );
     }
 
     private getheaderTitle(title: string) {
