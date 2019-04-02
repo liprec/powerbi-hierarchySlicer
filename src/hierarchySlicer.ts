@@ -286,7 +286,7 @@ export class HierarchySlicer implements IVisual {
                 let searchStr = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf = c === levels;
                 const filterTarget: IFilterTarget = {
-                    table: (columnsMetadata[c].identityExprs[0] as any).source.entity,
+                    table: (columns[c].identityExprs[0] as any).source.entity,
                     column: columns[c].displayName
                 };
                 const selected = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
