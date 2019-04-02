@@ -443,7 +443,6 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             this.persistFilter(null, 1);
             return;
         }
-console.log(filterInstance);
         this.persistFilter(filterInstance);
     }
 
