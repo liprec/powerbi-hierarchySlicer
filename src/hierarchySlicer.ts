@@ -461,12 +461,19 @@ export class HierarchySlicer implements IVisual {
             rowSelection.remove();
         };
 
+        let onLoadMoreData = () => {
+            this.hostServices.fetchMoreData();
+        };
+
+        const moreData = (this.dataView.metadata.segment) ? true : false;
+
         let treeViewOptions: IHierarchySlicerTreeViewOptions = {
             rowHeight: this.getRowHeight(),
             enter: rowEnter,
             exit: rowExit,
             update: rowUpdate,
-            loadMoreData: this.onLoadMoreData,
+            loadMoreData: onLoadMoreData,
+            moreData: moreData,
             scrollEnabled: true,
             viewport: this.getBodyViewport(this.viewport),
             baseContainer: this.slicerBody,
@@ -885,13 +892,6 @@ export class HierarchySlicer implements IVisual {
                     false);
             }
 
-        }
-    }
-
-    private onLoadMoreData(): void {
-        if (!this.waitingForData && this.dataView && this.dataView.metadata && this.dataView.metadata.segment) {
-            // this.hostServices.loadMoreData();
-            this.waitingForData = true;
         }
     }
 

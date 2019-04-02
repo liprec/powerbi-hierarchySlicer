@@ -169,7 +169,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
         this.defaultScrollToFrame(
             this,
-            true /*loadMoreData*/,
+            this.options.moreData,
             this.options.rowHeight || HierarchySlicerTreeView.defaultRowHeight,
             this.scrollBar.getScrollElement().scrollTop,
             this._totalRows,
@@ -211,7 +211,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .exit()
             .call((d) => options.exit(d))
             .remove();
-        if (loadMoreData && visibleRows !== totalRows && position1 >= totalRows * HierarchySlicerTreeView.loadMoreDataThreshold)
+        if (loadMoreData) // && visibleRows !== totalRows && position1 >= totalRows * HierarchySlicerTreeView.loadMoreDataThreshold)
             options.loadMoreData();
     }
 
@@ -246,7 +246,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         // render the first item to calculate the row height
         this.defaultScrollToFrame(
             this,
-            false /*loadMoreData*/,
+            this.options.moreData,
             this.options.rowHeight || HierarchySlicerTreeView.defaultRowHeight,
             this.scrollBar.getScrollElement().scrollTop,
             this._totalRows,

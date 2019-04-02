@@ -107,6 +107,7 @@ export interface IHierarchySlicerTreeViewOptions {
     update: (selection: Selection<any, any, any, any>) => void;
     loadMoreData: () => void;
     baseContainer: Selection<any, any, any, any>;
+    moreData: boolean;
     rowHeight: number;
     viewport: IViewport;
     scrollEnabled: boolean;
