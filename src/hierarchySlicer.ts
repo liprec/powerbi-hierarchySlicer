@@ -580,6 +580,7 @@ export class HierarchySlicer implements IVisual {
     }
 
     private updateInternal(resetScrollbar: boolean) {
+        this.updateSettings();
         this.updateSlicerBodyDimensions();
 
         const data = this.data = this.converter(this.dataView, this.jsonFilters, (this.searchInput.node() as HTMLInputElement).value);
@@ -590,7 +591,6 @@ export class HierarchySlicer implements IVisual {
             return;
         }
 
-        this.updateSettings();
         this.rowHeight = this.treeView.getRealRowHeight();
         this.treeView
             .viewport(this.getBodyViewport(this.viewport))
@@ -687,7 +687,7 @@ export class HierarchySlicer implements IVisual {
             .classed("icon", true)
             .classed("icon-left", true)
             .style("visibility", (d) => d.isLeaf ? "hidden" : "visible")
-            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed)))
+            .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
             .style("margin-left", (d) => PixelConverter.toString(-this.settings.items.textSizeZoomed / (2.5)))
             .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
             .style("height", PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
@@ -701,7 +701,7 @@ export class HierarchySlicer implements IVisual {
             .insert("div") // Spinner location
             .classed("spinner-icon", true)
             .style("display", "none")
-            .style("font-size", PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed)))
+            .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
             .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / (2.5)))
             .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
             .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))));
@@ -750,7 +750,7 @@ export class HierarchySlicer implements IVisual {
 
         labelElement
                 .style("color", this.settings.items.fontColor)
-                .style("font-size", this.settings.items.textSizeZoomed + "pt")
+                .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
                 .style("font-family", this.settings.items.fontFamily)
                 .style("font-weight", this.settings.items.fontWeight)
                 .style("font-style", () => {
@@ -816,7 +816,7 @@ export class HierarchySlicer implements IVisual {
                 .style("border-style", this.settings.header.outline === BorderStyle.None ? 'none' : "solid")
                 .style("border-color", this.settings.header.outlineColor)
                 .style("border-width", this.getBorderWidth(this.settings.header.outline, this.settings.header.outlineWeight))
-                .style("font-size", this.settings.header.textSizeZoomed + "pt")
+                .style("font-size", `${this.settings.header.textSizeZoomed}pt`)
                 .style("font-family", this.settings.header.fontFamily)
                 .style("font-weight", this.settings.header.fontWeight)
                 .style("font-style", () => {
@@ -895,24 +895,24 @@ export class HierarchySlicer implements IVisual {
         }
     }
 
-    public static getTextProperties(textSize?: number): TextProperties {
+    public static getTextProperties(fontFamily: string, textSize: number): TextProperties {
         return <TextProperties>{
-            fontFamily: HierarchySlicer.DefaultFontFamily,
-            fontSize: PixelConverter.fromPoint(textSize || HierarchySlicer.DefaultFontSizeInPt),
+            fontFamily: fontFamily,
+            fontSize: `${textSize}pt`,
         };
     }
 
     private getHeaderHeight(): number {
         const searchHeight: number = this.settings.general.selfFilterEnabled
-            ? TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.search.textSizeZoomed)) + 2
+            ? TextMeasurementService.estimateSvgTextHeight(HierarchySlicer.getTextProperties(this.settings.search.fontFamily, this.settings.search.textSizeZoomed)) + 2
             : 0;
         return TextMeasurementService.estimateSvgTextHeight(
-            HierarchySlicer.getTextProperties(+this.settings.header.textSizeZoomed)) + searchHeight;
+            HierarchySlicer.getTextProperties(this.settings.header.fontFamily, this.settings.header.textSizeZoomed)) + searchHeight;
     }
 
     private getRowHeight(): number {
         return this.rowHeight || TextMeasurementService.estimateSvgTextHeight(
-            HierarchySlicer.getTextProperties(this.settings.items.textSizeZoomed));
+            HierarchySlicer.getTextProperties(this.settings.items.fontFamily, this.settings.items.textSizeZoomed));
     }
 
     private getBodyViewport(currentViewport: IViewport): IViewport {
@@ -988,6 +988,7 @@ export class HierarchySlicer implements IVisual {
             .attr("drag-resize-disabled", "true")
             .classed("searchInput", true)
             .style("font-size", `${this.settings.search.textSizeZoomed}pt`)
+            .style("font-family", this.settings.search.fontFamily)
             .style("color", this.settings.search.fontColor)
             .style("background-color", this.settings.search.background)
             .on("input", () => {
@@ -1038,8 +1039,7 @@ export class HierarchySlicer implements IVisual {
                 .style("color", this.settings.search.fontColor)
                 .style("font-size", `${this.settings.search.textSizeZoomed}pt`)
                 .style("background-color", this.settings.search.background)
-                .style("font-size", this.settings.search.textSizeZoomed)
-                .style("font-family", this.settings.items.fontFamily);
+                .style("font-family", this.settings.search.fontFamily);
         }
     }
 

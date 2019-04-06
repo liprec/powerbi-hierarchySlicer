@@ -102,6 +102,7 @@ class SearchSettings {
     public fontColor: string = "#808080";
     public iconColor: string = "#666666";
     public background: string = "";
+    public fontFamily: string = fontFamily;
     public textSize: number = 10;
     public textSizeZoomed: number = 10;
 }
