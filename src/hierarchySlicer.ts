@@ -465,7 +465,7 @@ export class HierarchySlicer implements IVisual {
             this.hostServices.fetchMoreData();
         };
 
-        const moreData = (this.dataView.metadata.segment) ? true : false;
+        const moreData = false; // (this.dataView.metadata.segment) ? true : false;
 
         let treeViewOptions: IHierarchySlicerTreeViewOptions = {
             rowHeight: this.getRowHeight(),
@@ -704,7 +704,7 @@ export class HierarchySlicer implements IVisual {
             .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
             .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / (2.5)))
             .style("width", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))))
-            .style("height", PixelConverter.toString(Math.ceil(.95 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))));
+            .style("height", PixelConverter.toString(Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))));
 
         expandCollapse
             .exit()

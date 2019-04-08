@@ -118,7 +118,6 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             }
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             this.persistExpand(false);
-            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
         expanders.on("mouseover", (d: IHierarchySlicerDataPoint, i: number) => {
@@ -272,17 +271,11 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         const scale = size / 25.0;
         currentExpander.select(".icon").remove();
         const container = currentExpander.select(".spinner-icon").style("display", "inline");
-        const spinner = container.append("div").classed("xsmall", true).classed("powerbi-spinner", true)
-            .style("top", "25%")
-            .style("right", "50%")
+        const spinner = container.append("div").classed("powerbi-spinner", true)
             .style("transform", `scale(${scale})`)
-            .style("margin", "0px;")
-            .style("padding-left", "5px;")
-            .style("display", "block;")
-            .style("margin-right", "-3px")
-            .style("margin-left", (d) => PixelConverter.toString(this.settings.items.textSizeZoomed / (2.5)))
-            .style("margin-bottom", "0px")
-            .style("float", "right")
+            .style("margin-left", "0")
+            .style("vertical-align", "middle")
+            .style("line-height", `${currentExpanderHtml.clientHeight}px`)
             .attr("ng-if", "viewModel.showProgressBar")
             .attr("delay", "100")
             .append("div").classed("spinner", true);
