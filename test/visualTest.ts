@@ -142,7 +142,7 @@ describe("HierachySlicer =>", () => {
                             // Expanded icon styling
                             const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
                             expect(itemExpanderStyle.fill).toBe(hexToRgb(defaultSettings.items.fontColor));
-                            expect(itemExpanderStyle.fontSize).toBe(measurePixelString(PixelConverter.fromPointToPixel(defaultSettings.items.textSize)));
+                            expect(itemExpanderStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
@@ -704,7 +704,7 @@ describe("HierachySlicer =>", () => {
                 visualBuilder.updateRenderTimeout(dataViewTest, () => {
                     const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                    expect(headerTextStyle.fontSize).toBe(measurePixelString(textSize, "pt"));
+                    expect(headerTextStyle.fontSize).toBe(fontSizeString(textSize));
 
                     done();
                 }, renderTimeout);
@@ -970,7 +970,7 @@ describe("HierachySlicer =>", () => {
 
                             // Expanded icon styling
                             const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
-                            expect(itemExpanderStyle.fontSize).toBe(measurePixelString(PixelConverter.fromPointToPixel(textSize)));
+                            expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
@@ -1174,7 +1174,7 @@ describe("HierachySlicer =>", () => {
 
                             // Expanded icon styling
                             const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
-                            expect(itemExpanderStyle.fontSize).toBe(measurePixelString(PixelConverter.fromPointToPixel(textSize)));
+                            expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
