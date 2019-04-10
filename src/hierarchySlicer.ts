@@ -177,7 +177,7 @@ export class HierarchySlicer implements IVisual {
             return {
                 dataPoints: [],
                 fullTree: [],
-                settings: null,
+                settings: <HierarchySlicerSettings>HierarchySlicerSettings.getDefault(),
                 levels: null,
             };
         }
