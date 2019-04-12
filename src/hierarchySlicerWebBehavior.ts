@@ -30,7 +30,7 @@
 import powerbi from "powerbi-visuals-api";
 import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
-import { IFilterColumnTarget, ITupleFilter, FilterType } from "powerbi-models";
+import { IFilterColumnTarget, ITupleFilter, FilterType, Selector } from "powerbi-models";
 import { select, event, Selection } from "d3-selection";
 
 import * as interfaces from "./interfaces";
@@ -117,7 +117,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 window.clearTimeout(this.spinnerTimeoutId);
             }
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
-            this.persistExpand(false);
+            this.persistExpand();
         });
 
         expanders.on("mouseover", (d: IHierarchySlicerDataPoint, i: number) => {
@@ -168,8 +168,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 selectionDataPoints.forEach(function(dp) { dp.selected = !selected; });
                 this.renderSelection(true);
                 this.persistSelectAll(!selected);
-                // this.persistFilter([], FilterAction.remove);
-                this.persistFilter(null, 1);
+                this.persistFilter([], 1);
                 return;
             }
             selectionDataPoints = selectionDataPoints.filter((d) => d.ownId !== "selectAll");
@@ -230,14 +229,14 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 (select(".simplebar-content").node() as HTMLElement).scrollTop = 0;
 
                 this.dataPoints.forEach((d) => d.isExpand = false);
-                this.persistExpand(true);
+                this.persistExpand();
             }
         });
 
         slicerExpand.on("click", (d: IHierarchySlicerDataPoint) => {
             if (this.dataPoints.filter((d) => !d.isExpand && !d.isLeaf).length > 0) {
                 this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = true);
-                this.persistExpand(true);
+                this.persistExpand();
             }
         });
 
@@ -247,7 +246,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, 0), this.settings.general.spinnerDelay);
             this.selectionHandler.handleClearSelection();
             this.persistSelectAll(false);
-            this.persistFilter(null);
+            this.persistFilter([]);
             if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
@@ -367,20 +366,21 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             return;
         }
 
-        const tablesAndColumns: {} = {};
+        const tablesAndColumns: any = {};
         const dataPoints = this.dataPoints.filter((d) => d.ownId !== "selectAll");
 
         dataPoints.forEach((dataPoint: IHierarchySlicerDataPoint) => {
+            const filterTarget = (<IFilterColumnTarget>dataPoint.filterTarget);
             if ((dataPoint.selected) && dataPoint.level <= levels) {
-                if (!tablesAndColumns[dataPoint.filterTarget.table]) {
-                    tablesAndColumns[dataPoint.filterTarget.table] = {};
+                if (!tablesAndColumns[filterTarget.table]) {
+                    tablesAndColumns[filterTarget.table] = {};
                 }
 
-                if (!tablesAndColumns[dataPoint.filterTarget.table][(<IFilterColumnTarget>dataPoint.filterTarget).column]) {
-                    tablesAndColumns[dataPoint.filterTarget.table][(<IFilterColumnTarget>dataPoint.filterTarget).column] = [];
+                if (!tablesAndColumns[filterTarget.table][filterTarget.column]) {
+                    tablesAndColumns[filterTarget.table][filterTarget.column] = [];
                 }
 
-                tablesAndColumns[dataPoint.filterTarget.table][(<IFilterColumnTarget>dataPoint.filterTarget).column].push(dataPoint);
+                tablesAndColumns[filterTarget.table][filterTarget.column].push(dataPoint);
             }
         });
 
@@ -433,20 +433,20 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         };
 
         if (!filterValues.length || !filterValues.length) {
-            this.persistFilter(null, 1);
+            this.persistFilter([], 1);
             return;
         }
         this.persistFilter(filterInstance);
     }
 
     public static getParentDataPoints(dataPoints: IHierarchySlicerDataPoint[], parentId: string): IHierarchySlicerDataPoint[] {
-        let parent = dataPoints.filter((d) => d.ownId === parentId);
+        let parent: IHierarchySlicerDataPoint[] = dataPoints.filter((d) => d.ownId === parentId);
         if (!parent || (parent.length === 0)) {
             return [];
         } else if (parent[0].level === 0) {
             return parent;
         } else {
-            let returnParents = [];
+            let returnParents: IHierarchySlicerDataPoint[] = [];
 
             returnParents = returnParents.concat(parent, this.getParentDataPoints(dataPoints, parent[0].parentId));
 
@@ -456,9 +456,9 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
     private persistFilter(filter: IFilter | IFilter[], action: FilterAction = FilterAction.merge) {
         // make sure that the old method of storing the filter is deleted
-        const instance = {
+        const instance: VisualObjectInstance = {
             objectName: "general",
-            selector: undefined,
+            selector: Selector,
             properties: {
                 filterValues: ""
             },
@@ -471,12 +471,12 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         );
     }
 
-    private persistExpand(updateScrollbar: boolean) {
+    private persistExpand() {
         const expanded = this.dataPoints.filter((d) => d.isExpand).map((d) => d.ownId).join(",");
 
-        const instance = {
+        const instance: VisualObjectInstance = {
             objectName: "general",
-            selector: undefined,
+            selector: Selector,
             properties: {
                 expanded: expanded
             },
@@ -486,9 +486,9 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private persistSelectAll(selectAll: boolean) {
-        const instance = {
+        const instance: VisualObjectInstance = {
             objectName: "general",
-            selector: undefined,
+            selector: Selector,
             properties: {
                 selectAll: true
             },
@@ -499,15 +499,11 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     private toggleMobileView(currentStatus: boolean) {
         let properties: { [propertyName: string]: DataViewPropertyValue } = {};
         properties[hierarchySlicerProperties.mobileViewEnabled.propertyName] = !currentStatus;
-        let objects = {
-            merge: [
-                {
-                    objectName: hierarchySlicerProperties.mobileViewEnabled.objectName,
-                    selector: undefined,
-                    properties: properties,
-                }
-            ]
+        let instance: VisualObjectInstance = {
+            objectName: hierarchySlicerProperties.mobileViewEnabled.objectName,
+            selector: Selector,
+            properties: properties,
         };
-        this.hostServices.persistProperties(objects);
+        this.hostServices.persistProperties({ merge: [ instance ] });
     }
 }

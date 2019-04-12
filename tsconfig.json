@@ -1,20 +1,26 @@
 {
     "compilerOptions": {
-      "allowJs": false,
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "module": "es6",
-      "target": "ES6",
-      "sourceMap": true,
-      "outDir": "./.tmp/build/",
-      "moduleResolution": "node",
-      "declaration": true,
-      "noImplicitThis": true,
-      "alwaysStrict": true,
-      "strictBindCallApply": true,
-      "strictNullChecks": false
+        "baseUrl": ".",
+        "paths": { "*": ["types/*"] },
+        "allowJs": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "module": "es6",
+        "target": "ES6",
+        "sourceMap": true,
+        "outDir": "./.tmp/build/",
+        "moduleResolution": "node",
+        "declaration": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "alwaysStrict": true,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": false,
+        "strictPropertyInitialization": false
     },
     "files": [
-        "src/hierarchySlicer.ts"
+        "src/hierarchySlicer.ts",
+        "test/visualTest.ts"
     ]
 }

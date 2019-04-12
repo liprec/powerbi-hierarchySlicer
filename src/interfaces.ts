@@ -50,14 +50,13 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     label: string;
     isEmpty: boolean;
     dataType: ValueTypeDescriptor;
-    tooltip: VisualTooltipDataItem[];
+    tooltip?: VisualTooltipDataItem[];
     level: number;
     mouseOver?: boolean;
     mouseOut?: boolean;
     isSelectAllDataPoint?: boolean;
     selectable?: boolean;
     partialSelected: boolean;
-    id: {};
     isLeaf: boolean;
     isExpand: boolean;
     isHidden: boolean;
@@ -68,8 +67,8 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     isSearch: boolean;
     orderArray: any[];
     order: number;
-    filterTarget: IFilterTarget;
-    selectionId: ISelectionId;
+    filterTarget?: IFilterTarget;
+    selectionId?: ISelectionId;
 }
 
 export interface IHierarchySlicerData {
@@ -115,7 +114,7 @@ export interface IHierarchySlicerTreeViewOptions {
 }
 
 export interface IHierarchySlicerTreeView {
-    data(data: any[], dataIdFunction: (d) => {}, dataAppended: boolean): IHierarchySlicerTreeView;
+    data(data: any[], dataIdFunction: (d: any) => {}, dataAppended: boolean): IHierarchySlicerTreeView;
     rowHeight(rowHeight: number): IHierarchySlicerTreeView;
     viewport(viewport: IViewport): IHierarchySlicerTreeView;
     render(): void;

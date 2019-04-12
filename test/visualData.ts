@@ -32,7 +32,7 @@ import PrimitiveValue = powerbi.PrimitiveValue;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
 
 // powerbi.models
-import { IFilterTarget, ITupleElementValue, IFilterColumnTarget } from "powerbi-models";
+import { IFilterTarget, ITupleElementValue, IFilterColumnTarget, PrimitiveValueType } from "powerbi-models";
 
 // powerbi.extensibility.utils.test
 import { testDataViewBuilder } from "powerbi-visuals-utils-testutils";
@@ -46,10 +46,6 @@ import ValueType = valueType.ValueType;
 // powerbi.extensibility.utils.formatting
 import { valueFormatter, dateTimeSequence } from "powerbi-visuals-utils-formattingutils";
 import ValueFormat = valueFormatter.valueFormatter.format;
-
-// HierarchySlicer
-import { IHierarchySlicerDataPoint } from "../src/interfaces";
-import { PrimitiveType } from "powerbi-visuals-utils-typeutils/lib/valueType";
 
 export interface FullExpanded {
     expanded: string[];
@@ -91,7 +87,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
     public abstract getSelectedTests(): SelectTest[];
     public abstract getSearchTests(): SearchTest[];
 
-    public getValue(row: number, col: number): string | number | boolean {
+    public getValue(row: number, col: number): string | number | boolean | null {
         const convertedValue = this.convertRawValue(this.tableValues[row][col], this.columnTypes[col]);
         if (convertedValue === null) return null;
         if (!this.columnTypes[col].text) return convertedValue;
@@ -109,7 +105,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         }
     }
 
-    public getItemLabels(emptyString: boolean = true, label: string = null): string[] {
+    public getItemLabels(emptyString: boolean = true, label: string | null = null): string[] {
         return this.columnNames.map((col, index) => {
             const rawValue = this.convertRawValue(this.tableValues[0][index], this.columnTypes[index], true);
             const formatValue = ((rawValue === null || (emptyString && rawValue === ""))) ? label || "(Blank)" : ValueFormat(rawValue, this.columnFormat[index]);
@@ -117,7 +113,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         });
     }
 
-    public getOwnIds(length: number = undefined): string[] {
+    public getOwnIds(length: number | undefined = undefined): string[] {
         const columnLength = length || this.columnNames.length;
         const encodeValues = this.tableValues.map((row) => row.map((value, i) => "|~" + ValueFormat(this.convertRawValue(value, this.columnTypes[i]), this.columnFormat[i]).replace(/,/g, "") + "-" + i));
         const encodeExpandValues = encodeValues.map((row) => row.map((value, index, row) => row.slice(0, index + 1).join("_")));
@@ -165,7 +161,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         });
         let identityFields = TestDataViewBuilder.getDataViewBuilderColumnIdentitySources(categorialDataView);
         columns.forEach((c, index) =>
-            c.identityExprs = [ {
+            c.identityExprs = <any>[ {
                 fields: identityFields[index].fields,
                 identities: identityFields[index].identities,
                 ref: c.displayName,
@@ -240,7 +236,7 @@ export class HierarchyDataSet1 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ],
@@ -260,8 +256,8 @@ export class HierarchyDataSet1 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(0, 1) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 1) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 1, 2, 3 ],
@@ -286,9 +282,9 @@ export class HierarchyDataSet1 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(1, 0) },
-                        { value: this.getValue(1, 1) },
-                        { value: this.getValue(1, 2) }
+                        { value: (this.getValue(1, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(1, 1) as PrimitiveValueType) },
+                        { value: (this.getValue(1, 2) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 6, 5 ],
@@ -361,7 +357,7 @@ export class HierarchyDataSet2 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 3, 4 ],
@@ -378,10 +374,10 @@ export class HierarchyDataSet2 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(3, 0) }
+                        { value: (this.getValue(3, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 3, 4, 5, 6 ],
@@ -443,7 +439,7 @@ export class HierarchyDataSet3 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0 ],
@@ -460,10 +456,10 @@ export class HierarchyDataSet3 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(1, 0) }
+                        { value: (this.getValue(1, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1 ],
@@ -538,7 +534,7 @@ export class HierarchyDataSet4 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2 ],
@@ -559,16 +555,16 @@ export class HierarchyDataSet4 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(0, 1) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 1) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(5, 1) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(5, 1) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(1, 0) },
-                        { value: this.getValue(1, 1) }
+                        { value: (this.getValue(1, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(1, 1) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 4 ],
@@ -590,16 +586,16 @@ export class HierarchyDataSet4 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 1) },
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 1) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(5, 1) },
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(5, 1) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(1, 1) },
-                        { value: this.getValue(1, 0) }
+                        { value: (this.getValue(1, 1) as PrimitiveValueType) },
+                        { value: (this.getValue(1, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 4 ],
@@ -661,7 +657,7 @@ export class HierarchyDataSet5 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2 ],
@@ -682,16 +678,16 @@ export class HierarchyDataSet5 extends HierarchyData {
                 ],
                 values: [
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(0, 1) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 1) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(0, 0) },
-                        { value: this.getValue(5, 1) }
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(5, 1) as PrimitiveValueType) }
                     ],
                     [
-                        { value: this.getValue(1, 0) },
-                        { value: this.getValue(1, 1) }
+                        { value: (this.getValue(1, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(1, 1) as PrimitiveValueType) }
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 4 ],

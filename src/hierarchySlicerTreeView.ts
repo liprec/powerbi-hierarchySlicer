@@ -43,7 +43,7 @@ import IHierarchySlicerTreeView = interfaces.IHierarchySlicerTreeView;
 import IHierarchySlicerTreeViewOptions = interfaces.IHierarchySlicerTreeViewOptions;
 
 export module HierarchySlicerTreeViewFactory {
-    export function createListView(options): IHierarchySlicerTreeView {
+    export function createListView(options: IHierarchySlicerTreeViewOptions): IHierarchySlicerTreeView {
         return new HierarchySlicerTreeView(options);
     }
 }
@@ -57,8 +57,8 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private visibleGroupContainer: Selection<any, any, any, any>;
     private scrollContainer: Selection<any, any, any, any>;
     private scrollbarInner: Selection<any, any, any, any>;
-    private renderTimeoutId: number;
-    private scrollBar;
+    private renderTimeoutId: number | undefined;
+    private scrollBar: any;
     private mouseClick: boolean = false;
 
     /**
@@ -239,7 +239,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     }
 
     private getRowHeight(): Promise<{}> {
-        let cancelMeasurePass;
+        let cancelMeasurePass: any;
         const treeView = this;
         const options = treeView.options;
 
@@ -298,9 +298,9 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
     private static outerHeight(el: HTMLElement): number {
         let height = el.offsetHeight;
-        let style = getComputedStyle(el);
+        const style: CSSStyleDeclaration = getComputedStyle(el);
 
-        height += parseInt(style.marginTop) + parseInt(style.marginBottom);
+        height += parseInt(style.marginTop as string) + parseInt(style.marginBottom as string);
         return height;
     }
 }

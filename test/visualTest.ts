@@ -76,7 +76,7 @@ describe("HierachySlicer =>", () => {
                 const dataViewTest = testData.getDataView();
                 const testOwnIds = testData.getOwnIds();
                 visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const data = visualBuilder.instance.converter(dataViewTest, [], null);
+                    const data = visualBuilder.instance.converter(dataViewTest, [], "");
 
                     expect(data.dataPoints.map((dataPoint) => dataPoint.ownId)).toEqual(testOwnIds);
 
@@ -137,26 +137,26 @@ describe("HierachySlicer =>", () => {
 
                         if (testData.columnNames.length > 1) {
                             const itemExpander = itemContainer.firstChild;
-                            expect(itemExpander.childNodes.length).toBe(2);
+                            expect(itemExpander && itemExpander.childNodes.length).toBe(2);
 
                             // Expanded icon styling
-                            const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fill).toBe(hexToRgb(defaultSettings.items.fontColor));
                             expect(itemExpanderStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
-                        expect(itemContainerChild.childNodes.length).toBe(2);
+                        expect(itemContainerChild && itemContainerChild.childNodes.length).toBe(2);
 
                         // Checkbox styling
-                        const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.height).toBe(measurePixelString(.75 * defaultSettings.items.textSize));
                         expect(checkboxStyle.width).toBe(measurePixelString(.75 * defaultSettings.items.textSize));
                         expect(checkboxStyle.marginRight).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * defaultSettings.items.textSize)));
                         expect(checkboxStyle.marginBottom).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * defaultSettings.items.textSize)));
 
                         // // Span (label) styling
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.color).toBe(hexToRgb(defaultSettings.items.fontColor));
                         expect(labelStyle.fontFamily).toBe(fontFamilyString(defaultSettings.items.fontFamily));
                         expect(labelStyle.fontStyle).toBe(fontStyleString(defaultSettings.items.fontStyle));
@@ -251,11 +251,11 @@ describe("HierachySlicer =>", () => {
 
                             const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
 
-                            searchTest.selectedDataPoints.forEach((dataPoint) => {
+                            searchTest.selectedDataPoints && searchTest.selectedDataPoints.forEach((dataPoint) => {
                                 expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
                             });
 
-                            searchTest.partialDataPoints.forEach((dataPoint) => {
+                            searchTest.partialDataPoints && searchTest.partialDataPoints.forEach((dataPoint) => {
                                 expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
                             });
                             done();
@@ -779,18 +779,18 @@ describe("HierachySlicer =>", () => {
                             const itemExpander = itemContainer.firstChild;
 
                             // Expanded icon styling
-                            const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            const itemExpanderStyle = (( itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fill).toBe(hexToRgb(fontColor));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
 
                         // Checkbox styling
-                        const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.borderColor).toBe(hexToRgb(fontColor));
 
                         // // Span (label) styling
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.color).toBe(hexToRgb(fontColor));
                     });
 
@@ -815,42 +815,42 @@ describe("HierachySlicer =>", () => {
                         if (testData.columnNames.length > 1) {
                             let itemExpander = itemContainer.firstChild;
                             // Mouseover event
-                            itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                            itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
                             itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
 
                             // Expanded icon styling
-                            let itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            let itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fill).toBe(hexToRgb(hoverColor));
 
                             // Mouseout event
-                            itemExpander.dispatchEvent(new MouseEvent('mouseout'));
+                            itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseout'));
                             itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
                             // Expanded icon styling
-                            itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fill).toBe(hexToRgb(fontColor));
                         }
 
                         let itemContainerChild = itemContainer.lastChild;
                         // Mouseover event
-                        itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                        itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
                         itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
                         // // Checkbox styling
-                        let checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        let checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.borderColor).toBe(hexToRgb(hoverColor));
 
-                        let labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        let labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.color).toBe(hexToRgb(hoverColor));
 
                         // Mouseout event
-                        itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
+                        itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
                         itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
                         // Checkbox styling
-                        checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.borderColor).toBe(hexToRgb(fontColor));
 
-                        labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.color).toBe(hexToRgb(fontColor));
                     });
 
@@ -872,25 +872,25 @@ describe("HierachySlicer =>", () => {
                     itemContainers.forEach((itemContainer, index) => {
                         if (testData.columnNames.length > 1) {
                             let itemExpander = itemContainer.firstChild;
-                            itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                            itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
 
                             itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
 
                             // Expanded icon styling
-                            const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fill).toBe(hexToRgb(hoverColor));
                         }
 
                         let itemContainerChild = itemContainer.lastChild;
-                        itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                        itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
 
                         itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
                         // // Checkbox styling
-                        const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.borderColor).toBe(hexToRgb(hoverColor));
 
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.color).toBe(hexToRgb(hoverColor));
                     });
 
@@ -919,7 +919,7 @@ describe("HierachySlicer =>", () => {
                         const itemContainerChild = itemContainer.lastChild;
 
                         // Checkbox styling
-                        const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.backgroundColor).toBe(hexToRgb(selectedColor));
                     });
 
@@ -969,21 +969,21 @@ describe("HierachySlicer =>", () => {
                             const itemExpander = itemContainer.firstChild;
 
                             // Expanded icon styling
-                            const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
 
                         // Checkbox styling
-                        const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.height).toBe(measurePixelString(.75 * textSize));
                         expect(checkboxStyle.width).toBe(measurePixelString(.75 * textSize));
                         expect(checkboxStyle.marginRight).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
                         expect(checkboxStyle.marginBottom).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
 
                         // // Span (label) styling
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
                     });
 
@@ -1005,7 +1005,7 @@ describe("HierachySlicer =>", () => {
                     itemContainers.forEach((itemContainer) => {
                         const itemContainerChild = itemContainer.lastChild;
 
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.fontFamily).toBe(fontFamilyString(fontFamily));
                     });
 
@@ -1027,7 +1027,7 @@ describe("HierachySlicer =>", () => {
                     itemContainers.forEach((itemContainer) => {
                         const itemContainerChild = itemContainer.lastChild;
 
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.fontStyle).toBe(fontStyleString(fontStyle));
                     });
 
@@ -1049,7 +1049,7 @@ describe("HierachySlicer =>", () => {
                     itemContainers.forEach((itemContainer) => {
                         const itemContainerChild = itemContainer.lastChild;
 
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.fontWeight).toBe(fontWeight.toString());
                     });
 
@@ -1173,21 +1173,21 @@ describe("HierachySlicer =>", () => {
                             const itemExpander = itemContainer.firstChild;
 
                             // Expanded icon styling
-                            const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                             expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
 
                         // Checkbox styling
-                        const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                         expect(checkboxStyle.height).toBe(measurePixelString(.75 * textSize));
                         expect(checkboxStyle.width).toBe(measurePixelString(.75 * textSize));
                         expect(checkboxStyle.marginRight).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
                         expect(checkboxStyle.marginBottom).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
 
                         // // Span (label) styling
-                        const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                         expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
                     });
 
@@ -1203,7 +1203,8 @@ describe("HierachySlicer =>", () => {
                     headerTitle.click();
                     headerTitle.click(); // 'Fake' double click as implementation is needed due different behavior for mobile
 
-                    const enableZoom = (visualBuilder.properties[0].merge[0].properties["enable"] as boolean);
+                    const visualProperties = visualBuilder.properties[0];
+                    const enableZoom = (visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["enable"] as boolean);
 
                     expect(enableZoom).toBe(true);
 
@@ -1222,7 +1223,8 @@ describe("HierachySlicer =>", () => {
 
                         if (testData.columnNames.length > 1) {
                             expandAllButton.click();
-                            const expanded: string[] = (visualBuilder.properties[0].merge[0].properties["expanded"] as string).split(",");
+                            const visualProperties = visualBuilder.properties[0];
+                            const expanded: string[] = ((visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["expanded"]) as string).split(",");
 
                             expect(expanded).toEqual(expandedToBe.expanded);
 
@@ -1278,7 +1280,8 @@ describe("HierachySlicer =>", () => {
                         if (testData.columnNames.length > 1) {
                             // Click 'Expand All'
                             expandAllButton.click();
-                            const expanded: string[] = (visualBuilder.properties[0].merge[0].properties["expanded"] as string).split(",");
+                            const visualProperties = visualBuilder.properties[0];
+                            const expanded: string[] = ((visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["expanded"]) as string).split(",");
 
                             expect(expanded).toEqual(expandedToBe.expanded);
 
@@ -1295,7 +1298,8 @@ describe("HierachySlicer =>", () => {
                                 // Click 'Collapse All'
                                 collapseAllButton.click();
                                 // expanded object only removed if there is somthing to collapse
-                                const removeExpanded: VisualObjectInstance = visualBuilder.properties[1].remove[0];
+                                const visualProperties = visualBuilder.properties[1];
+                                const removeExpanded = visualProperties.remove && visualProperties.remove[0];
                                 expect(removeExpanded).not.toBeEmpty();
 
                                 dataViewTest.metadata.objects = undefined;
@@ -1346,11 +1350,12 @@ describe("HierachySlicer =>", () => {
 
                         clearAllButton.click();
 
-                        const removeSelectAll = visualBuilder.properties[0].remove[0];
+                        const visualProperties = visualBuilder.properties[0];
+                        const removeSelectAll = visualProperties.remove && visualProperties.remove[0];
                         expect(removeSelectAll).not.toBeEmpty();
 
                         const filter = visualBuilder.filter;
-                        expect(filter).toBe(null);
+                        expect(filter).toEqual([]);
 
                         done();
                     }, renderTimeout);
@@ -1371,7 +1376,8 @@ describe("HierachySlicer =>", () => {
                     visualBuilder.updateRenderTimeout(dataViewTest, () => {
                         const firstExpander = visualBuilder.element.find(selector)[0];
                         firstExpander.click();
-                        const expanded: string[] = (visualBuilder.properties[0].merge[0].properties["expanded"] as string).split(",");
+                        const visualProperties = visualBuilder.properties[0];
+                        const expanded: string[] = ((visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["expanded"]) as string).split(",");
 
                         expect(expanded).toEqual(expandedToBe.expanded);
 
@@ -1388,7 +1394,8 @@ describe("HierachySlicer =>", () => {
                             const firstExpander = visualBuilder.element.find(selector)[0];
                             firstExpander.click();
 
-                            const removeExpanded: VisualObjectInstance = visualBuilder.properties[1].remove[0];
+                            const visualProperties = visualBuilder.properties[1];
+                            const removeExpanded = visualProperties.remove && visualProperties.remove[0];
                             expect(removeExpanded).not.toBeEmpty();
 
                             dataViewTest.metadata.objects = undefined;
@@ -1478,7 +1485,8 @@ describe("HierachySlicer =>", () => {
                     visualBuilder.updateRenderTimeout(dataViewTest, () => {
                         const selectedItem = visualBuilder.element.find(selector)[0];
                         selectedItem.click();
-                        const selectedAll: boolean = (visualBuilder.properties[0].merge[0].properties["selectAll"] as boolean);
+                        const visualProperties = visualBuilder.properties[0];
+                        const selectedAll = (visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["selectAll"] as boolean);
 
                         expect(selectedAll).toBe(true);
 
@@ -1520,7 +1528,8 @@ describe("HierachySlicer =>", () => {
 
                             // Deselect 'Select All'
                             selectedItem.click();
-                            const removeSelectedAll = visualBuilder.properties[2].remove[0];
+                            const visualProperties = visualBuilder.properties[2];
+                            const removeSelectedAll = visualProperties.remove && visualProperties.remove[0];
                             expect(removeSelectedAll).not.toBeEmpty();
 
                             expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
@@ -1660,18 +1669,18 @@ describe('HierarchySlicer in high constrast mode =>', () => {
                     const itemExpander = itemContainer.firstChild;
 
                     // Expanded icon styling
-                    const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                     expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
                 }
 
                 const itemContainerChild = itemContainer.lastChild;
 
                 // Checkbox styling
-                const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                 expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
                 // // Span (label) styling
-                const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                 expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
             });
 
@@ -1696,42 +1705,42 @@ describe('HierarchySlicer in high constrast mode =>', () => {
                 if (testData.columnNames.length > 1) {
                     let itemExpander = itemContainer.firstChild;
                     // Mouseover event
-                    itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                    itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
                     itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
 
                     // Expanded icon styling
-                    let itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    let itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                     expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
 
                     // Mouseout event
-                    itemExpander.dispatchEvent(new MouseEvent('mouseout'));
+                    itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseout'));
                     itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
                     // Expanded icon styling
-                    itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                     expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
                 }
 
                 let itemContainerChild = itemContainer.lastChild;
                 // Mouseover event
-                itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
                 itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
                 // Checkbox styling
-                let checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                let checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                 expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
-                let labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                let labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                 expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
 
                 // Mouseout event
-                itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
+                itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
                 itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
                 // Checkbox styling
-                checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                 expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
-                labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                 expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
             });
 
@@ -1753,25 +1762,25 @@ describe('HierarchySlicer in high constrast mode =>', () => {
             itemContainers.forEach((itemContainer, index) => {
                 if (testData.columnNames.length > 1) {
                     let itemExpander = itemContainer.firstChild;
-                    itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                    itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
 
                     itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
 
                     // Expanded icon styling
-                    const itemExpanderStyle = (itemExpander.firstChild as HTMLElement).style;
+                    const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
                     expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
                 }
 
                 let itemContainerChild = itemContainer.lastChild;
-                itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
 
                 itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
                 // // Checkbox styling
-                const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                 expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
-                const labelStyle = (itemContainerChild.lastChild as HTMLElement).style;
+                const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
                 expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
             });
 
@@ -1800,7 +1809,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
                 const itemContainerChild = itemContainer.lastChild;
 
                 // Checkbox styling
-                const checkboxStyle = (itemContainerChild.firstChild.lastChild as HTMLElement).style;
+                const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
                 expect(checkboxStyle.backgroundColor).toBe(hexToRgb(highConstrastForegroundSelectedColor));
             });
 
@@ -1837,7 +1846,7 @@ describe('HierarchySlicer in high constrast mode =>', () => {
 
 function hexToRgb(hex: string): string {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})` : null;
+    return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})` : "";
 }
 
 function fontFamilyString(fontFamily: string) {

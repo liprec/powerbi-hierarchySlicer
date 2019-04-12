@@ -47,7 +47,7 @@ export class HierarchySlicerSettings extends DataViewObjectsParser {
 
 class GeneralSettings {
     public selectAll: boolean = false;
-    public filterValues: string = undefined;
+    public filterValues: string | undefined = undefined;
     public expanded: string = "";
     public selfFilterEnabled: boolean = false;
     public searching: boolean = false;
@@ -58,7 +58,7 @@ class GeneralSettings {
 
 class SelectionSettings {
     public singleSelect: boolean = true;
-    public emptyLeafs: boolean = undefined;
+    public emptyLeafs: boolean | undefined = undefined;
     public hideMembers: HideMembers = HideMembers.Never;
     public emptyLeafLabel: string = "";
     public emptyString: boolean = true;
