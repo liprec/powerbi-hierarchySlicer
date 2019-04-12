@@ -251,12 +251,12 @@ describe("HierachySlicer =>", () => {
 
                             const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
 
-                            searchTest.selectedDataPoints.forEach((datePoint) => {
-                                expect(itemCheckBoxes[datePoint]).toHaveClass("selected");
+                            searchTest.selectedDataPoints.forEach((dataPoint) => {
+                                expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
                             });
 
-                            searchTest.partialDataPoints.forEach((datePoint) => {
-                                expect(itemCheckBoxes[datePoint]).toHaveClass("partiallySelected");
+                            searchTest.partialDataPoints.forEach((dataPoint) => {
+                                expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
                             });
                             done();
                         }, renderTimeout);
@@ -1437,12 +1437,12 @@ describe("HierachySlicer =>", () => {
 
                             const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
 
-                            selectedTest.selectedDataPoints.forEach((datePoint) => {
-                                expect(itemCheckBoxes[datePoint]).toHaveClass("selected");
+                            selectedTest.selectedDataPoints.forEach((dataPoint) => {
+                                expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
                             });
 
-                            selectedTest.partialDataPoints.forEach((datePoint) => {
-                                expect(itemCheckBoxes[datePoint]).toHaveClass("partiallySelected");
+                            selectedTest.partialDataPoints.forEach((dataPoint) => {
+                                expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
                             });
 
                             expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
@@ -1560,12 +1560,12 @@ describe("HierachySlicer =>", () => {
 
                             const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
 
-                            selectedTest.selectedDataPoints.forEach((datePoint) => {
-                                expect(itemCheckBoxes[datePoint]).toHaveClass("selected");
+                            selectedTest.selectedDataPoints.forEach((dataPoint) => {
+                                expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
                             });
 
-                            selectedTest.partialDataPoints.forEach((datePoint) => {
-                                expect(itemCheckBoxes[datePoint]).toHaveClass("partiallySelected");
+                            selectedTest.partialDataPoints.forEach((dataPoint) => {
+                                expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
                             });
 
                             expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)

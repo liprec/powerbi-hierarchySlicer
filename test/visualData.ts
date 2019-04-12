@@ -168,6 +168,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
             c.identityExprs = [ {
                 fields: identityFields[index].fields,
                 identities: identityFields[index].identities,
+                ref: c.displayName,
                 source: {
                     "entity": this.tableName
                 }
