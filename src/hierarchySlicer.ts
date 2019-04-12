@@ -214,8 +214,9 @@ export class HierarchySlicer implements IVisual {
                 selectedIds = jFilter.values.map((d) => "|~" + (
                         Array.isArray(d) ?
                         d.map((dp, i) => {
-                            const index = columns.findIndex((c) => c.queryName === jFilter.target[i].table + '.' + jFilter.target[i].column);
-                            return { value: ValueFormat(dp.value, columns[index].format).replace(/,/g, "") + "-" + index.toString(), index: index };
+                            const index = columns.findIndex((c) => (c.identityExprs[0] as any).source.entity === jFilter.target[i].table && (c.identityExprs[0] as any).ref === jFilter.target[i].column);
+                            const format = index > -1 ? columns[index].format : undefined;
+                            return { value: ValueFormat(dp.value, format).replace(/,/g, "") + "-" + index.toString(), index: index };
                         }).sort((dp1, dp2) => dp1.index - dp2.index).map((dp) => dp.value).join('_|~')
                         : ValueFormat(d, columns[0].format).replace(/,/g, "") + "-0"));
             } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
