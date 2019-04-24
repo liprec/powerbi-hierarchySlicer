@@ -59,7 +59,6 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
-import DataRepetitionSelector = powerbi.data.DataRepetitionSelector;
 import ISQExpr = powerbi.data.ISQExpr;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -576,8 +575,8 @@ export class HierarchySlicer implements IVisual {
                 && dv2TableIdentity
                 && dv1TableIdentity.length === dv2TableIdentity.length) {
                 for (let i = 0, len = dv1TableIdentity.length; i < len; i++) {
-                    let dv1Identity: DataRepetitionSelector = dv1TableIdentity[i];
-                    let dv2Identity: DataRepetitionSelector = dv2TableIdentity[i];
+                    let dv1Identity: any = dv1TableIdentity[i];
+                    let dv2Identity: any = dv2TableIdentity[i];
 
                     // debugger;
                     if (!isEqual((<any>dv1Identity).scopeId, (<any>dv2Identity).scopeId))
