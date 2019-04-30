@@ -220,9 +220,9 @@ export class HierarchySlicer implements IVisual {
                         Array.isArray(d) ?
                         d.map((dp, i) => {
                             const index = columns.findIndex((c: DataViewMetadataColumn) => {
-                                const identityExpr: ISQExpr[] | undefined = c && c.identityExprs;
-                                return  (identityExpr && identityExpr[0] as any).source.entity === jFilter.target[i].table &&
-                                        (identityExpr && identityExpr[0] as any).ref === jFilter.target[i].column;
+                                const identityExpr: ISQExpr | undefined = c && c.expr;
+                                return  (identityExpr as any).source.entity === jFilter.target[i].table &&
+                                        (identityExpr as any).ref === jFilter.target[i].column;
                             });
                             const format = index > -1 ? columns[index].format : undefined;
                             return { value: ValueFormat(dp.value, format).replace(/,/g, "") + "-" + index.toString(), index: index };
@@ -296,9 +296,10 @@ export class HierarchySlicer implements IVisual {
                 let searchStr: string = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf: boolean = c === levels;
                 const identityExpr: ISQExpr[] | undefined = columns[c] && columns[c].identityExprs;
+                const expr: ISQExpr | undefined = columns[c] && columns[c].expr;
                 const filterTarget: IFilterTarget = {
                     table: (identityExpr && identityExpr[0] as any).source.entity,
-                    column: columns[c].displayName
+                    column: (expr as any).ref
                 };
                 const selected: boolean = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
                 toolTip = toolTip.concat([({ displayName: columns[c].displayName, value: labelValue } as VisualTooltipDataItem)]);

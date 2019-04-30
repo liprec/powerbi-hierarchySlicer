@@ -147,6 +147,12 @@ export abstract class HierarchyData extends TestDataViewBuilder {
                 format: this.columnFormat[index],
                 index: index,
                 queryName: this.tableName + '.' + field,
+                expr: {
+                    ref: field.replace(' ', ''),
+                    source: {
+                        "entity": this.tableName
+                    }
+                },
                 identityExprs: undefined
             };
         });
@@ -230,7 +236,7 @@ export class HierarchyDataSet1 extends HierarchyData {
                 clickedDataPoints: [ 0 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -246,11 +252,11 @@ export class HierarchyDataSet1 extends HierarchyData {
                 clickedDataPoints: [ 1 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[1].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -268,15 +274,15 @@ export class HierarchyDataSet1 extends HierarchyData {
                 clickedDataPoints: [ 6 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[1].replace(' ', ''),
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[2],
+                        column: this.columnNames[2].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -351,7 +357,7 @@ export class HierarchyDataSet2 extends HierarchyData {
                 clickedDataPoints: [ 0 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -368,7 +374,7 @@ export class HierarchyDataSet2 extends HierarchyData {
                 clickedDataPoints: [ 0, 5 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -433,7 +439,7 @@ export class HierarchyDataSet3 extends HierarchyData {
                 clickedDataPoints: [ 0 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -450,7 +456,7 @@ export class HierarchyDataSet3 extends HierarchyData {
                 clickedDataPoints: [ 0, 1 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -528,7 +534,7 @@ export class HierarchyDataSet4 extends HierarchyData {
                 clickedDataPoints: [ 0 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -545,11 +551,11 @@ export class HierarchyDataSet4 extends HierarchyData {
                 clickedDataPoints: [ 0, 4 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[1].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -576,11 +582,11 @@ export class HierarchyDataSet4 extends HierarchyData {
                 clickedDataPoints: [ 0, 4 ],
                 target: [
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[1].replace(' ', ''),
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -651,7 +657,7 @@ export class HierarchyDataSet5 extends HierarchyData {
                 clickedDataPoints: [ 0 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
@@ -668,11 +674,11 @@ export class HierarchyDataSet5 extends HierarchyData {
                 clickedDataPoints: [ 0, 4 ],
                 target: [
                     {
-                        column: this.columnNames[0],
+                        column: this.columnNames[0].replace(' ', ''),
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[1],
+                        column: this.columnNames[1].replace(' ', ''),
                         table: this.tableName
                     }
                 ],
