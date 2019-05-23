@@ -1,23 +1,26 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "ES5",
-    "sourceMap": true,
-    "out": "./.tmp/build/visual.js"
-  },
-  "files": [
-    "typings/index.d.ts",
-    ".api/v1.7.0/PowerBI-visuals.d.ts",
-    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.d.ts",
-    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.d.ts",
-    "node_modules/powerbi-visuals-utils-typeutils/lib/index.d.ts",
-    "node_modules/powerbi-visuals-utils-svgutils/lib/index.d.ts",
-    "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.d.ts",
-    "node_modules/powerbi-visuals-utils-sqexprutils/lib/index.d.ts",
-    "src/hierarchySlicerTreeView.ts",
-    "src/hierarchySlicerWebBehavior.ts",
-    "src/hierarchySlicer.ts"
-  ]
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": { "*": ["types/*"] },
+        "allowJs": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "module": "es6",
+        "target": "ES6",
+        "sourceMap": true,
+        "outDir": "./.tmp/build/",
+        "moduleResolution": "node",
+        "declaration": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "alwaysStrict": true,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": false,
+        "strictPropertyInitialization": false
+    },
+    "files": [
+        "src/hierarchySlicer.ts",
+        "test/visualTest.ts"
+    ]
 }

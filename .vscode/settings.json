@@ -11,27 +11,38 @@
     ".tmp": true
   },
   "search.exclude": {
-    ".tmp": true,
-    "typings": true
+    ".tmp": true
   },
   "json.schemas": [
     {
       "fileMatch": [
         "/pbiviz.json"
       ],
-      "url": "./.api/v1.6.0/schema.pbiviz.json"
+      "url": "./node_modules/powerbi-visuals-api/schema.pbiviz.json"
     },
     {
       "fileMatch": [
         "/capabilities.json"
       ],
-      "url": "./.api/v1.6.0/schema.capabilities.json"
+      "url": "./node_modules/powerbi-visuals-api/schema.capabilities.json"
     },
     {
       "fileMatch": [
-        "./external/advancedFilter.json"
+        "/dependencies.json"
       ],
-      "url": "./external/schema.advancedFilter.json"
+      "url": "./node_modules/powerbi-visuals-api/schema.dependencies.json"
     }
-  ]
+  ],
+  "cSpell.words": [
+    "tooltips"
+  ],
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#f2c811",
+    "titleBar.inactiveBackground": "#f2c81199",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveForeground": "#15202b99",
+    "statusBar.background": "#f2c811",
+    "statusBarItem.hoverBackground": "#c5a20b",
+    "statusBar.foreground": "#15202b"
+  }
 }

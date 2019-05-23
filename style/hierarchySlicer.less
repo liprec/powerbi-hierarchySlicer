@@ -1,0 +1,796 @@
+.pbi-spinner {
+    background-position: -32px 0;
+    width: 20px;
+    height: 20px
+}
+
+.pbi-spinner-large {
+    background-position: 0 0;
+    width: 32px;
+    height: 32px
+}
+
+.powerbi-spinner.dotsLoader .spinner {
+    width: 100%;
+    height: 30px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    text-align: center;
+    font-size: 20px;
+    color: #000
+}
+
+.powerbi-spinner.dotsLoader span {
+    display: block;
+    margin: 0 auto
+}
+
+.powerbi-spinner.dotsLoader .dots span {
+    display: inline-block;
+    background: #000;
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    margin: 0 4px;
+    position: relative;
+    -webkit-animation: dotsLoader 4s infinite;
+    -webkit-animation-timing-function: cubic-bezier(.03, .615, .995, .415);
+    -webkit-animation-fill-mode: both;
+    animation: dotsLoader 4s infinite;
+    animation-timing-function: cubic-bezier(.03, .615, .995, .415);
+    animation-fill-mode: both
+}
+
+.powerbi-spinner.dotsLoader .dots span:nth-child(1) {
+    -webkit-animation-delay: 1s;
+    animation-delay: 1s
+}
+
+.powerbi-spinner.dotsLoader .dots span:nth-child(2) {
+    -webkit-animation-delay: .8s;
+    animation-delay: .8s
+}
+
+.powerbi-spinner.dotsLoader .dots span:nth-child(3) {
+    -webkit-animation-delay: .6s;
+    animation-delay: .6s
+}
+
+.powerbi-spinner.dotsLoader .dots span:nth-child(4) {
+    -webkit-animation-delay: .4s;
+    animation-delay: .4s
+}
+
+.powerbi-spinner.dotsLoader .dots span:nth-child(5) {
+    -webkit-animation-delay: .2s;
+    animation-delay: .2s
+}
+
+.powerbi-spinner.dotsLoader .dots span:nth-child(6) {
+    -webkit-animation-delay: 0s;
+    animation-delay: 0s
+}
+
+@-webkit-keyframes dotsLoader {
+    0% {
+        -webkit-transform: translateX(-80px);
+        opacity: 0
+    }
+    25% {
+        opacity: 1
+    }
+    50% {
+        -webkit-transform: translateX(80px);
+        opacity: 0
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@-moz-keyframes dotsLoader {
+    0% {
+        -moz-transform: translateX(-80px);
+        opacity: 0
+    }
+    25% {
+        opacity: 1
+    }
+    50% {
+        -moz-transform: translateX(80px);
+        opacity: 0
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@-ms-keyframes dotsLoader {
+    0%,
+    100%,
+    50% {
+        opacity: 0
+    }
+    0% {
+        -ms-transform: translateX(-80px)
+    }
+    25% {
+        opacity: 1
+    }
+    50% {
+        -ms-transform: translateX(80px)
+    }
+}
+
+@keyframes dotsLoader {
+    0% {
+        transform: translateX(-80px);
+        opacity: 0
+    }
+    25% {
+        opacity: 1
+    }
+    50% {
+        transform: translateX(80px);
+        opacity: 0
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@-moz-keyframes spin {
+    100% {
+        -moz-transform: rotate(360deg)
+    }
+}
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg)
+    }
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
+.powerbi-spinner:not(.dotsLoader) {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: initial !important;
+    vertical-align: middle
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner {
+    transform: scale(.35714286)
+}
+
+.powerbi-spinner:not(.dotsLoader).centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -10px;
+    margin-left: -10px
+}
+
+.powerbi-spinner:not(.dotsLoader).xlarge {
+    width: 48px;
+    height: 48px
+}
+
+.powerbi-spinner:not(.dotsLoader).xlarge .spinner {
+    transform: scale(.85714286)
+}
+
+.powerbi-spinner:not(.dotsLoader).xlarge.centered {
+    margin-top: -24px;
+    margin-left: -24px
+}
+
+.powerbi-spinner:not(.dotsLoader).large {
+    width: 32px;
+    height: 32px
+}
+
+.powerbi-spinner:not(.dotsLoader).large .spinner {
+    transform: scale(.57142857)
+}
+
+.powerbi-spinner:not(.dotsLoader).large.centered {
+    margin-top: -16px;
+    margin-left: -16px
+}
+
+.powerbi-spinner:not(.dotsLoader).small {
+    width: 20px;
+    height: 20px
+}
+
+.powerbi-spinner:not(.dotsLoader).small .spinner {
+    transform: scale(.35714286)
+}
+
+.powerbi-spinner:not(.dotsLoader).small.centered {
+    margin-top: -10px;
+    margin-left: -10px
+}
+
+.powerbi-spinner:not(.dotsLoader).xsmall {
+    width: 16px;
+    height: 16px
+}
+
+.powerbi-spinner:not(.dotsLoader).xsmall .spinner {
+    transform: scale(.28571429)
+}
+
+.powerbi-spinner:not(.dotsLoader).xsmall.centered {
+    margin-top: -8px;
+    margin-left: -8px
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner {
+    position: static;
+    display: block;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    box-sizing: content-box;
+    transform-origin: 0 0;
+    -webkit-transform-origin: 0 0
+}
+
+html[dir=rtl] .powerbi-spinner:not(.dotsLoader) .spinner {
+    transform-origin: top left
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner .circle {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    opacity: 0;
+    transform: rotate(225deg);
+    animation-iteration-count: infinite;
+    animation-name: orbit;
+    animation-duration: 5.5s
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner .circle:after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    background: #666
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner .circle:nth-child(2) {
+    animation-delay: 360ms
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner .circle:nth-child(3) {
+    animation-delay: 720ms
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner .circle:nth-child(4) {
+    animation-delay: 1.08s
+}
+
+.powerbi-spinner:not(.dotsLoader) .spinner .circle:nth-child(5) {
+    animation-delay: 1.44s
+}
+
+@keyframes orbit {
+    0% {
+        transform: rotate(225deg);
+        opacity: 1;
+        animation-timing-function: ease-out
+    }
+    7% {
+        transform: rotate(345deg);
+        animation-timing-function: linear
+    }
+    30% {
+        transform: rotate(455deg);
+        animation-timing-function: ease-in-out
+    }
+    39% {
+        transform: rotate(690deg);
+        animation-timing-function: linear
+    }
+    70% {
+        transform: rotate(815deg);
+        opacity: 1;
+        animation-timing-function: ease-out
+    }
+    75% {
+        transform: rotate(945deg);
+        animation-timing-function: ease-out
+    }
+    100%,
+    76% {
+        transform: rotate(945deg);
+        opacity: 0
+    }
+}
+
+/* Search box */
+
+.slicerHeaderContainer .searchHeader {
+    overflow: hidden
+}
+
+.slicerHeaderContainer .searchHeader.collapsed {
+    display: none
+}
+
+.slicerHeaderContainer .searchHeader.show {
+    display: -webkit-box;
+    display: flex;
+    justify-content: space-between;
+    -webkit-align-items: center;
+    width: calc(100% - 2px);
+    border: 1px solid #212121;
+}
+
+.slicerHeaderContainer .searchHeader .search {
+    cursor: pointer;
+    margin: 4px 4px 0px 4px;
+    flex: 0 0 auto;
+    -webkit-flex: 0 0 auto;
+    color: #212121
+}
+
+.slicerHeaderContainer .searchHeader input {
+    color: #333;
+    cursor: auto;
+    align-self: center;
+    flex: 1 1 0px;
+    -webkit-flex: 1 1 0px;
+    border-style: none;
+    padding: 0;
+    margin-right: 4px;
+}
+
+.slicerHeaderContainer .searchHeader input::-ms-clear {
+    color: transparent;
+}
+
+.slicerContainer .slicerItemContainer {
+    margin: 0;
+    padding: 2px 0 0 0;
+    box-sizing: border-box;
+    white-space: nowrap;
+    cursor: pointer;
+    display: -webkit-box !important;
+    display: flex !important;
+    justify-content: space-between;
+    overflow: hidden;
+    -webkit-align-items: center;
+    width: 100%;
+    outline: 0;
+}
+
+.slicerContainer li,
+.slicerContainer ol,
+.slicerContainer ul {
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    list-style: none;
+    box-sizing: border-box;
+}
+
+.slicerContainer.isMultiSelectEnabled :not(.partiallySelected).slicerCheckbox.selected span.checkbox::before {
+    content: "";
+    height: 80%;
+    width: 50%;
+    position: relative;
+    display: inline-block;
+    margin: -2px 0 0 3px;
+    border-right: 2px solid #FFF;
+    border-bottom: 2px solid #FFF;
+    transform: rotate(45deg);
+    vertical-align: top;
+}
+
+.slicerContainer .slicerCheckbox.partiallySelected span.checkbox::before {
+    content: "";
+    height: 60%;
+    width: 60%;
+    position: relative;
+    display: block;
+    margin: 20% 0 0 20%;
+    background-color: #c8c8c8;
+    box-shadow: 0px 0px 2px #c8c8c8;
+    border: none;
+}
+
+.slicerContainer .slicerCheckbox.partiallySelected span.checkbox {
+    background-color: transparent;
+    border-color: #C8C8C8;
+}
+
+.slicerContainer .slicerCheckbox.selected span.checkbox {
+    box-shadow: none;
+}
+
+.slicerContainer .slicerText {
+    align-self: center;
+    flex: 1 1 0px;
+    -webkit-flex: 1 1 0px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.slicerContainer .slicerCheckbox {
+    cursor: pointer;
+    vertical-align: middle;
+    align-self: center;
+    margin: 0px 4px 0px 0px;
+    // margin-left: 0px !important;
+    // margin-right: 4px !important;
+    flex: 0 0 auto;
+    -webkit-flex: 0 0 auto;
+    display: inline-block;
+}
+
+.slicerContainer .slicerCheckbox span {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border: 2px solid #c8c8c8;
+    box-shadow: inset 0px 0px 1px #c8c8c8;
+    // margin-left: 0px !important;
+    // margin-right: 4px !important;
+}
+
+.explorationContainer input {
+    box-sizing: border-box;
+    outline: 0;
+}
+
+.slicerContainer .slicerCheckbox input {
+    display: none;
+}
+
+input[type=checkbox], input[type=radio] {
+    box-sizing: border-box;
+    padding: 0;
+}
+
+input {
+    line-height: normal;
+}
+
+button, input, optgroup, select, textarea {
+    color: inherit;
+    font: inherit;
+    margin: 0;
+}
+
+.slicerContainer {
+    display: block;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    cursor: pointer;
+    font-family: "Segoe UI",wf_segoe-ui_normal,helvetica,arial,sans-serif;
+    font-size: 14px;
+    flex: 1 0 0px;
+    -webkit-flex: 1 0 0px;
+    color: rgb(102, 102, 102);
+}
+
+.slicerContainer .slicerItemContainer * {
+    vertical-align: bottom;
+}
+
+.icon {
+    float: right;
+    cursor: pointer;
+    display: flex;
+    width: 12px;
+    height: 12px;
+    font-style: normal;
+    align-items: flex-end;
+    padding: 0;
+    background-color: inherit;
+    border-style: none;
+}
+
+.hiddenicon {
+    visibility: hidden;
+}
+
+.hasSelection:hover .hiddenicon,
+.slicerContainer.hasSelection:hover .hiddenicon {
+    visibility: visible;
+}
+
+.icon-left {
+    float: left;
+    cursor: pointer;
+    display: flex;
+    width: 12px;
+    height: 12px;
+    font-style: normal;
+    visibility: hidden;
+    align-items: flex-end;
+    padding: 0;
+    background-color: inherit;
+    border-style: none;
+}
+
+.slicerItemContainerExpander {
+    display: block !important;
+}
+
+.slicerItemContainerExpander .collapsed {
+    margin-top: -2px;
+}
+
+.slicerItemContainerExpander path {
+    transform-origin: 50% 50%;
+    transition-property: "transform";
+    transition-duration: 300ms;
+}
+
+.slicerItemContainerExpander svg {
+    vertical-align: sub !important;
+}
+
+.slicerItemContainerExpander .spinner-icon {
+    display: block !important;
+}
+
+.spinner-icon::before {
+    font-family: PowrMDL2;
+    font-style: normal;
+    vertical-align: middle;
+}
+
+/* Adjustments */
+
+.slicerContainer {
+    height: 100%;
+}
+
+.powerbi-spinner {
+    display: inline-block !important;
+}
+
+.delete {
+    padding-right: 4px;
+    margin-top: 5px;
+}
+
+.slicerItemContainerChild {
+    width: 100%;
+    display: block !important;
+}
+
+.reportContainerContent i {
+    padding-left: 0px;
+    color: inherit;
+}
+
+.powerbi-spinner {
+    margin-left: -4px;
+    margin-right: 0px;
+    content: normal;
+}
+
+.slicerItemContainerExpander {
+    vertical-align: middle !important;
+    align-self: center;
+    margin: 0px;
+    flex: 0 0 auto;
+    -webkit-flex: 0 0 auto;
+    display: inline-block;
+}
+
+.watermark {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    cursor: default;    
+}
+
+.watermark > svg {
+    width: 100%;
+    height: 100%;
+}
+
+
+// SimpleBar start
+
+[data-simplebar] {
+    position: relative;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: flex-start;
+    width: inherit;
+    height: inherit;
+    max-width: inherit;
+    max-height: inherit;
+}
+
+.simplebar-wrapper {
+    overflow: hidden;
+    width: inherit;
+    height: inherit;
+    max-width: inherit;
+    max-height: inherit;
+}
+
+.simplebar-mask {
+    direction: inherit;
+    position: absolute;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: auto !important;
+    height: auto !important;
+    z-index: 0;
+}
+
+.simplebar-offset {
+    direction: inherit !important;
+    box-sizing: inherit !important;
+    resize: none !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.simplebar-content {
+    direction: inherit;
+    box-sizing: border-box !important;
+    position: relative;
+    display: block;
+    height: 100%; /* Required for horizontal native scrollbar to not appear if parent is taller than natural height */
+    width: auto;
+    visibility: visible;
+    overflow: scroll; /* Scroll on this element otherwise element can't have a padding applied properly */
+    max-width: 100%; /* Not required for horizontal scroll to trigger */
+    max-height: 100%; /* Needed for vertical scroll to trigger */
+}
+
+.simplebar-placeholder {
+    max-height: 100%;
+    max-width: 100%;
+    width: 100%;
+    pointer-events: none;
+}
+
+.simplebar-height-auto-observer-wrapper {
+    box-sizing: inherit !important;
+    height: 100%;
+    width: inherit;
+    max-width: 1px;
+    position: relative;
+    float: left;
+    max-height: 1px;
+    overflow: hidden;
+    z-index: -1;
+    padding: 0;
+    margin: 0;
+    pointer-events: none;
+    flex-grow: inherit;
+    flex-shrink: 0;
+    flex-basis: 0;
+}
+
+.simplebar-height-auto-observer {
+    box-sizing: inherit;
+    display: block;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1000%;
+    width: 1000%;
+    min-height: 1px;
+    min-width: 1px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.simplebar-track {
+    z-index: 1;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.simplebar-scrollbar {
+    position: absolute;
+    right: 2px;
+    width: 7px;
+    min-height: 10px;
+}
+
+.simplebar-scrollbar:before {
+    position: absolute;
+    content: "";
+    background: black;
+    border-radius: 7px;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.2s linear;
+}
+
+.simplebar-track .simplebar-scrollbar.simplebar-visible:before {
+    /* When hovered, remove all transitions from drag handle */
+    opacity: 0.5;
+    transition: opacity 0s linear;
+}
+
+.simplebar-track.simplebar-vertical {
+    top: 0;
+    width: 11px;
+}
+
+.simplebar-track.simplebar-vertical .simplebar-scrollbar:before {
+    top: 2px;
+    bottom: 2px;
+}
+
+.simplebar-track.simplebar-horizontal {
+    left: 0;
+    height: 11px;
+}
+
+.simplebar-track.simplebar-horizontal .simplebar-scrollbar:before {
+    height: 100%;
+    left: 2px;
+    right: 2px;
+}
+
+.simplebar-track.simplebar-horizontal .simplebar-scrollbar {
+    right: auto;
+    left: 0;
+    top: 2px;
+    height: 7px;
+    min-height: 0;
+    min-width: 10px;
+    width: auto;
+}
+
+/* Rtl support */
+[data-simplebar-direction="rtl"] .simplebar-track.simplebar-vertical {
+    right: auto;
+    left: 0;
+}
+
+.hs-dummy-scrollbar-size {
+    direction: rtl;
+    position: fixed;
+    opacity: 0;
+    visibility: hidden;
+    height: 500px;
+    width: 500px;
+    overflow-y: hidden;
+    overflow-x: scroll;
+}

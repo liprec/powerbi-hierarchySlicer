@@ -51,7 +51,13 @@ node_modules
 
 # Power BI custom visuals
 .tmp
+*.pbiviz
 
-# Not finished visuals
-boxWhiskerChart
-hierarchySlicer
+# Build artifacts
+dist
+
+# webpack.statistics
+webpack.statistics.*
+
+# Coverage files
+/coverage

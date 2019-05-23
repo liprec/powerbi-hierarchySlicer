@@ -1,5 +1,6 @@
 {
-    "dataRoles": [{
+    "dataRoles": [
+        {
             "name": "Fields",
             "kind": "Grouping",
             "displayName": "Fields"
@@ -12,15 +13,29 @@
     ],
     "dataViewMappings": [{
         "conditions": [{
-            "Values": { "min": 0, "max": 1 }
+            "Values": {
+                "min": 0,
+                "max": 1
+            }
         }],
         "table": {
             "rows": {
-                "select": 
-                [
-                    {"for": { "in": "Fields" } },
-                    {"for": { "in": "Values" } }
-                ], "dataReductionAlgorithm": { "bottom": { "count": 4000 } }
+                "select": [{
+                        "for": {
+                            "in": "Fields"
+                        }
+                    },
+                    {
+                        "for": {
+                            "in": "Values"
+                        }
+                    }
+                ],
+                "dataReductionAlgorithm": {
+                    "window": {
+                        "count": 30000
+                    }
+                }
             }
         }
     }],
@@ -28,10 +43,9 @@
         "general": {
             "displayName": "General",
             "properties": {
-                "selection": {
-                    "displayName": "Selection",
+                "filter": {
                     "type": {
-                        "text": true
+                        "filter": true
                     }
                 },
                 "filterValues": {
@@ -44,15 +58,15 @@
                         "text": true
                     }
                 },
-                "hidden": {
+                "selectAll": {
                     "type": {
-                        "text": true
+                        "bool": true
                     }
                 },
-                "formatString": {
+                "selfFilter": {
                     "type": {
-                        "formatting": {
-                            "labelDisplayUnits": false
+                        "filter": {
+                            "selfFilter": true
                         }
                     }
                 },
@@ -62,48 +76,94 @@
                             "searchEnabled": true
                         }
                     }
-                },
-                "filter": {
-                    "type": {
-                        "filter": true
-                    }
                 }
             }
         },
         "selection": {
             "displayName": "Selection",
             "properties": {
-                "selectAll": {
-                    "displayName": "Select All",
-                    "description": "Show the 'Select All' options",
+                "singleSelect": {
+                    "displayName": "Single Select",
                     "type": {
                         "bool": true
                     }
                 },
-                "singleSelect": {
-                    "displayName": "Single Select",
-                    "description": "Set single item select",
+                "hideMembers": {
+                    "displayName": "Hide Members",
+                    "description": "Ragged/unbalanced hierarchies can be enabled by hidding members",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Never",
+                                "value": "0"
+                            },
+                            {
+                                "displayName": "Empty",
+                                "value": "1"
+                            },
+                            {
+                                "displayName": "Parent Name",
+                                "value": "2"
+                            }
+                        ]
+                    }
+                },
+                "emptyLeafs": {
                     "type": {
                         "bool": true
+                    }
+                },
+                "emptyString": {
+                    "displayName": "'' strings are empty",
+                    "description": "An 'blank' string is threated as an empty value",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "emptyLeafLabel": {
+                    "displayName": "Empty leaf label",
+                    "description": "Replacement text for empty values",
+                    "placeHolderText": "(Blank)",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "selectAll": {
+                    "displayName": "Select All",
+                    "description": "Show the 'Select All' member",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "selectAllLabel": {
+                    "displayName": "Select All Label",
+                    "description": "Label for 'Select All' member",
+                    "type": {
+                        "text": true
                     }
                 }
             }
         },
         "header": {
-            "displayName": "Header",
+            "displayName": "Slicer header",
             "properties": {
                 "show": {
                     "displayName": "Show",
-                    "description": "Show header",
                     "type": {
                         "bool": true
                     }
                 },
                 "title": {
                     "displayName": "Title",
-                    "description": "Custom hierarchy title",
+                    "placeHolderText": "Auto",
                     "type": {
                         "text": true
+                    }
+                },
+                "restatement": {
+                    "displayName": "Show summary",
+                    "type": {
+                        "bool": true
                     }
                 },
                 "fontColor": {
@@ -117,9 +177,19 @@
                         }
                     }
                 },
+                "hoverColor": {
+                    "displayName": "Hover",
+                    "description": "Title color of the cells when the mouse if hovered over",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "background": {
                     "displayName": "Background",
-                    "description": "Backgroung color of the title",
                     "type": {
                         "fill": {
                             "solid": {
@@ -130,11 +200,94 @@
                 },
                 "textSize": {
                     "displayName": "Text Size",
-                    "description": "Text size of the title",
                     "type": {
                         "formatting": {
                             "fontSize": true
                         }
+                    }
+                },
+                "fontFamily": {
+                    "displayName": "Font family",
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontStyle": {
+                    "displayName": "Font style",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Normal",
+                                "value": "0"
+                            },
+                            {
+                                "displayName": "Italic",
+                                "value": "1"
+                            }
+                        ]
+                    }
+                },
+                "fontWeight": {
+                    "displayName": "Font weight",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Light",
+                                "value": "200"
+                            },
+                            {
+                                "displayName": "Normal",
+                                "value": "400"
+                            },
+                            {
+                                "displayName": "Semi bold",
+                                "value": "600"
+                            },
+                            {
+                                "displayName": "Bold",
+                                "value": "800"
+                            }
+                        ]
+                    }
+                },
+                "outline": {
+                    "displayName": "Outline",
+                    "type": {
+                        "enumeration": [{
+                                "value": "0",
+                                "displayName": "None"
+                            },
+                            {
+                                "value": "1",
+                                "displayName": "Bottom only"
+                            },
+                            {
+                                "value": "2",
+                                "displayName": "Top only"
+                            },
+                            {
+                                "value": "3",
+                                "displayName": "Left only"
+                            },
+                            {
+                                "value": "4",
+                                "displayName": "Right only"
+                            },
+                            {
+                                "value": "5",
+                                "displayName": "Top + bottom"
+                            },
+                            {
+                                "value": "6",
+                                "displayName": "Left + right"
+                            },
+                            {
+                                "value": "7",
+                                "displayName": "Frame"
+                            }
+                        ]
                     }
                 }
             }
@@ -142,13 +295,6 @@
         "items": {
             "displayName": "Items",
             "properties": {
-                "emptyLeafs": {
-                    "displayName": "Empty leafs",
-                    "description": "Show empty leafs as <blank>",
-                    "type": {
-                        "bool": true
-                    }
-                },
                 "fontColor": {
                     "displayName": "Font color",
                     "description": "Font color of the cells",
@@ -160,20 +306,9 @@
                         }
                     }
                 },
-                "background": {
-                    "displayName": "Background",
-                    "description": "Background color of the cells",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
                 "selectedColor": {
-                    "displayName": "Selected",
-                    "description": "Color of the cells when is selected",
+                    "displayName": "Select color",
+                    "description": "Font color of the selected cells",
                     "type": {
                         "fill": {
                             "solid": {
@@ -193,9 +328,125 @@
                         }
                     }
                 },
+                "background": {
+                    "displayName": "Background",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "textSize": {
                     "displayName": "Text Size",
-                    "description": "Text size of the item text",
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "displayName": "Font family",
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "fontStyle": {
+                    "displayName": "Font style",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Normal",
+                                "value": "0"
+                            },
+                            {
+                                "displayName": "Italic",
+                                "value": "1"
+                            }
+                        ]
+                    }
+                },
+                "fontWeight": {
+                    "displayName": "Font weight",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Light",
+                                "value": "200"
+                            },
+                            {
+                                "displayName": "Normal",
+                                "value": "400"
+                            },
+                            {
+                                "displayName": "Semi bold",
+                                "value": "600"
+                            },
+                            {
+                                "displayName": "Bold",
+                                "value": "800"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "search": {
+            "displayName": "Search",
+            "properties": {
+                "addSelection": {
+                    "displayName": "Add to selection",
+                    "description": "Add search selection to \ncurrent selection (multiselect only)",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
+                    "displayName": "Font color",
+                    "description": "Font color of the search",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "iconColor": {
+                    "displayName": "Icon color",
+                    "description": "Color of the search icons",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "background": {
+                    "displayName": "Background",
+                    "description": "Background color of the searchbox",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fontFamily": {
+                    "displayName": "Font family",
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "textSize": {
+                    "displayName": "Text Size",
                     "type": {
                         "formatting": {
                             "fontSize": true
@@ -203,10 +454,63 @@
                     }
                 }
             }
+        },
+        "mobile": {
+            "displayName": "Zoom mode",
+            "description": "Options related to the mobile friendly and focus views",
+            "properties": {
+                "enable": {
+                    "displayName": "Enable",
+                    "description": "Toggle zoom view",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "title": {
+                    "displayName": "Header",
+                    "description": "Double tap to toggle zoom view",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "focus": {
+                    "displayName": "Focus mode",
+                    "description": "Enable zoom in Focus mode",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "enLarge": {
+                    "displayName": "Enlarge",
+                    "description": "Amount of enlarging the font for zoom view",
+                    "type": {
+                        "enumeration": [{
+                                "value": "25",
+                                "displayName": "Small (25%)"
+                            },
+                            {
+                                "value": "50",
+                                "displayName": "Normal (50%)"
+                            },
+                            {
+                                "value": "100",
+                                "displayName": "Large (100%)"
+                            }
+                        ]
+                    }
+                }
+            }
         }
     },
-    "supportsHighlight": false,
+    "tooltips": {
+        "supportedTypes": {
+            "default": true
+        }
+    },
+    "supportsHighlight": true,
     "suppressDefaultTitle": true,
+    "supportsLandingPage": true,
+    "supportsSynchronizingFilterState": true,
     "sorting": {
         "default": {}
     }
