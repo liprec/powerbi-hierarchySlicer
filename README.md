@@ -1,6 +1,6 @@
 # Power BI HierachySlicer
 
-[![Build Status](https://dev.azure.com/datascenarios/GitHub%20Projects/_apis/build/status/powerbi-hierarchySlicer?branchName=v2)](https://dev.azure.com/datascenarios/GitHub%20Projects/_build/latest?definitionId=13?branchName=v2)
+[![Build Status](https://dev.azure.com/datascenarios/GitHub%20Projects/_apis/build/status/powerbi-hierarchySlicer?branchName=master)](https://dev.azure.com/datascenarios/GitHub%20Projects/_build/latest?definitionId=13?branchName=master)
 
 Home for my Power BI Custom Visual: HierarchySlicer
 
