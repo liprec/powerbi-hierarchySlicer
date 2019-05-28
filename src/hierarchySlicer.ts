@@ -231,12 +231,13 @@ export class HierarchySlicer implements IVisual {
                                 // hack workaround to get original table name and column names from expression
                                 if ((identityExpr as any).kind === SQExprKind.HierarchyLevel) {
                                     return (identityExpr as any).arg.arg.entity === jFilter.target[i].table &&
-                                    (identityExpr as any).level === jFilter.target[i].column;
+                                        (identityExpr as any).level === jFilter.target[i].column;
                                 }
                                 if ((identityExpr as any).kind === SQExprKind.ColumnRef) {
-                                    return  (identityExpr as any).source.entity === jFilter.target[i].table &&
-                                            (identityExpr as any).ref === jFilter.target[i].column;
+                                    return (identityExpr as any).source.entity === jFilter.target[i].table &&
+                                        (identityExpr as any).ref === jFilter.target[i].column;
                                 }
+                                return false; // returning false for 'strictNullChecks'
                             });
                             const format = index > -1 ? columns[index].format : undefined;
                             return { value: ValueFormat(dp.value, format).replace(/,/g, "") + "-" + index.toString(), index: index };
