@@ -42,7 +42,7 @@ import TextMeasurementService = textMeasurementService.textMeasurementService;
 import { HierarchySlicer } from "../src/hierarchySlicer";
 
 import { HierarchySlicerBuilder } from "./visualBuilder";
-import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5 } from "./visualData";
+import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5, HierarchyDataSet6 } from "./visualData";
 import { HierarchySlicerSettings } from "../src/settings";
 import { IFilter, TupleFilter } from "powerbi-models";
 import { FontStyle, FontWeight, BorderStyle, Zoomed } from "../src/enums";
@@ -66,7 +66,8 @@ describe("HierachySlicer =>", () => {
         new HierarchyDataSet2(),
         new HierarchyDataSet3(),
         new HierarchyDataSet4(),
-        new HierarchyDataSet5()
+        new HierarchyDataSet5(),
+        new HierarchyDataSet6()
     ];
 
     dataSets.forEach((testData, index) => {

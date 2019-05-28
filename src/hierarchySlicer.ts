@@ -227,17 +227,10 @@ export class HierarchySlicer implements IVisual {
                         Array.isArray(d) ?
                         d.map((dp, i) => {
                             const index = columns.findIndex((c: DataViewMetadataColumn) => {
-                                const identityExpr: ISQExpr | undefined = c && c.expr;
-                                // hack workaround to get original table name and column names from expression
-                                if ((identityExpr as any).kind === SQExprKind.HierarchyLevel) {
-                                    return (identityExpr as any).arg.arg.entity === jFilter.target[i].table &&
-                                        (identityExpr as any).level === jFilter.target[i].column;
-                                }
-                                if ((identityExpr as any).kind === SQExprKind.ColumnRef) {
-                                    return (identityExpr as any).source.entity === jFilter.target[i].table &&
-                                        (identityExpr as any).ref === jFilter.target[i].column;
-                                }
-                                return false; // returning false for 'strictNullChecks'
+                                let identityExpr: ISQExpr[] | ISQExpr | undefined = c && c.identityExprs;
+                                identityExpr = isArray(identityExpr) ? identityExpr[0] : identityExpr;
+                                return (identityExpr as any).source.entity === jFilter.target[i].table &&
+                                    (identityExpr as any).ref === jFilter.target[i].column;
                             });
                             const format = index > -1 ? columns[index].format : undefined;
                             return { value: ValueFormat(dp.value, format).replace(/,/g, "") + "-" + index.toString(), index: index };
@@ -311,23 +304,11 @@ export class HierarchySlicer implements IVisual {
                 let searchStr: string = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf: boolean = c === levels;
                 let identityExpr: ISQExpr[] | ISQExpr | undefined = columns[c] && columns[c].identityExprs;
-                const expr: ISQExpr | undefined = columns[c] && columns[c].expr;
-                // debugger;
-                let table;
-                let column;
                 identityExpr = isArray(identityExpr) ? identityExpr[0] : identityExpr;
                 // hack workaround to get original table name and column names from expression
-                if ((identityExpr as any).kind === SQExprKind.HierarchyLevel) {
-                    table = (identityExpr as any).arg.arg.entity;
-                    column = (identityExpr as any).level;
-                }
-                if ((identityExpr as any).kind === SQExprKind.ColumnRef) {
-                    table = (identityExpr as any).source.entity;
-                    column = (identityExpr as any).ref;
-                }
                 const filterTarget: IFilterTarget = {
-                    table: table,
-                    column: column
+                    table: (identityExpr as any).source.entity,
+                    column: (identityExpr as any).ref
                 };
                 const selected: boolean = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
                 toolTip = toolTip.concat([({ displayName: columns[c].displayName, value: labelValue } as VisualTooltipDataItem)]);
