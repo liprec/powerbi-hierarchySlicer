@@ -150,10 +150,10 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         const columns = this.columnNames.map((field, index) => {
             const expr = {
                 kind: this.fieldsKind,
-                ref: field.replace(' ', ''),
-                source: {
-                    "entity": this.tableName
-                }
+                ref: (this.fieldsKind === SQExprKind.ColumnRef ? field.replace(' ', '') : undefined),
+                level: (this.fieldsKind === SQExprKind.HierarchyLevel ? field : undefined),
+                source: (this.fieldsKind === SQExprKind.ColumnRef ? { entity: this.tableName } : undefined),
+                arg: (this.fieldsKind === SQExprKind.HierarchyLevel ? { arg: { arg: { entity: this.tableName }}} : undefined)
             };
             return {
                 displayName: field,
@@ -178,6 +178,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         let identityFields = TestDataViewBuilder.getDataViewBuilderColumnIdentitySources(categorialDataView);
         columns.forEach((c, index) =>
             c.identityExprs = <any>[ {
+                kind: SQExprKind.ColumnRef,
                 fields: identityFields[index].fields,
                 identities: identityFields[index].identities,
                 ref: c.displayName.replace(' ', ''),
