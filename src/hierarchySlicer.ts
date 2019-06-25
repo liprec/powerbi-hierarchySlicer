@@ -27,18 +27,19 @@
 
 "use strict";
 import powerbi from "powerbi-visuals-api";
-import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
-import { valueFormatter, textMeasurementService, stringExtensions} from "powerbi-visuals-utils-formattingutils";
+import { interactivitySelectionService, interactivityBaseService, interactivityFilterService } from "powerbi-visuals-utils-interactivityutils";
+import extractFilterColumnTarget = interactivityFilterService.extractFilterColumnTarget;
+import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import { IMargin, CssConstants } from "powerbi-visuals-utils-svgutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
 import { ITooltipServiceWrapper, createTooltipServiceWrapper, TooltipEventArgs } from "powerbi-visuals-utils-tooltiputils";
 import { valueType } from "powerbi-visuals-utils-typeutils";
-import { IFilterTarget, TupleFilter, FilterType, ITupleFilterTarget, IFilterColumnTarget, ITupleFilter, Selector } from "powerbi-models";
+import { IFilterColumnTarget, Selector } from "powerbi-models";
 import { select, Selection } from "d3-selection";
 
-import { isEqual, uniqWith } from "lodash-es";
+import { isEqual } from "lodash-es";
 
-import "@babel/polyfill";
+import "core-js/stable";
 import "./matchesPolyfill";
 
 import "../style/hierarchySlicer.less";
@@ -309,22 +310,7 @@ export class HierarchySlicer implements IVisual {
                 let ownId: string = parentId + (parentId === "" ? "" : "_") + "|~" + labelValueId.replace(/,/g, "") + "-" + c;
                 let searchStr: string = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf: boolean = c === levels;
-                let table, column;
-                const expr: ISQExpr[] | ISQExpr | undefined = columns[c] && columns[c].expr;
-                let identityExpr: ISQExpr[] | ISQExpr | undefined = columns[c] && columns[c].identityExprs;
-                identityExpr = isArray(identityExpr) ? identityExpr[0] : identityExpr;
-                // hack workaround to get original table name and column names from expression
-                if ((expr as any).kind === SQExprKind.HierarchyLevel) {
-                    table = (identityExpr as any).source.entity;
-                    column = (identityExpr as any).ref;
-                } else {
-                    table = (identityExpr as any).source.entity;
-                    column = (expr as any).ref;
-                }
-                const filterTarget: IFilterTarget = {
-                    table: table,
-                    column: column
-                };
+                const filterTarget: IFilterColumnTarget = extractFilterColumnTarget(columns[c]);
                 const selected: boolean = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
                 toolTip = toolTip.concat([({ displayName: columns[c].displayName, value: labelValue } as VisualTooltipDataItem)]);
 
