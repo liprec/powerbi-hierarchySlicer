@@ -38,7 +38,7 @@ import { select, Selection } from "d3-selection";
 
 import { isEqual, uniqWith } from "lodash-es";
 
-import "@babel/polyfill";
+import "core-js/stable";
 import "./matchesPolyfill";
 
 import "../style/hierarchySlicer.less";
