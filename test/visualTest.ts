@@ -42,7 +42,7 @@ import TextMeasurementService = textMeasurementService.textMeasurementService;
 import { HierarchySlicer } from "../src/hierarchySlicer";
 
 import { HierarchySlicerBuilder } from "./visualBuilder";
-import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5, HierarchyDataSet6 } from "./visualData";
+import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5, HierarchyDataSet6, HierarchyDataSet7, HierarchyDataSet8 } from "./visualData";
 import { HierarchySlicerSettings } from "../src/settings";
 import { IFilter, TupleFilter } from "powerbi-models";
 import { FontStyle, FontWeight, BorderStyle, Zoomed } from "../src/enums";
@@ -67,7 +67,9 @@ describe("HierachySlicer =>", () => {
         new HierarchyDataSet3(),
         new HierarchyDataSet4(),
         new HierarchyDataSet5(),
-        new HierarchyDataSet6()
+        new HierarchyDataSet6(),
+        new HierarchyDataSet7(),
+        new HierarchyDataSet8()
     ];
 
     dataSets.forEach((testData, index) => {
@@ -369,7 +371,7 @@ describe("HierachySlicer =>", () => {
 
                 // old behavior, now [hideMembers: 1]
                 const dataViewTest = testData.getDataView();
-                const testValue: ExpandTest = testData.getExpandedTests()[1];
+                const testValue: ExpandTest = testData.getExpandedTests()[0];
                 dataViewTest.metadata.objects = {
                     general: {
                         expanded: testValue.expanded.join(",")
@@ -393,7 +395,7 @@ describe("HierachySlicer =>", () => {
 
                 // old behavior, now [hideMembers: 0]
                 const dataViewTest = testData.getDataView();
-                const testValue: ExpandTest = testData.getExpandedTests()[1];
+                const testValue: ExpandTest = testData.getExpandedTests()[0];
                 dataViewTest.metadata.objects = {
                     general: {
                         expanded: testValue.expanded.join(",")

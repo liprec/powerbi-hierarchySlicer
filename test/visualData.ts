@@ -77,12 +77,22 @@ export interface SelectTest {
 
 enum SQExprKind {
     ColumnRef = 2,
+    PropertyVariationSource = 5,
     Hierarchy = 6,
     HierarchyLevel = 7
 }
 
+enum DataSourceKind {
+    Native = 0,
+    Tabular = 1,
+    MD = 2
+}
+
 export abstract class HierarchyData extends TestDataViewBuilder {
+    public dataSource: DataSourceKind = DataSourceKind.Native;
     public tableName: string = "Hierarchy";
+    public tableGuid: string = "LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca";
+    public hierarchyName?: string;
     public tableValues: any[][];
 
     public columnNames: string[];
@@ -148,22 +158,61 @@ export abstract class HierarchyData extends TestDataViewBuilder {
 
     public getDataView(columnNames?: string[], emptyValues: boolean = false): DataView {
         const columns = this.columnNames.map((field, index) => {
+            let arg = undefined;
+            let level = undefined;
+            let source = undefined;
+            let ref = undefined;
+            if (this.fieldsKind === SQExprKind.HierarchyLevel) {
+                arg = {
+                    arg: {
+                        entity: this.tableName,
+                        kind: 0
+                    },
+                    hierarchy: this.hierarchyName,
+                    kind: 6
+                };
+                level = field;
+            }
+            if (this.fieldsKind === SQExprKind.ColumnRef) {
+                source = {
+                    entity: this.tableName,
+                    kind: 0
+                };
+                ref = field.replace(' ', '');
+            }
+            if (this.fieldsKind === SQExprKind.PropertyVariationSource) {
+                arg = {
+                    arg: {
+                        arg: {
+                            entity: this.tableName,
+                            kind: 0
+                        },
+                        name: "Variation",
+                        property: (this.hierarchyName as any).replace('Hierarchy', ''),
+                        kind: 5
+                    },
+                    hierarchy: this.hierarchyName,
+                    kind: 6
+                };
+                level = field;
+            }
             const expr = {
-                kind: this.fieldsKind,
-                ref: (this.fieldsKind === SQExprKind.ColumnRef ? field.replace(' ', '') : undefined),
-                level: (this.fieldsKind === SQExprKind.HierarchyLevel ? field : undefined),
-                source: (this.fieldsKind === SQExprKind.ColumnRef ? { entity: this.tableName } : undefined),
-                arg: (this.fieldsKind === SQExprKind.HierarchyLevel ? { arg: { arg: { entity: this.tableName }}} : undefined)
+                arg: arg,
+                ref: ref,
+                level: level,
+                source: source,
+                kind: this.fieldsKind === SQExprKind.PropertyVariationSource ? SQExprKind.HierarchyLevel : this.fieldsKind
             };
             return {
-                displayName: field,
                 roles: { Fields: true },
                 type: this.columnTypes[index],
                 format: this.columnFormat[index],
-                index: index,
-                queryName: this.tableName + '.' + field,
+                displayName: field,
+                queryName: this.tableName + (this.fieldsKind === SQExprKind.PropertyVariationSource ? 'Variation.' : '') + (this.hierarchyName ? `.${this.hierarchyName}.` : '.') + field,
                 expr: expr,
-                identityExprs: undefined
+                discourageAggregationAcrossGroups: this.dataSource === DataSourceKind.MD && index === 0  ? true : undefined,
+                index: index,
+                identityExprs: []
             };
         });
         const rows = this.tableValues.map((row: any[]) => {
@@ -175,22 +224,26 @@ export abstract class HierarchyData extends TestDataViewBuilder {
                 values: rows[index]
             };
         });
+        let identityExprs: any;
         let identityFields = TestDataViewBuilder.getDataViewBuilderColumnIdentitySources(categorialDataView);
-        columns.forEach((c, index) =>
-            c.identityExprs = <any>[ {
-                kind: SQExprKind.ColumnRef,
-                fields: identityFields[index].fields,
-                identities: identityFields[index].identities,
-                ref: c.displayName.replace(' ', ''),
-                source: {
-                    "entity": this.tableName
+        if (this.fieldsKind === SQExprKind.PropertyVariationSource) {
+            columns.forEach((c, index) => {
+                    let ref = c.displayName.replace(' ', '');
+                    c.identityExprs = <any>[ {
+                        source: {
+                            entity: this.tableGuid,
+                            kind: 0
+                        },
+                        ref: ref,
+                        kind: SQExprKind.ColumnRef
+                    } ];
                 }
-            } ]
-        );
+            );
+        }
         const dataView = {
             table: {
                 columns: columns,
-                identityFields: identityFields,
+                identityFields: this.dataSource === DataSourceKind.MD ? identityExprs : identityFields,
                 rows: rows
             },
             metadata: {
@@ -204,7 +257,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
 export class HierarchyDataSet1 extends HierarchyData {
     public columnNames: string[] =
         ["Level 1", "Level 2", "Level 3", "Value"];
-    public tableValues: any[][] = [
+    public tableValues = [
         [     "L1",      null,      null,      1],
         [     "L1",     "L11",    "L111",      2],
         [     "L1",     "L11",    "L112",      3],
@@ -217,7 +270,7 @@ export class HierarchyDataSet1 extends HierarchyData {
         ValueType.fromDescriptor({ text: true }),
         ValueType.fromDescriptor({ numeric: true })
     ];
-    public columnFormat: any[] = [
+    public columnFormat = [
         undefined, undefined, undefined, "0"
     ];
 
@@ -332,18 +385,18 @@ export class HierarchyDataSet2 extends HierarchyData {
     public tableName: string = "Hierarchy";
     public columnNames: string[] =
         ["Level 1", "Level 2"];
-    public tableValues: any[][] = [
+    public tableValues = [
         [     "L1",      null],
         [     "L1",     "L11"],
         [     "L1",     "L12"],
         [     "L_2",    "L12"],
         [     "L1",     "L13"],
     ];
-    public columnTypes: any[] = [
+    public columnTypes = [
         ValueType.fromDescriptor({ text: true }),
         ValueType.fromDescriptor({ text: true })
     ];
-    public columnFormat: any[] = [
+    public columnFormat = [
         undefined, undefined
     ];
 
@@ -425,17 +478,17 @@ export class HierarchyDataSet3 extends HierarchyData {
     public tableName: string = "Hierarchy";
     public columnNames: string[] =
         ["Date"];
-    public tableValues: any[][] = [
+    public tableValues = [
         ["2018-01-01T00:00:00.000Z"],
         ["2018-01-02T00:00:00.000Z"],
         ["2018-01-03T00:00:00.000Z"],
         ["2018-01-04T00:00:00.000Z"],
         ["2018-01-05T00:00:00.000Z"],
     ];
-    public columnTypes: any[] = [
+    public columnTypes = [
         ValueType.fromDescriptor({ dateTime: true })
     ];
-    public columnFormat: any[] = [
+    public columnFormat = [
         "dd MMM, yyyy"
     ];
 
@@ -507,7 +560,7 @@ export class HierarchyDataSet4 extends HierarchyData {
     public tableName: string = "Hierarchy";
     public columnNames: string[] =
         ["Parent", "Child"];
-    public tableValues: any[][] = [
+    public tableValues = [
         [ null,    2 ],
         [    1,    1 ],
         [    2, null ],
@@ -515,11 +568,11 @@ export class HierarchyDataSet4 extends HierarchyData {
         [    1,    5 ],
         [ null,    6 ]
     ];
-    public columnTypes: any[] = [
+    public columnTypes = [
         ValueType.fromDescriptor({ numeric: true }),
         ValueType.fromDescriptor({ numeric: true })
     ];
-    public columnFormat: any[] = [
+    public columnFormat = [
         "0", "0"
     ];
 
@@ -630,7 +683,7 @@ export class HierarchyDataSet5 extends HierarchyData {
     public tableName: string = "Hierarchy";
     public columnNames: string[] =
         ["Parent", "Child"];
-    public tableValues: any[][] = [
+    public tableValues = [
         [  "", "2" ],
         [ "1", "1" ],
         [ "2",  "" ],
@@ -638,13 +691,107 @@ export class HierarchyDataSet5 extends HierarchyData {
         [ "1", "5" ],
         [  "", "6" ]
     ];
-    public columnTypes: any[] = [
+    public columnTypes = [
         ValueType.fromDescriptor({ text: true }),
         ValueType.fromDescriptor({ text: true })
     ];
-    public columnFormat: any[] = [
+    public columnFormat = [
         undefined, undefined
     ];
+
+    public getExpandedTests(): ExpandTest[] {
+        return [
+            {
+                expanded: [ "|~-0" ],
+                number: 5,
+                hideMembersOffset: [0, -3, 0]
+            },
+            {
+                expanded: [ "|~1-0" ],
+                number: 5,
+                hideMembersOffset: [0, -1, -1]
+            }
+        ];
+    }
+
+    public getSelectedTests(): SelectTest[] {
+        return [
+            {
+                description: "Empty string",
+                clickedDataPoints: [ 0 ],
+                target: [
+                    {
+                        column: this.columnNames[0].replace(' ', ''),
+                        table: this.tableName
+                    }
+                ],
+                values: [
+                    [
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
+                    ]
+                ],
+                selectedDataPoints: [ 0, 1, 2 ],
+                partialDataPoints: []
+            },
+            {
+                description: `${this.getValue(0, 0)} and ${this.getValue(1, 1)}`,
+                clickedDataPoints: [ 0, 4 ],
+                target: [
+                    {
+                        column: this.columnNames[0].replace(' ', ''),
+                        table: this.tableName
+                    },
+                    {
+                        column: this.columnNames[1].replace(' ', ''),
+                        table: this.tableName
+                    }
+                ],
+                values: [
+                    [
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 1) as PrimitiveValueType) }
+                    ],
+                    [
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(5, 1) as PrimitiveValueType) }
+                    ],
+                    [
+                        { value: (this.getValue(1, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(1, 1) as PrimitiveValueType) }
+                    ]
+                ],
+                selectedDataPoints: [ 0, 1, 2, 4 ],
+                partialDataPoints: [ 3 ]
+            }
+        ];
+    }
+
+    public getSearchTests(): SearchTest[] {
+        return [];
+    }
+}
+
+export class HierarchyDataSet6 extends HierarchyData {
+    public tableName: string = "Sales";
+    public hierarchyName = "Hierarchy";
+    public columnNames: string[] =
+        ["Parent", "Child"];
+    public tableValues = [
+        [  "", "2" ],
+        [ "1", "1" ],
+        [ "2",  "" ],
+        [ "2", "3" ],
+        [ "1", "5" ],
+        [  "", "6" ]
+    ];
+    public columnTypes = [
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ text: true })
+    ];
+    public columnFormat = [
+        undefined, undefined
+    ];
+    public fieldsKind = SQExprKind.HierarchyLevel;
 
     public getExpandedTests(): ExpandTest[] {
         return [
@@ -718,38 +865,59 @@ export class HierarchyDataSet5 extends HierarchyData {
     }
 }
 
-export class HierarchyDataSet6 extends HierarchyData {
-    public tableName: string = "Hierarchy";
-    public columnNames: string[] =
-        ["Parent", "Child"];
-    public tableValues: any[][] = [
-        [  "", "2" ],
-        [ "1", "1" ],
-        [ "2",  "" ],
-        [ "2", "3" ],
-        [ "1", "5" ],
-        [  "", "6" ]
+export class HierarchyDataSet7 extends HierarchyData {
+    public dataSource = DataSourceKind.MD;
+    public tableName = "Organization";
+    public hierarchyName = "Organizations";
+    public columnNames = ["Organization Level 01", "Organization Level 02", "Organization Level 03", "Organization Level 04"];
+    public tableValues = [
+        [ "AdventureWorks Cycle", "AdventureWorks Cycle", null, null ],
+        [ "AdventureWorks Cycle", "European Operations", "European Operations", null ],
+        [ "AdventureWorks Cycle", "European Operations", "France", null ],
+        [ "AdventureWorks Cycle", "European Operations", "Germany", null ],
+        [ "AdventureWorks Cycle", "North America Operations", "Canadian Division", null ],
+        [ "AdventureWorks Cycle", "North America Operations", "North America Operations", null ],
+        [ "AdventureWorks Cycle", "North America Operations", "USA Operations", "Central Division" ],
+        [ "AdventureWorks Cycle", "North America Operations", "USA Operations", "Northeast Division" ],
+        [ "AdventureWorks Cycle", "North America Operations", "USA Operations", "Northwest Division" ],
+        [ "AdventureWorks Cycle", "North America Operations", "USA Operations", "Southeast Division" ],
+        [ "AdventureWorks Cycle", "North America Operations", "USA Operations", "Southwest Division"],
+        [ "AdventureWorks Cycle", "North America Operations", "USA Operations", "USA Operations" ],
+        [ "AdventureWorks Cycle", "Pacific Operations", "Australia", null ],
+        [ "AdventureWorks Cycle", "Pacific Operations", "Pacific Operations", null ]
     ];
-    public columnTypes: any[] = [
+    public columnTypes = [
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ text: true }),
         ValueType.fromDescriptor({ text: true }),
         ValueType.fromDescriptor({ text: true })
     ];
-    public columnFormat: any[] = [
-        undefined, undefined
+    public columnFormat = [
+        undefined, undefined, undefined, undefined
     ];
     public fieldsKind = SQExprKind.HierarchyLevel;
 
     public getExpandedTests(): ExpandTest[] {
         return [
             {
-                expanded: [ "|~-0" ],
+                expanded: [ "|~AdventureWorks Cycle-0" ],
                 number: 5,
-                hideMembersOffset: [0, -3, 0]
+                hideMembersOffset: [0, 0, -1]
             },
             {
-                expanded: [ "|~1-0" ],
-                number: 5,
-                hideMembersOffset: [0, -1, -1]
+                expanded: [ "|~AdventureWorks Cycle-0", "|~AdventureWorks Cycle-0_|~AdventureWorks Cycle-1" ],
+                number: 6,
+                hideMembersOffset: [0, -1, -2]
+            },
+            {
+                expanded: [ "|~AdventureWorks Cycle-0", "|~AdventureWorks Cycle-0_|~European Operations-1" ],
+                number: 8,
+                hideMembersOffset: [0, 0, -2]
+            },
+            {
+                expanded: [ "|~AdventureWorks Cycle-0", "|~AdventureWorks Cycle-0_|~North America Operations-1", "|~AdventureWorks Cycle-0_|~North America Operations-1_|~USA Operations-2" ],
+                number: 14,
+                hideMembersOffset: [0, 0, -3]
             }
         ];
     }
@@ -757,11 +925,11 @@ export class HierarchyDataSet6 extends HierarchyData {
     public getSelectedTests(): SelectTest[] {
         return [
             {
-                description: "Empty string",
+                description: "Root level",
                 clickedDataPoints: [ 0 ],
                 target: [
                     {
-                        column: this.columnNames[0].replace(' ', ''),
+                        column: this.columnNames[0],
                         table: this.tableName
                     }
                 ],
@@ -770,38 +938,145 @@ export class HierarchyDataSet6 extends HierarchyData {
                         { value: (this.getValue(0, 0) as PrimitiveValueType) }
                     ]
                 ],
-                selectedDataPoints: [ 0, 1, 2 ],
+                selectedDataPoints: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 ],
                 partialDataPoints: []
             },
             {
-                description: `'${this.getValue(0, 0)}' and ${this.getValue(1, 1)}`,
-                clickedDataPoints: [ 0, 4 ],
+                description: `${this.getValue(4, 1)}`,
+                clickedDataPoints: [ 11 ],
                 target: [
                     {
-                        column: this.columnNames[0].replace(' ', ''),
+                        column: this.columnNames[0],
                         table: this.tableName
                     },
                     {
-                        column: this.columnNames[1].replace(' ', ''),
+                        column: this.columnNames[1],
                         table: this.tableName
                     }
                 ],
                 values: [
                     [
-                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
-                        { value: (this.getValue(0, 1) as PrimitiveValueType) }
-                    ],
-                    [
-                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
-                        { value: (this.getValue(5, 1) as PrimitiveValueType) }
-                    ],
-                    [
-                        { value: (this.getValue(1, 0) as PrimitiveValueType) },
-                        { value: (this.getValue(1, 1) as PrimitiveValueType) }
+                        { value: (this.getValue(4, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(4, 1) as PrimitiveValueType) }
                     ]
                 ],
-                selectedDataPoints: [ 0, 1, 2, 4 ],
-                partialDataPoints: [ 3 ]
+                selectedDataPoints: [ 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 ],
+                partialDataPoints: [ 0 ]
+            }
+        ];
+    }
+
+    public getSearchTests(): SearchTest[] {
+        return [];
+    }
+}
+
+export class HierarchyDataSet8 extends HierarchyData {
+    public dataSource = DataSourceKind.Native;
+    public tableName = "Sales";
+    public hierarchyName = "Date Hierarchy";
+    public columnNames = ["Year", "Month", "Date"];
+    public tableValues = [ // TODO: Wrong row order due missing 'sort by column' in tests
+        [ 2018, "April", 1 ],
+        [ 2018, "April", 2 ],
+        [ 2018, "February", 1 ],
+        [ 2018, "February", 2 ],
+        [ 2018, "February", 3 ],
+        [ 2018, "January", 1 ],
+        [ 2018, "March", 1 ],
+        [ 2018, "March", 2 ],
+        [ 2018, "March", 3 ],
+        [ 2018, "March", 4 ],
+        [ 2018, "March", 5 ],
+        [ 2018, "March", 6 ],
+        [ 2018, "March", 7 ],
+        [ 2018, "March", 8 ]
+    ];
+    public columnTypes = [
+        ValueType.fromDescriptor({ numeric: true }),
+        ValueType.fromDescriptor({ text: true }),
+        ValueType.fromDescriptor({ numeric: true })
+    ];
+    public columnFormat = [
+        undefined, undefined, undefined, undefined
+    ];
+    public fieldsKind = SQExprKind.PropertyVariationSource;
+
+    public getExpandedTests(): ExpandTest[] {
+        return [
+            {
+                expanded: [ "|~2018-0" ],
+                number: 5,
+                hideMembersOffset: [0, 0, 0]
+            },
+            {
+                expanded: [ "|~2018-0", "|~2018-0_|~February-1" ],
+                number: 8,
+                hideMembersOffset: [0, 0, 0]
+            },
+            {
+                expanded: [ "|~2018-0", "|~2018-0_|~March-1" ],
+                number: 13,
+                hideMembersOffset: [0, 0, 0]
+            },
+            {
+                expanded: [ "|~2018-0", "|~2018-0_|~February-1", "|~2018-0_|~March-1" ],
+                number: 16,
+                hideMembersOffset: [0, 0, 0]
+            }
+        ];
+    }
+
+    public getSelectedTests(): SelectTest[] {
+        return [
+            {
+                description: `${this.getValue(0, 0)}`,
+                clickedDataPoints: [ 0 ],
+                target: [
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableGuid
+                    }
+                ],
+                values: [
+                    [
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) }
+                    ]
+                ],
+                selectedDataPoints: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 ],
+                partialDataPoints: []
+            },
+            {
+                description: `${this.getValue(0, 1)} ${this.getValue(0, 2)}, ${this.getValue(0, 0)} and ${this.getValue(2, 1)} ${this.getValue(2, 2)}, ${this.getValue(2, 0)}`,
+                clickedDataPoints: [ 2, 5 ],
+                target: [
+                    {
+                        column: this.columnNames[0],
+                        table: this.tableGuid
+                    },
+                    {
+                        column: this.columnNames[1],
+                        table: this.tableGuid
+                    },
+                    {
+                        column: this.columnNames[2],
+                        table: this.tableGuid
+                    }
+                ],
+                values: [
+                    [
+                        { value: (this.getValue(0, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 1) as PrimitiveValueType) },
+                        { value: (this.getValue(0, 2) as PrimitiveValueType) }
+                    ],
+                    [
+                        { value: (this.getValue(2, 0) as PrimitiveValueType) },
+                        { value: (this.getValue(2, 1) as PrimitiveValueType) },
+                        { value: (this.getValue(2, 2) as PrimitiveValueType) }
+                    ]
+                ],
+                selectedDataPoints: [ 2, 5 ],
+                partialDataPoints: [ 0, 1, 4 ]
             }
         ];
     }
