@@ -9,9 +9,15 @@ steps:
 
 - script: |
     npm install
+  displayName: 'npm install'
+
+- script: |
     npm run lint
+  displayName: 'npm lint'
+
+- script: |
     npm run test
-  displayName: 'npm install, lint and test'
+  displayName: 'npm test'
 
 - task: PublishTestResults@2
   inputs:
