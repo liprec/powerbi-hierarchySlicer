@@ -46,7 +46,7 @@
     "dependencies": {
         "core-js": "^3.1.4",
         "d3-selection": "^1.4.0",
-        "lodash-es": "^4.17.11",
+        "lodash-es": "^4.17.14",
         "powerbi-models": "^1.2.0",
         "powerbi-visuals-utils-dataviewutils": "^2.2.0",
         "powerbi-visuals-utils-formattingutils": "^4.3.1",
