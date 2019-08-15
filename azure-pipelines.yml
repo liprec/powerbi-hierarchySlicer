@@ -41,6 +41,10 @@ steps:
   displayName: 'npm package'
 
 - script: |
+    cp ./dist/HierarchySlicer1458836712039.$(pbivizversion).pbiviz ./dist/HierarchySlicer-$(pbivizversion).pbiviz
+  displayName: 'rename visual'
+
+- script: |
     node -e "const v = require('./pbiviz.json').visual.version;console.log('##vso[task.setvariable variable=pbivizversion]' + v);"
   displayName: 'extract version name'
 
@@ -51,13 +55,13 @@ steps:
     repositoryName: liprec/powerbi-hierarchySlicer
     action: edit
     target: $(Build.SourceVersion)
-    tagSource: manual
+    tagSource: auto
     tag: $(pbivizversion)
     title: Version $(pbivizversion)
     isDraft: true
     isPreRelease: true
-    addChangeLog: false
-    assets: ./dist/HierarchySlicer1458836712039.$(pbivizversion).pbiviz
+    addChangeLog: true
+    assets: ./dist/HierarchySlicer-$(pbivizversion).pbiviz
     assetUploadMode: 'delete'
     releaseNotesSource: input
     releaseNotes: |
