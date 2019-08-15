@@ -37,16 +37,16 @@ steps:
     failIfCoverageEmpty: true
 
 - script: |
+    node -e "const v = require('./pbiviz.json').visual.version;console.log('##vso[task.setvariable variable=pbivizversion]' + v);"
+  displayName: 'extract version name'
+
+- script: |
     npm run package
   displayName: 'npm package'
 
 - script: |
     cp ./dist/HierarchySlicer1458836712039.$(pbivizversion).pbiviz ./dist/HierarchySlicer-$(pbivizversion).pbiviz
   displayName: 'rename visual'
-
-- script: |
-    node -e "const v = require('./pbiviz.json').visual.version;console.log('##vso[task.setvariable variable=pbivizversion]' + v);"
-  displayName: 'extract version name'
 
 - task: GitHubRelease@0
   displayName: 'release to github'
