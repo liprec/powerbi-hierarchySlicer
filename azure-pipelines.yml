@@ -57,7 +57,7 @@ steps:
     isDraft: true
     isPreRelease: true
     addChangeLog: false
-    assets: HierarchySlicer1458836712039.$(pbivizversion).pbiviz
+    assets: ./dist/HierarchySlicer1458836712039.$(pbivizversion).pbiviz
     assetUploadMode: 'delete'
     releaseNotesSource: input
     releaseNotes: |
