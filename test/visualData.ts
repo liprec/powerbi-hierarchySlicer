@@ -45,7 +45,7 @@ import ValueType = valueType.ValueType;
 
 // powerbi.extensibility.utils.formatting
 import { valueFormatter, dateTimeSequence } from "powerbi-visuals-utils-formattingutils";
-import ValueFormat = valueFormatter.valueFormatter.format;
+import ValueFormat = valueFormatter.format;
 
 export interface FullExpanded {
     expanded: string[];
