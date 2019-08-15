@@ -55,8 +55,9 @@ steps:
     tag: $(pbivizversion)
     title: Version $(pbivizversion)
     isDraft: true
+    isPreRelease: true
     addChangeLog: false
-    assets: dist/HierarchySlicer-$(pbivizversion).pbiviz
+    assets: ./dist/HierarchySlicer-$(pbivizversion).pbiviz
     assetUploadMode: 'delete'
     releaseNotesSource: input
     releaseNotes: |
