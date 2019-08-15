@@ -39,6 +39,7 @@ jobs:
       failIfCoverageEmpty: true
 - deployment: deploy
   displayName: Deploy to GitHub
+  environment: GitHub release
   pool:
     vmImage: 'Ubuntu 16.04'
   strategy:
