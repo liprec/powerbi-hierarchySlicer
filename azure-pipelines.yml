@@ -1,34 +1,71 @@
+variables:
+  pbivizversion: "0.0.0"
+
 pool:
   vmImage: 'Ubuntu 16.04'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+jobs:
+  - job: test
+    displayName: Test visual
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '10.x'
+        displayName: 'Install Node.js'
 
-- script: |
-    npm install
-  displayName: 'npm install'
+      - script: |
+          npm install
+        displayName: 'npm install'
 
-- script: |
-    npm run lint
-  displayName: 'npm lint'
+      - script: |
+          npm run lint
+        displayName: 'npm lint'
 
-- script: |
-    npm run test
-  displayName: 'npm test'
+      - script: |
+          npm run test
+        displayName: 'npm test'
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: '**/TESTS-*.xml'
-    testRunTitle: 'Custom Visual unit-tests'
-    mergeTestResults: true
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '**/TESTS-*.xml'
+          testRunTitle: 'Custom Visual unit-tests'
+          mergeTestResults: true
 
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
-    summaryFileLocation: '**/*-coverage.xml'
-    reportDirectory: '**/html-report'
-    failIfCoverageEmpty: true
+      - task: PublishCodeCoverageResults@1
+        inputs:
+          codeCoverageTool: 'cobertura' # Options: cobertura, jaCoCo
+          summaryFileLocation: '**/*-coverage.xml'
+          reportDirectory: '**/html-report'
+          failIfCoverageEmpty: true
+  - deployment: deploy
+    displayName: Deploy to GitHub
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              node -e "const v = require('./pbiviz.json').visual.version;console.log('##vso[task.setvariable variable=pbivizversion]' + v);"
+            displayName: 'extract version name'
+          - task: GitHubRelease@0
+            displayName: 'release to github'
+            inputs:
+              gitHubConnection: GitHub
+              repositoryName: liprec/powerbi-hierarchySlicer
+              action: edit
+              target: $(Build.SourceVersion)
+              tagSource: manual
+              tag: $(pbivizversion)
+              title: Version $(pbivizversion)
+              isDraft: true
+              addChangeLog: false
+              assets: HierarchySlicer-$(pbivizversion).pbiviz
+              assetUploadMode: 'delete'
+              releaseNotesSource: input
+              releaseNotes: |
+                # Power BI HierarchySlicer
+                Create a hierarchy of different fields and use it as a slicer with Power BI.
+
+                ## Availability
+                The final version is available at AppSource : https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380821
+              condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
