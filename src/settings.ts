@@ -34,7 +34,7 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
 import { BorderStyle, FontStyle, FontWeight, HideMembers, Zoomed } from "./enums";
 
-const fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif";
+const fontFamily: string = "wf_standard-font,helvetica,arial,sans-serif";
 
 export class HierarchySlicerSettings extends DataViewObjectsParser {
     public general: GeneralSettings = new GeneralSettings();
