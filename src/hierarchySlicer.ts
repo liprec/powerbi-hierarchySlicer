@@ -33,7 +33,7 @@ import { IMargin, CssConstants } from "powerbi-visuals-utils-svgutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
 import { ITooltipServiceWrapper, createTooltipServiceWrapper, TooltipEventArgs } from "powerbi-visuals-utils-tooltiputils";
 import { valueType } from "powerbi-visuals-utils-typeutils";
-import { IFilterTarget, TupleFilter, FilterType, ITupleFilterTarget, IFilterColumnTarget, ITupleFilter, Selector } from "powerbi-models";
+import { IFilterTarget, TupleFilter, FilterType, ITupleFilterTarget, IFilterColumnTarget, ITupleFilter, Selector, IFilterHierarchyTarget } from "powerbi-models";
 import { select, Selection } from "d3-selection";
 
 import { isEqual, uniqWith } from "lodash-es";
@@ -48,6 +48,7 @@ import * as settings from "./settings";
 import * as webBehavior from "./hierarchySlicerWebBehavior";
 import * as treeView from "./hierarchySlicerTreeView";
 import * as enums from "./enums";
+import { extractFilterColumnTarget, convertAdvancedFilterConditionsToSlicerData } from "./utils";
 
 import DataView = powerbi.DataView;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
@@ -61,6 +62,7 @@ import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import DataViewTableRow = powerbi.DataViewTableRow;
 import ISQExpr = powerbi.data.ISQExpr;
+import ISemanticFilter = powerbi.data.ISemanticFilter;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
@@ -69,7 +71,7 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
 import createInteractivitySelectionService = interactivitySelectionService.createInteractivitySelectionService;
-import extractFilterColumnTarget = interactivityFilterService.extractFilterColumnTarget;
+// import extractFilterColumnTarget = interactivityFilterService.extractFilterColumnTarget;
 import PixelConverter = pixelConverter;
 import ClassAndSelector = CssConstants.ClassAndSelector;
 import createClassAndSelector = CssConstants.createClassAndSelector;
@@ -91,12 +93,6 @@ import BorderStyle = enums.BorderStyle;
 import FontStyle = enums.FontStyle;
 import HideMembers = enums.HideMembers;
 import { isArray } from "util";
-
-enum SQExprKind {
-    ColumnRef = 2,
-    Hierarchy = 6,
-    HierarchyLevel = 7
-}
 
 export class HierarchySlicer implements IVisual {
     // MDL icons
@@ -211,7 +207,7 @@ export class HierarchySlicer implements IVisual {
         const rows: DataViewTableRow[] = dataView.table.rows.map((r) => hierarchyRowIndex.map((i: number) => r[i]));
         const columns: DataViewMetadataColumn[] = hierarchyRowIndex.map((i: number) => rawColumns[i]);
         const columnsMetadata = hierarchyRowIndex.map((i: number) => dataView.metadata.columns[i]);
-        const columnFilters: IFilterColumnTarget[] = columns.map((c: DataViewMetadataColumn) => extractFilterColumnTarget(c));
+        const columnFilters: IFilterTarget[] = columns.map((c: DataViewMetadataColumn) => extractFilterColumnTarget(c));
         const levels = hierarchyRows.length - 1;
         let dataPoints: IHierarchySlicerDataPoint[] = [];
         let fullTree: IHierarchySlicerDataPoint[] = [];
@@ -224,15 +220,18 @@ export class HierarchySlicer implements IVisual {
         let parentIndex: number[] = [];
         if (jsonFilters) {
             if (jsonFilters.length > 0) {
-                const jFilter = jsonFilters[0] as any;
-                selectedIds = jFilter.values.map((values: any | any[]) => "|~" + (
-                        Array.isArray(values) ?
-                        values.map((value, index) => {
-                            const columnIndex = columnFilters.findIndex((filter: IFilterColumnTarget) => isEqual(filter, jFilter.target[index]));
-                            const format = columnIndex > -1 ? columns[columnIndex].format : undefined;
-                            return { value: ValueFormat(value.value, format).replace(/,/g, "") + "-" + columnIndex.toString(), index: columnIndex };
-                        }).sort((dp1, dp2) => dp1.index - dp2.index).map((dp) => dp.value).join('_|~')
-                        : ValueFormat(values, columns[0].format).replace(/,/g, "") + "-0"));
+                const filter: any = 
+                    dataView.metadata &&
+                    dataView.metadata.objects &&
+                    dataView.metadata.objects.general && 
+                    dataView.metadata.objects.general.filter;
+                if (filter
+                    && filter.whereItems
+                    && filter.whereItems[0]
+                    && filter.whereItems[0].condition) {
+                        // convert advanced filter conditions list to HierarchySlicer selected values format
+                        selectedIds = convertAdvancedFilterConditionsToSlicerData(filter.whereItems[0].condition, dataView.metadata.columns);
+                    }
             } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
                 selectedIds = this.settings.general.filterValues.split(",");
             }
@@ -300,7 +299,7 @@ export class HierarchySlicer implements IVisual {
                 let ownId: string = parentId + (parentId === "" ? "" : "_") + "|~" + labelValueId.replace(/,/g, "") + "-" + c;
                 let searchStr: string = parentSearchStr + labelValue.replace(/,/g, "");
                 let isLeaf: boolean = c === levels;
-                const filterTarget: IFilterColumnTarget = columnFilters[c];
+                const filterTarget: IFilterTarget = columnFilters[c];
                 const selected: boolean = this.settings.general.selectAll || selectedIds.filter((d) => ownId.indexOf(d) > -1).length > 0;
                 toolTip = toolTip.concat([({ displayName: columns[c].displayName, value: labelValue } as VisualTooltipDataItem)]);
 
@@ -569,7 +568,6 @@ export class HierarchySlicer implements IVisual {
             && dataView2
             && dataView1.table // in table view mapping is null
             && dataView2.table) { // in table view mapping is null
-            // debugger;
             let dv1TableIdentity = dataView1.table.identity;
             let dv2TableIdentity = dataView2.table.identity;
             if (dv1TableIdentity
@@ -579,7 +577,6 @@ export class HierarchySlicer implements IVisual {
                     let dv1Identity: any = dv1TableIdentity[i];
                     let dv2Identity: any = dv2TableIdentity[i];
 
-                    // debugger;
                     if (!isEqual((<any>dv1Identity).scopeId, (<any>dv2Identity).scopeId))
                         return false;
                 }
