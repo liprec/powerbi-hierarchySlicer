@@ -86,9 +86,9 @@ class HeaderSettings {
 }
 
 class SlicerTextSettings {
-    public fontColor: string = "#666666";
-    public hoverColor: string = "#212121";
-    public selectedColor: string = "#444444";
+    public fontColor: string = "#888";
+    public hoverColor: string = "#222";
+    public selectedColor: string = "#444";
     public background: string = "";
     public textSize: number = 10;
     public fontFamily: string = fontFamily;
