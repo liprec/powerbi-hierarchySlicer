@@ -97,14 +97,14 @@ export function convertAdvancedFilterConditionsToSlicerData(conditions: any, col
     if (!conditions || !conditions.values) {
         return [];
     }
-    
+
     let result: string[] = [];
 
     conditions.values.forEach((value: any) => {
         let res = "";
-        for (let index = value.length-1; index >= 0; index--) {
+        for (let index = value.length - 1; index >= 0; index--) {
             let level = value[index];
-            if (level.value===null) {
+            if (level.value === null) {
                 result.push(res);
             }
             let format = columnDefs[index].format;
@@ -115,6 +115,6 @@ export function convertAdvancedFilterConditionsToSlicerData(conditions: any, col
 
         result.push(res);
     });
-    
+
     return result;
-};
+}

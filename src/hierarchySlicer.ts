@@ -220,10 +220,10 @@ export class HierarchySlicer implements IVisual {
         let parentIndex: number[] = [];
         if (jsonFilters) {
             if (jsonFilters.length > 0) {
-                const filter: any = 
+                const filter: any =
                     dataView.metadata &&
                     dataView.metadata.objects &&
-                    dataView.metadata.objects.general && 
+                    dataView.metadata.objects.general &&
                     dataView.metadata.objects.general.filter;
                 if (filter
                     && filter.whereItems
