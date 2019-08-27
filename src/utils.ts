@@ -30,9 +30,13 @@
 import powerbi from "powerbi-visuals-api";
 import { IFilterTarget } from "powerbi-models";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import { valueType } from "powerbi-visuals-utils-typeutils";
 
+import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
+import PrimitiveValue = powerbi.PrimitiveValue;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import ValueType = valueType.ValueType;
 import ValueFormat = valueFormatter.format;
 
 enum SQExprKind {
@@ -93,25 +97,45 @@ export function extractFilterColumnTarget(categoryColumn: DataViewCategoryColumn
     };
 }
 
+export function convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDescriptor, full: boolean = false): any {
+    if ((dataType.dateTime) && (full)) {
+       return new Date(rawValue as Date);
+    } else if (dataType.numeric) {
+        return rawValue as number;
+    } else {
+        return rawValue as string;
+    }
+};
+
 export function convertAdvancedFilterConditionsToSlicerData(conditions: any, columnDefs: DataViewMetadataColumn[]): string[] {
-    if (!conditions || !conditions.values) {
+    if (!conditions || !conditions.values || !conditions.args || !columnDefs) {
         return [];
     }
 
     let result: string[] = [];
 
-    conditions.values.forEach((value: any) => {
+    const args = conditions.args;
+    conditions.values.forEach((valueArray: any) => {
         let res = "";
-        for (let index = value.length - 1; index >= 0; index--) {
-            let level = value[index];
-            if (level.value === null) {
+        valueArray.forEach((value: any, index: number) => {
+            const columnIndex = columnDefs.findIndex((def) => {
+                const expr = def.expr as any;
+                const arg = args[index];
+                const exprColumnName = expr.level ? expr.level : expr.ref;
+                const exprTableName = expr.source ? expr.source.entity : expr.arg.arg.entity;
+                const argColumnName = arg.level ? arg.level : arg.ref;
+                const argTableName = arg.source ? arg.source.entity : arg.arg.arg.entity;
+                return exprColumnName === argColumnName && exprTableName === argTableName;
+            });
+            if (value.value===null) {
                 result.push(res);
             }
-            let format = columnDefs[index].format;
-            let labelValue = ValueFormat(level.value, format);
-            labelValue = labelValue === null ? "(blank)" : labelValue;
-            res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + (value.length - index - 1);
-        }
+
+            const format = columnDefs[columnIndex].format || "g";
+            const dataType: ValueTypeDescriptor = columnDefs[columnIndex] && columnDefs[columnIndex].type || ValueType.fromDescriptor({ text: true });
+            const labelValue = ValueFormat(convertRawValue(value.value, dataType), format)
+            res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
+        });
 
         result.push(res);
     });

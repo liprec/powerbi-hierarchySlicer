@@ -48,7 +48,7 @@ import * as settings from "./settings";
 import * as webBehavior from "./hierarchySlicerWebBehavior";
 import * as treeView from "./hierarchySlicerTreeView";
 import * as enums from "./enums";
-import { extractFilterColumnTarget, convertAdvancedFilterConditionsToSlicerData } from "./utils";
+import { extractFilterColumnTarget, convertAdvancedFilterConditionsToSlicerData, convertRawValue } from "./utils";
 
 import DataView = powerbi.DataView;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
@@ -191,16 +191,6 @@ export class HierarchySlicer implements IVisual {
             };
         }
 
-        let convertRawValue = (rawValue: PrimitiveValue, dataType: ValueTypeDescriptor, full: boolean = false) => {
-            if ((dataType.dateTime) && (full)) {
-               return new Date(rawValue as Date);
-            } else if (dataType.numeric) {
-                return rawValue as number;
-            } else {
-                return rawValue as string;
-            }
-        };
-
         const rawColumns = dataView.table && dataView.table.columns;
         const hierarchyRows: DataViewMetadataColumn[] = dataView.metadata.columns.filter((c: DataViewMetadataColumn) => c.roles ? c.roles["Fields"] : false); // Filter out 'Values' level
         const hierarchyRowIndex: (number | undefined)[] = hierarchyRows.map((c) => c.index);
@@ -220,18 +210,30 @@ export class HierarchySlicer implements IVisual {
         let parentIndex: number[] = [];
         if (jsonFilters) {
             if (jsonFilters.length > 0) {
-                const filter: any =
-                    dataView.metadata &&
-                    dataView.metadata.objects &&
-                    dataView.metadata.objects.general &&
-                    dataView.metadata.objects.general.filter;
-                if (filter
-                    && filter.whereItems
-                    && filter.whereItems[0]
-                    && filter.whereItems[0].condition) {
-                        // convert advanced filter conditions list to HierarchySlicer selected values format
-                        selectedIds = convertAdvancedFilterConditionsToSlicerData(filter.whereItems[0].condition, dataView.metadata.columns);
-                    }
+                if (!(columnFilters[0] as any).hierarchyLevel) {
+                    const jFilter = jsonFilters[0] as any;
+                    selectedIds = jFilter.values.map((values: any | any[]) => "|~" + (
+                            Array.isArray(values) ?
+                            values.map((value, index) => {
+                                const columnIndex = columnFilters.findIndex((filter: IFilterColumnTarget) => isEqual(filter, jFilter.target[index]));
+                                const format = columnIndex > -1 ? columns[columnIndex].format : undefined;
+                                return { value: ValueFormat(value.value, format).replace(/,/g, "") + "-" + columnIndex.toString(), index: columnIndex };
+                            }).sort((dp1, dp2) => dp1.index - dp2.index).map((dp) => dp.value).join('_|~')
+                            : ValueFormat(values, columns[0].format).replace(/,/g, "") + "-0"));
+                } else { // fallback scenario due to missing info in jsonFilter
+                    const filter: any =
+                        dataView.metadata &&
+                        dataView.metadata.objects &&
+                        dataView.metadata.objects.general &&
+                        dataView.metadata.objects.general.filter;
+                    if (filter
+                        && filter.whereItems
+                        && filter.whereItems[0]
+                        && filter.whereItems[0].condition) {
+                            // convert advanced filter conditions list to HierarchySlicer selected values format
+                            selectedIds = convertAdvancedFilterConditionsToSlicerData(filter.whereItems[0].condition, columns);
+                        }
+                }
             } else if (this.settings.general.filterValues && (this.settings.general.filterValues !== "")) {
                 selectedIds = this.settings.general.filterValues.split(",");
             }
