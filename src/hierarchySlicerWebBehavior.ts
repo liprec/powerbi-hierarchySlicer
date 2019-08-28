@@ -374,7 +374,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             const filterTarget = (<IFilterColumnTarget>dataPoint.filterTarget);
             if ((dataPoint.selected) && dataPoint.level <= levels) {
                 if (targets.indexOf(filterTarget) === -1) {
-                    targets.push(filterTarget)
+                    targets.push(filterTarget);
                 }
             }
         });

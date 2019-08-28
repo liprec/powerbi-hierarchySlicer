@@ -2155,7 +2155,7 @@ describe('HierarchySlicer specific dataView cases =>', () => {
 
             visualBuilder.updateRenderTimeout(options, () => {
                 const data = visualBuilder.instance.converter((options as any).dataViews[0], [{}], "");
-                
+
                 expect(data.dataPoints.length).toBe(4);
 
                 expect(data.dataPoints.filter(d => d.selected).length).toBe(1);

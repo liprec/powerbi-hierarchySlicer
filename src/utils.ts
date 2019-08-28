@@ -105,7 +105,7 @@ export function convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDes
     } else {
         return rawValue as string;
     }
-};
+}
 
 export function convertAdvancedFilterConditionsToSlicerData(conditions: any, columnDefs: DataViewMetadataColumn[]): string[] {
     if (!conditions || !conditions.values || !conditions.args || !columnDefs) {
@@ -128,13 +128,13 @@ export function convertAdvancedFilterConditionsToSlicerData(conditions: any, col
                 const argTableName = arg.source ? arg.source.entity : arg.arg.hierarchy;
                 return exprColumnName === argColumnName && exprTableName === argTableName;
             });
-            if (value.value===null) {
+            if (value.value === null) {
                 result.push(res);
             }
             if (columnIndex !== -1) {
                 const format = columnDefs[columnIndex].format || "g";
                 const dataType: ValueTypeDescriptor = columnDefs[columnIndex] && columnDefs[columnIndex].type || ValueType.fromDescriptor({ text: true });
-                const labelValue = ValueFormat(convertRawValue(value.value, dataType), format)
+                const labelValue = ValueFormat(convertRawValue(value.value, dataType), format);
                 res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
             }
         });
