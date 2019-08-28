@@ -26,7 +26,7 @@
  */
 
 import powerbi from "powerbi-visuals-api";
-import { valueFormatter, textMeasurementService} from "powerbi-visuals-utils-formattingutils";
+import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
 
 import DataView = powerbi.DataView;
@@ -42,7 +42,7 @@ import TextMeasurementService = textMeasurementService.textMeasurementService;
 import { HierarchySlicer } from "../src/hierarchySlicer";
 
 import { HierarchySlicerBuilder } from "./visualBuilder";
-import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5, HierarchyDataSet6, HierarchyDataSet7, HierarchyDataSet8 } from "./visualData";
+import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5, HierarchyDataSet6, HierarchyDataSet7, HierarchyDataSet8 } from "./visualData"; // tslint:disable-line: prettier
 import { HierarchySlicerSettings } from "../src/settings";
 import { IFilter, TupleFilter } from "powerbi-models";
 import { FontStyle, FontWeight, BorderStyle, Zoomed } from "../src/enums";
@@ -52,8 +52,7 @@ const hideMembers: number[] = [0, 1, 2];
 const renderTimeout: number = 125;
 
 describe("HierachySlicer =>", () => {
-    let visualBuilder: HierarchySlicerBuilder,
-        defaultSettings: HierarchySlicerSettings;
+    let visualBuilder: HierarchySlicerBuilder, defaultSettings: HierarchySlicerSettings;
 
     beforeEach(() => {
         visualBuilder = new HierarchySlicerBuilder(1000, 500);
@@ -69,233 +68,295 @@ describe("HierachySlicer =>", () => {
         new HierarchyDataSet5(),
         new HierarchyDataSet6(),
         new HierarchyDataSet7(),
-        new HierarchyDataSet8()
+        new HierarchyDataSet8(),
     ];
 
     dataSets.forEach((testData, index) => {
-
         describe(`converter tests [dataset: ${index + 1}] =>`, () => {
-            it(`same list of ownIds`, (done) => {
+            it(`same list of ownIds`, done => {
                 const dataViewTest = testData.getDataView();
                 const testOwnIds = testData.getOwnIds();
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const data = visualBuilder.instance.converter(dataViewTest, [], "");
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const data = visualBuilder.instance.converter(dataViewTest, [], "");
 
-                    expect(data.dataPoints.map((dataPoint) => dataPoint.ownId)).toEqual(testOwnIds);
+                        expect(data.dataPoints.map(dataPoint => dataPoint.ownId)).toEqual(testOwnIds);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Basic render tests [dataset: ${index + 1}] =>`, () => {
-            it(`no dataView, show watermark [dataset: ${index + 1}]`, (done) => {
-                visualBuilder.updateRenderTimeout([], () => {
-                    expect(visualBuilder.element.find("svg").length)
-                        .toBe(1); // Watermark is a SVG drawing
+            it(`no dataView, show watermark [dataset: ${index + 1}]`, done => {
+                visualBuilder.updateRenderTimeout(
+                    [],
+                    () => {
+                        expect(visualBuilder.element.find("svg").length).toBe(1); // Watermark is a SVG drawing
 
-                    expect(visualBuilder.element.find("svg").find("rect").length)
-                        .toBe(22); // rect in Watermark
+                        expect(visualBuilder.element.find("svg").find("rect").length).toBe(22); // rect in Watermark
 
-                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                        .toBe(0); // No row items
+                        expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(0); // No row items
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`default settings [dataset: ${index + 1}]`, (done) => {
+            it(`default settings [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const rowLength: number = testData.getLevelCount(1); // Collapse all
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const rowLength: number = testData.getLevelCount(1); // Collapse all
 
-                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                        .toBe(rowLength);
+                        expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(rowLength);
 
-                    const slicerBodyHeightToBe = visualBuilder.viewport.height -
-                        TextMeasurementService.estimateSvgTextHeight(
-                            <TextProperties>{
+                        const slicerBodyHeightToBe =
+                            visualBuilder.viewport.height -
+                            TextMeasurementService.estimateSvgTextHeight(<TextProperties>{
                                 fontFamily: HierarchySlicer.DefaultFontFamily,
                                 fontSize: PixelConverter.fromPoint(defaultSettings.header.textSize),
                             }) -
-                        defaultSettings.header.borderBottomWidth;
+                            defaultSettings.header.borderBottomWidth;
 
-                    expect(visualBuilder.element.find(".slicerBody")[0])
-                        .toHaveCss({ height: `${slicerBodyHeightToBe.toString()}px` });
+                        expect(visualBuilder.element.find(".slicerBody")[0]).toHaveCss({
+                            height: `${slicerBodyHeightToBe.toString()}px`,
+                        });
 
-                    expect(visualBuilder.element.find(".slicerBody").attr("width"))
-                        .toBe(visualBuilder.viewport.width.toString());
+                        expect(visualBuilder.element.find(".slicerBody").attr("width")).toBe(
+                            visualBuilder.viewport.width.toString()
+                        );
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`default item formatting [dataset: ${index + 1}]`, (done) => {
+            it(`default item formatting [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        expect(itemContainer.children.length).toBe(2);
+                        itemContainers.forEach(itemContainer => {
+                            expect(itemContainer.children.length).toBe(2);
 
-                        if (testData.columnNames.length > 1) {
-                            const itemExpander = itemContainer.firstChild;
-                            expect(itemExpander && itemExpander.childNodes.length).toBe(2);
+                            if (testData.columnNames.length > 1) {
+                                const itemExpander = itemContainer.firstChild;
+                                expect(itemExpander && itemExpander.childNodes.length).toBe(2);
 
-                            // Expanded icon styling
-                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fill).toBe(hexToRgb(defaultSettings.items.fontColor));
-                            expect(itemExpanderStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
-                        }
+                                // Expanded icon styling
+                                const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement)
+                                    .style;
+                                expect(itemExpanderStyle.fill).toBe(hexToRgb(defaultSettings.items.fontColor));
+                                expect(itemExpanderStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
+                            }
 
-                        const itemContainerChild = itemContainer.lastChild;
-                        expect(itemContainerChild && itemContainerChild.childNodes.length).toBe(2);
+                            const itemContainerChild = itemContainer.lastChild;
+                            expect(itemContainerChild && itemContainerChild.childNodes.length).toBe(2);
 
-                        // Checkbox styling
-                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.height).toBe(measurePixelString(.75 * defaultSettings.items.textSize));
-                        expect(checkboxStyle.width).toBe(measurePixelString(.75 * defaultSettings.items.textSize));
-                        expect(checkboxStyle.marginRight).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * defaultSettings.items.textSize)));
-                        expect(checkboxStyle.marginBottom).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * defaultSettings.items.textSize)));
+                            // Checkbox styling
+                            const checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.height).toBe(
+                                measurePixelString(0.75 * defaultSettings.items.textSize)
+                            );
+                            expect(checkboxStyle.width).toBe(measurePixelString(0.75 * defaultSettings.items.textSize));
+                            expect(checkboxStyle.marginRight).toBe(
+                                measurePixelString(
+                                    PixelConverter.fromPointToPixel(0.25 * defaultSettings.items.textSize)
+                                )
+                            );
+                            expect(checkboxStyle.marginBottom).toBe(
+                                measurePixelString(
+                                    PixelConverter.fromPointToPixel(0.25 * defaultSettings.items.textSize)
+                                )
+                            );
 
-                        // // Span (label) styling
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.color).toBe(hexToRgb(defaultSettings.items.fontColor));
-                        expect(labelStyle.fontFamily).toBe(fontFamilyString(defaultSettings.items.fontFamily));
-                        expect(labelStyle.fontStyle).toBe(fontStyleString(defaultSettings.items.fontStyle));
-                        expect(labelStyle.fontWeight).toBe(defaultSettings.items.fontWeight.toString());
-                        expect(labelStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
-                    });
+                            // // Span (label) styling
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.color).toBe(hexToRgb(defaultSettings.items.fontColor));
+                            expect(labelStyle.fontFamily).toBe(fontFamilyString(defaultSettings.items.fontFamily));
+                            expect(labelStyle.fontStyle).toBe(fontStyleString(defaultSettings.items.fontStyle));
+                            expect(labelStyle.fontWeight).toBe(defaultSettings.items.fontWeight.toString());
+                            expect(labelStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`default item labels [dataset: ${index + 1}]`, (done) => {
+            it(`default item labels [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const expandedToBe: FullExpanded = testData.getFullExpanded();
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: expandedToBe.expanded.join(",")
-                    }
+                        expanded: expandedToBe.expanded.join(","),
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    testData.getItemLabels().forEach((label, index) => {
-                        const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        testData.getItemLabels().forEach((label, index) => {
+                            const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
 
-                        expect(item).toHaveText(label);
-                    });
+                            expect(item).toHaveText(label);
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Visual context menu [dataset: ${index + 1}] =>`, () => {
-            it(`Search on (selfFilterEnabled: true) [dataset: ${index + 1}]`, (done) => {
+            it(`Search on (selfFilterEnabled: true) [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 dataViewTest.metadata.objects = {
                     general: {
-                        selfFilterEnabled: true
-                    }
+                        selfFilterEnabled: true,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const slicerBodyHeightToBe = visualBuilder.viewport.height -
-                        TextMeasurementService.estimateSvgTextHeight(
-                            <TextProperties>{
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const slicerBodyHeightToBe =
+                            visualBuilder.viewport.height -
+                            TextMeasurementService.estimateSvgTextHeight(<TextProperties>{
                                 fontFamily: HierarchySlicer.DefaultFontFamily,
                                 fontSize: PixelConverter.fromPoint(defaultSettings.search.textSize),
                             }) -
-                        TextMeasurementService.estimateSvgTextHeight(
-                            <TextProperties>{
+                            TextMeasurementService.estimateSvgTextHeight(<TextProperties>{
                                 fontFamily: HierarchySlicer.DefaultFontFamily,
                                 fontSize: PixelConverter.fromPoint(defaultSettings.header.textSize),
                             }) -
-                        defaultSettings.header.borderBottomWidth
-                        - 2;
-                    const slicerBodyHeightStyle = visualBuilder.element.find(".slicerBody")[0].style.height;
+                            defaultSettings.header.borderBottomWidth -
+                            2;
+                        const slicerBodyHeightStyle = visualBuilder.element.find(".slicerBody")[0].style.height;
 
-                    expect(slicerBodyHeightStyle)
-                        .toBe(`${slicerBodyHeightToBe.toString()}px`);
+                        expect(slicerBodyHeightStyle).toBe(`${slicerBodyHeightToBe.toString()}px`);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
             testData.getSearchTests().forEach((searchTest, index) => {
-                it(`Search for ${searchTest.searchString} [dataset: ${index + 1}`, (done) => {
+                it(`Search for ${searchTest.searchString} [dataset: ${index + 1}`, done => {
                     const selector = HierarchySlicer.ItemContainerChild.selectorName;
                     const dataViewTest = testData.getDataView();
                     const expandedToBe: FullExpanded = testData.getFullExpanded();
                     dataViewTest.metadata.objects = {
                         general: {
                             selfFilterEnabled: true,
-                            expanded: expandedToBe.expanded.join(",")
-                        }
+                            expanded: expandedToBe.expanded.join(","),
+                        },
                     };
 
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const searchInput = visualBuilder.element.find(".searchInput");
-                        searchInput.val(searchTest.searchString);
-                        searchInput[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const searchInput = visualBuilder.element.find(".searchInput");
+                            searchInput.val(searchTest.searchString);
+                            searchInput[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
 
-                        const searchCallBack = visualBuilder.properties[0].merge;
-                        expect(searchCallBack).not.toBeEmpty();
+                            const searchCallBack = visualBuilder.properties[0].merge;
+                            expect(searchCallBack).not.toBeEmpty();
 
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                .toBe(searchTest.results);
+                            visualBuilder.updateRenderTimeout(
+                                dataViewTest,
+                                () => {
+                                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                        searchTest.results
+                                    );
 
-                            const item = visualBuilder.element.find(selector).toArray().filter((row, index) =>
-                                $(row).find(".slicerText")[0].textContent === searchTest.searchString);
+                                    const item = visualBuilder.element
+                                        .find(selector)
+                                        .toArray()
+                                        .filter(
+                                            (row, index) =>
+                                                $(row).find(".slicerText")[0].textContent === searchTest.searchString
+                                        );
 
-                            $(item).click();
+                                    $(item).click();
 
-                            const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
+                                    const itemCheckBoxes: HTMLElement[] = visualBuilder.element
+                                        .find(".visibleGroup")
+                                        .children(".row")
+                                        .find(".slicerCheckbox")
+                                        .toArray();
 
-                            searchTest.selectedDataPoints && searchTest.selectedDataPoints.forEach((dataPoint) => {
-                                expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
-                            });
+                                    searchTest.selectedDataPoints &&
+                                        searchTest.selectedDataPoints.forEach(dataPoint => {
+                                            expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
+                                        });
 
-                            searchTest.partialDataPoints && searchTest.partialDataPoints.forEach((dataPoint) => {
-                                expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
-                            });
-                            done();
-                        }, renderTimeout);
-                    }, renderTimeout);
+                                    searchTest.partialDataPoints &&
+                                        searchTest.partialDataPoints.forEach(dataPoint => {
+                                            expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
+                                        });
+                                    done();
+                                },
+                                renderTimeout
+                            );
+                        },
+                        renderTimeout
+                    );
                 });
             });
 
             testData.getSearchTests().forEach((searchTest, index) => {
-                it(`Search for ${searchTest.searchString} with 'Select All' [dataset: ${index + 1}`, (done) => {
+                it(`Search for ${searchTest.searchString} with 'Select All' [dataset: ${index + 1}`, done => {
                     const dataViewTest = testData.getDataView();
                     const expandedToBe: FullExpanded = testData.getFullExpanded();
                     dataViewTest.metadata.objects = {
                         general: {
                             selfFilterEnabled: true,
-                            expanded: expandedToBe.expanded.join(",")
+                            expanded: expandedToBe.expanded.join(","),
                         },
                         selection: {
-                            selectAll: true
-                        }
+                            selectAll: true,
+                        },
                     };
 
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const searchInput = visualBuilder.element.find(".searchInput");
-                        searchInput.val(searchTest.searchString);
-                        searchInput[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const searchInput = visualBuilder.element.find(".searchInput");
+                            searchInput.val(searchTest.searchString);
+                            searchInput[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
 
-                        const searchCallBack = visualBuilder.properties[0].merge;
-                        expect(searchCallBack).not.toBeEmpty();
+                            const searchCallBack = visualBuilder.properties[0].merge;
+                            expect(searchCallBack).not.toBeEmpty();
 
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                .toBe(searchTest.results + (searchTest.searchString.length < 3 ? 1 : 0));
+                            visualBuilder.updateRenderTimeout(
+                                dataViewTest,
+                                () => {
+                                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                        searchTest.results + (searchTest.searchString.length < 3 ? 1 : 0)
+                                    );
 
-                            done();
-                        }, renderTimeout);
-                    }, renderTimeout);
+                                    done();
+                                },
+                                renderTimeout
+                            );
+                        },
+                        renderTimeout
+                    );
                 });
             });
         });
@@ -303,67 +364,83 @@ describe("HierachySlicer =>", () => {
         describe(`Saved settings restored =>`, () => {
             describe(`Restore saved 'expanded' setting [dataset: ${index + 1}] =>`, () => {
                 testData.getExpandedTests().forEach((expandedTest, testIndex) => {
-                    it(`Restore expanded [dataset: ${index + 1}, test: ${testIndex + 1}]`, (done) => {
+                    it(`Restore expanded [dataset: ${index + 1}, test: ${testIndex + 1}]`, done => {
                         const dataViewTest = testData.getDataView();
                         dataViewTest.metadata.objects = {
                             general: {
-                                expanded: expandedTest.expanded.join(",")
-                            }
+                                expanded: expandedTest.expanded.join(","),
+                            },
                         };
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                .toBe(expandedTest.number);
+                        visualBuilder.updateRenderTimeout(
+                            dataViewTest,
+                            () => {
+                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                    expandedTest.count
+                                );
 
-                            done();
-                        }, renderTimeout);
+                                done();
+                            },
+                            renderTimeout
+                        );
                     });
                 });
 
                 testData.getExpandedTests().forEach((expandedTest: ExpandTest, testIndex: number) => {
-                    it(`Restore expanded (selectAll: true) [dataset: ${index + 1}, test: ${testIndex + 1}]`, (done) => {
+                    it(`Restore expanded (selectAll: true) [dataset: ${index + 1}, test: ${testIndex + 1}]`, done => {
                         const dataViewTest = testData.getDataView();
                         dataViewTest.metadata.objects = {
                             general: {
-                                expanded: expandedTest.expanded.join(",")
+                                expanded: expandedTest.expanded.join(","),
                             },
                             selection: {
-                                selectAll: true
-                            }
+                                selectAll: true,
+                            },
                         };
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                .toBe(expandedTest.number + 1);
+                        visualBuilder.updateRenderTimeout(
+                            dataViewTest,
+                            () => {
+                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                    expandedTest.count + 1
+                                );
 
-                            done();
-                        }, renderTimeout);
+                                done();
+                            },
+                            renderTimeout
+                        );
                     });
                 });
             });
         });
 
         describe(`Selection settings [dataset: ${index + 1}] =>`, () => {
-            hideMembers.forEach((hideMember) => {
+            hideMembers.forEach(hideMember => {
                 testData.getExpandedTests().forEach((expandedTest: ExpandTest, testIndex: number) => {
-                    it(`Restore expanded (hideMembers: ${hideMember}) [dataset: ${index + 1}, test: ${testIndex + 1}]`, (done) => {
+                    it(`Restore expanded (hideMembers: ${hideMember}) [dataset: ${index + 1}, test: ${testIndex +
+                        1}]`, done => {
                         const dataViewTest = testData.getDataView();
                         dataViewTest.metadata.objects = {
                             general: {
-                                expanded: expandedTest.expanded.join(",")
+                                expanded: expandedTest.expanded.join(","),
                             },
                             selection: {
-                                hideMembers: hideMember
-                            }
+                                hideMembers: hideMember,
+                            },
                         };
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                .toBe(expandedTest.number + expandedTest.hideMembersOffset[hideMember]);
-                            done();
-                        }, renderTimeout);
+                        visualBuilder.updateRenderTimeout(
+                            dataViewTest,
+                            () => {
+                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                    expandedTest.count + expandedTest.hideMembersOffset[hideMember]
+                                );
+                                done();
+                            },
+                            renderTimeout
+                        );
                     });
                 });
             });
 
-            it(`Restore expanded, old settings  (emptyLeafs: false) [dataset: ${index + 1}]`, (done) => {
+            it(`Restore expanded, old settings  (emptyLeafs: false) [dataset: ${index + 1}]`, done => {
                 if (testData.getExpandedTests().length === 0) {
                     done();
                     return;
@@ -374,20 +451,25 @@ describe("HierachySlicer =>", () => {
                 const testValue: ExpandTest = testData.getExpandedTests()[0];
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: testValue.expanded.join(",")
+                        expanded: testValue.expanded.join(","),
                     },
                     selection: {
-                        emptyLeafs: false
-                    }
+                        emptyLeafs: false,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                        .toBe(testValue.number + testValue.hideMembersOffset[1]);
-                    done();
-                }, renderTimeout);
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                            testValue.count + testValue.hideMembersOffset[1]
+                        );
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Restore expanded, old settings (emptyLeafs: true) [dataset: ${index + 1}]`, (done) => {
+            it(`Restore expanded, old settings (emptyLeafs: true) [dataset: ${index + 1}]`, done => {
                 if (testData.getExpandedTests().length === 0) {
                     done();
                     return;
@@ -398,204 +480,246 @@ describe("HierachySlicer =>", () => {
                 const testValue: ExpandTest = testData.getExpandedTests()[0];
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: testValue.expanded.join(",")
+                        expanded: testValue.expanded.join(","),
                     },
                     selection: {
-                        emptyLeafs: true
-                    }
+                        emptyLeafs: true,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                        .toBe(testValue.number + testValue.hideMembersOffset[0]);
-                    done();
-                }, renderTimeout);
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                            testValue.count + testValue.hideMembersOffset[0]
+                        );
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Empty leaf label: xxxxxxx, '' strings are empty: true [dataset: ${index + 1}]`, (done) => {
+            it(`Empty leaf label: xxxxxxx, '' strings are empty: true [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const expandedToBe: FullExpanded = testData.getFullExpanded();
                 const emptyLeafLabel = "xxxxxxx";
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: expandedToBe.expanded.join(",")
+                        expanded: expandedToBe.expanded.join(","),
                     },
                     selection: {
                         emptyLeafLabel: emptyLeafLabel,
                         emptyString: true,
-                    }
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    testData.getItemLabels(true, emptyLeafLabel).forEach((label, index) => {
-                        const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
-                        expect(item).toHaveText(label);
-                        expect(item).not.toHaveText("(Blank)");
-                    });
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        testData.getItemLabels(true, emptyLeafLabel).forEach((label, index) => {
+                            const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                            expect(item).toHaveText(label);
+                            expect(item).not.toHaveText("(Blank)");
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Empty leaf label: xxxxxxx, '' strings are empty: false [dataset: ${index + 1}]`, (done) => {
+            it(`Empty leaf label: xxxxxxx, '' strings are empty: false [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const expandedToBe: FullExpanded = testData.getFullExpanded();
                 const emptyLeafLabel = "xxxxxxx";
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: expandedToBe.expanded.join(",")
+                        expanded: expandedToBe.expanded.join(","),
                     },
                     selection: {
                         emptyLeafLabel: emptyLeafLabel,
                         emptyString: false,
-                    }
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    testData.getItemLabels(false, emptyLeafLabel).forEach((label, index) => {
-                        const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
-                        expect(item).toHaveText(label);
-                    });
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        testData.getItemLabels(false, emptyLeafLabel).forEach((label, index) => {
+                            const item = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                            expect(item).toHaveText(label);
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Single select: false [dataset: ${index + 1}]`, (done) => {
+            it(`Single select: false [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const expandedToBe: FullExpanded = testData.getFullExpanded();
                 dataViewTest.metadata.objects = {
                     general: {
                         selfFilterEnabled: true,
-                        expanded: expandedToBe.expanded.join(",")
+                        expanded: expandedToBe.expanded.join(","),
                     },
                     selection: {
                         selectAll: true,
-                        singleSelect: false
-                    }
+                        singleSelect: false,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const slicerContainer = visualBuilder.element.find(".slicerContainer");
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const slicerContainer = visualBuilder.element.find(".slicerContainer");
 
-                    expect(slicerContainer).toHaveClass("isMultiSelectEnabled");
+                        expect(slicerContainer).toHaveClass("isMultiSelectEnabled");
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Single select: true [dataset: ${index + 1}]`, (done) => {
+            it(`Single select: true [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const expandedToBe: FullExpanded = testData.getFullExpanded();
                 dataViewTest.metadata.objects = {
                     general: {
                         selfFilterEnabled: true,
-                        expanded: expandedToBe.expanded.join(",")
+                        expanded: expandedToBe.expanded.join(","),
                     },
                     selection: {
                         selectAll: true,
-                        singleSelect: true
-                    }
+                        singleSelect: true,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const slicerContainer = visualBuilder.element.find(".slicerContainer");
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const slicerContainer = visualBuilder.element.find(".slicerContainer");
 
-                    expect(slicerContainer).not.toHaveClass("isMultiSelectEnabled");
+                        expect(slicerContainer).not.toHaveClass("isMultiSelectEnabled");
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Select All label 'xxxxxxx' [dataset: ${index + 1}]`, (done) => {
+            it(`Select All label 'xxxxxxx' [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const selectAllLabel = "xxxxxxx";
                 dataViewTest.metadata.objects = {
                     selection: {
                         selectAll: true,
-                        selectAllLabel: selectAllLabel
-                    }
+                        selectAllLabel: selectAllLabel,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const selectAllLabelItem = visualBuilder.element.find(".slicerItemContainer").find(".slicerText")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const selectAllLabelItem = visualBuilder.element
+                            .find(".slicerItemContainer")
+                            .find(".slicerText")[0];
 
-                    expect(selectAllLabelItem).toHaveText(selectAllLabel);
+                        expect(selectAllLabelItem).toHaveText(selectAllLabel);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Slicer Header settings [dataset: ${index + 1}] =>`, () => {
-            it(`Show: false [dataset: ${index + 1}]`, (done) => {
+            it(`Show: false [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 dataViewTest.metadata.objects = {
                     header: {
-                        show: false
-                    }
+                        show: false,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const slicerBodyHeightToBe = visualBuilder.viewport.height -
-                        defaultSettings.header.borderBottomWidth;
-                    const slicerBodyHeightStyle = visualBuilder.element.find(".slicerBody")[0].style.height;
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const slicerBodyHeightToBe =
+                            visualBuilder.viewport.height - defaultSettings.header.borderBottomWidth;
+                        const slicerBodyHeightStyle = visualBuilder.element.find(".slicerBody")[0].style.height;
 
-                    expect(slicerBodyHeightStyle)
-                        .toBe(`${slicerBodyHeightToBe.toString()}px`);
+                        expect(slicerBodyHeightStyle).toBe(`${slicerBodyHeightToBe.toString()}px`);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - default label [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - default label [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 dataViewTest.metadata.objects = {
                     header: {
-                        show: true
-                    }
+                        show: true,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0];
 
-                    expect(headerTextStyle).toContainText(testData.columnNames[0]);
+                        expect(headerTextStyle).toContainText(testData.columnNames[0]);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - 'xxxxxxxxxx' [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - 'xxxxxxxxxx' [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const title = "xxxxxxxxxx";
                 dataViewTest.metadata.objects = {
                     header: {
                         show: true,
-                        title: title
-                    }
+                        title: title,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0];
 
-                    expect(headerTextStyle).toContainText(title);
+                        expect(headerTextStyle).toContainText(title);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - Show summary - none selected [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - Show summary - none selected [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 dataViewTest.metadata.objects = {
                     header: {
                         show: true,
-                        restatement: true
-                    }
+                        restatement: true,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0];
 
-                    expect(headerTextStyle).toContainText(`${testData.columnNames[0]}: All`);
+                        expect(headerTextStyle).toContainText(`${testData.columnNames[0]}: All`);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
             // it (`Slicer header - Show summary - 1 item selected [dataset: ${index + 1}]`, (done) => {
@@ -631,845 +755,1065 @@ describe("HierachySlicer =>", () => {
             // });
 
             const borderStyles = [
-                { style: BorderStyle.None, result: "0px"},
-                { style: BorderStyle.BottomOnly, result: "0px 0px 1px"},
-                { style: BorderStyle.TopOnly, result: "1px 0px 0px"},
-                { style: BorderStyle.LeftOnly, result: "0px 0px 0px 1px"},
-                { style: BorderStyle.RightOnly, result: "0px 1px 0px 0px"},
-                { style: BorderStyle.TopBottom, result: "1px 0px"},
-                { style: BorderStyle.LeftRight, result: "0px 1px"},
-                { style: BorderStyle.Frame, result: "1px"}
+                { style: BorderStyle.None, result: "0px" },
+                { style: BorderStyle.BottomOnly, result: "0px 0px 1px" },
+                { style: BorderStyle.TopOnly, result: "1px 0px 0px" },
+                { style: BorderStyle.LeftOnly, result: "0px 0px 0px 1px" },
+                { style: BorderStyle.RightOnly, result: "0px 1px 0px 0px" },
+                { style: BorderStyle.TopBottom, result: "1px 0px" },
+                { style: BorderStyle.LeftRight, result: "0px 1px" },
+                { style: BorderStyle.Frame, result: "1px" },
             ];
             const dataViewTest = testData.getDataView();
-            borderStyles.forEach((borderStyle) => {
-                it (`Slicer header - outline [style: ${borderStyle.style}, dataset: ${index + 1}]`, (done) => {
+            borderStyles.forEach(borderStyle => {
+                it(`Slicer header - outline [style: ${borderStyle.style}, dataset: ${index + 1}]`, done => {
                     dataViewTest.metadata.objects = {
                         header: {
-                            outline: borderStyle.style
-                        }
+                            outline: borderStyle.style,
+                        },
                     };
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                        expect(headerTextStyle.borderWidth).toBe(borderStyle.result);
+                            expect(headerTextStyle.borderWidth).toBe(borderStyle.result);
 
-                        done();
-                    }, renderTimeout);
+                            done();
+                        },
+                        renderTimeout
+                    );
                 });
             });
 
-            it (`Slicer header - fontColor [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - fontColor [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontColor = "#FFFFFF";
                 dataViewTest.metadata.objects = {
                     header: {
-                        fontColor: fontColor
-                    }
+                        fontColor: fontColor,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                    expect(headerTextStyle.color).toBe(hexToRgb(fontColor));
+                        expect(headerTextStyle.color).toBe(hexToRgb(fontColor));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - background [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - background [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const background = "#FFFFFF";
                 dataViewTest.metadata.objects = {
                     header: {
-                        background: background
-                    }
+                        background: background,
+                    },
                 };
 
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerItems = visualBuilder.element.find(".headerText").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerItems = visualBuilder.element.find(".headerText").toArray();
 
-                    headerItems.forEach((headerItem) => {
-                        expect(headerItem.style.backgroundColor).toBe(hexToRgb(background));
-                    });
+                        headerItems.forEach(headerItem => {
+                            expect(headerItem.style.backgroundColor).toBe(hexToRgb(background));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - textSize [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - textSize [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const textSize = 20;
                 dataViewTest.metadata.objects = {
                     header: {
-                        textSize: textSize
-                    }
+                        textSize: textSize,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                    expect(headerTextStyle.fontSize).toBe(fontSizeString(textSize));
+                        expect(headerTextStyle.fontSize).toBe(fontSizeString(textSize));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - fontFamily [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - fontFamily [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontFamily = '"Courier New"';
                 dataViewTest.metadata.objects = {
                     header: {
-                        fontFamily: fontFamily
-                    }
+                        fontFamily: fontFamily,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                    expect(headerTextStyle.fontFamily).toBe(fontFamilyString(fontFamily));
+                        expect(headerTextStyle.fontFamily).toBe(fontFamilyString(fontFamily));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - fontStyle [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - fontStyle [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontStyle = FontStyle.Italic;
                 dataViewTest.metadata.objects = {
                     header: {
-                        fontStyle: fontStyle
-                    }
+                        fontStyle: fontStyle,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                    expect(headerTextStyle.fontStyle).toBe(fontStyleString(fontStyle));
+                        expect(headerTextStyle.fontStyle).toBe(fontStyleString(fontStyle));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it (`Slicer header - fontWeight [dataset: ${index + 1}]`, (done) => {
+            it(`Slicer header - fontWeight [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontWeight = FontWeight.SemiBold;
                 dataViewTest.metadata.objects = {
                     header: {
-                        fontWeight: fontWeight
-                    }
+                        fontWeight: fontWeight,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-                    expect(headerTextStyle.fontWeight).toBe(fontWeight.toString());
+                        expect(headerTextStyle.fontWeight).toBe(fontWeight.toString());
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Items settings [dataset: ${index + 1}] =>`, () => {
-            it(`Item formatting - fontcolor [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - fontcolor [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontColor = "#FFFFFF";
                 dataViewTest.metadata.objects = {
                     items: {
-                        fontColor: fontColor
-                    }
+                        fontColor: fontColor,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        if (testData.columnNames.length > 1) {
-                            const itemExpander = itemContainer.firstChild;
+                        itemContainers.forEach(itemContainer => {
+                            if (testData.columnNames.length > 1) {
+                                const itemExpander = itemContainer.firstChild;
 
-                            // Expanded icon styling
-                            const itemExpanderStyle = (( itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fill).toBe(hexToRgb(fontColor));
-                        }
+                                // Expanded icon styling
+                                const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement)
+                                    .style;
+                                expect(itemExpanderStyle.fill).toBe(hexToRgb(fontColor));
+                            }
 
-                        const itemContainerChild = itemContainer.lastChild;
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        // Checkbox styling
-                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.borderColor).toBe(hexToRgb(fontColor));
+                            // Checkbox styling
+                            const checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.borderColor).toBe(hexToRgb(fontColor));
 
-                        // // Span (label) styling
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.color).toBe(hexToRgb(fontColor));
-                    });
+                            // // Span (label) styling
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.color).toBe(hexToRgb(fontColor));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - fontcolor after hover [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - fontcolor after hover [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const hoverColor = "#FF0000";
                 const fontColor = "#FFFFFF";
                 dataViewTest.metadata.objects = {
                     items: {
                         fontColor: fontColor,
-                        hoverColor: hoverColor
-                    }
+                        hoverColor: hoverColor,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer, index) => {
-                        if (testData.columnNames.length > 1) {
-                            let itemExpander = itemContainer.firstChild;
+                        itemContainers.forEach((itemContainer, index) => {
+                            if (testData.columnNames.length > 1) {
+                                let itemExpander = itemContainer.firstChild;
+                                // Mouseover event
+                                itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
+                                itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                    .firstChild;
+
+                                // Expanded icon styling
+                                let itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement)
+                                    .style;
+                                expect(itemExpanderStyle.fill).toBe(hexToRgb(hoverColor));
+
+                                // Mouseout event
+                                itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseout"));
+                                itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                    .firstChild;
+                                // Expanded icon styling
+                                itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
+                                expect(itemExpanderStyle.fill).toBe(hexToRgb(fontColor));
+                            }
+
+                            let itemContainerChild = itemContainer.lastChild;
                             // Mouseover event
-                            itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
-                            itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                            itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
+                            itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                .lastChild;
 
-                            // Expanded icon styling
-                            let itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fill).toBe(hexToRgb(hoverColor));
+                            // // Checkbox styling
+                            let checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.borderColor).toBe(hexToRgb(hoverColor));
+
+                            let labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.color).toBe(hexToRgb(hoverColor));
 
                             // Mouseout event
-                            itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseout'));
-                            itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
-                            // Expanded icon styling
-                            itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fill).toBe(hexToRgb(fontColor));
-                        }
+                            itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseout"));
+                            itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                .lastChild;
 
-                        let itemContainerChild = itemContainer.lastChild;
-                        // Mouseover event
-                        itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
-                        itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                            // Checkbox styling
+                            checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.borderColor).toBe(hexToRgb(fontColor));
 
-                        // // Checkbox styling
-                        let checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.borderColor).toBe(hexToRgb(hoverColor));
+                            labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
+                            expect(labelStyle.color).toBe(hexToRgb(fontColor));
+                        });
 
-                        let labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.color).toBe(hexToRgb(hoverColor));
-
-                        // Mouseout event
-                        itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
-                        itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
-
-                        // Checkbox styling
-                        checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.borderColor).toBe(hexToRgb(fontColor));
-
-                        labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.color).toBe(hexToRgb(fontColor));
-                    });
-
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - hoverColor [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - hoverColor [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const hoverColor = "#FF0000";
                 dataViewTest.metadata.objects = {
                     items: {
-                        hoverColor: hoverColor
-                    }
+                        hoverColor: hoverColor,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer, index) => {
-                        if (testData.columnNames.length > 1) {
-                            let itemExpander = itemContainer.firstChild;
-                            itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                        itemContainers.forEach((itemContainer, index) => {
+                            if (testData.columnNames.length > 1) {
+                                let itemExpander = itemContainer.firstChild;
+                                itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
 
-                            itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                                itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                    .firstChild;
 
-                            // Expanded icon styling
-                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fill).toBe(hexToRgb(hoverColor));
-                        }
+                                // Expanded icon styling
+                                const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement)
+                                    .style;
+                                expect(itemExpanderStyle.fill).toBe(hexToRgb(hoverColor));
+                            }
 
-                        let itemContainerChild = itemContainer.lastChild;
-                        itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                            let itemContainerChild = itemContainer.lastChild;
+                            itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
 
-                        itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                            itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                .lastChild;
 
-                        // // Checkbox styling
-                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.borderColor).toBe(hexToRgb(hoverColor));
+                            // // Checkbox styling
+                            const checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.borderColor).toBe(hexToRgb(hoverColor));
 
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.color).toBe(hexToRgb(hoverColor));
-                    });
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.color).toBe(hexToRgb(hoverColor));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - selectColor [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - selectColor [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const selectedColor = "#0000FF";
                 dataViewTest.metadata.objects = {
                     general: {
-                        selectAll: true
+                        selectAll: true,
                     },
                     selection: {
-                        selectAll: true
+                        selectAll: true,
                     },
                     items: {
-                        selectedColor: selectedColor
-                    }
+                        selectedColor: selectedColor,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        const itemContainerChild = itemContainer.lastChild;
+                        itemContainers.forEach(itemContainer => {
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        // Checkbox styling
-                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.backgroundColor).toBe(hexToRgb(selectedColor));
-                    });
+                            // Checkbox styling
+                            const checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.backgroundColor).toBe(hexToRgb(selectedColor));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - background [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - background [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const background = "#0000FF";
                 dataViewTest.metadata.objects = {
                     general: {
-                        selectAll: true
+                        selectAll: true,
                     },
                     selection: {
-                        selectAll: true
+                        selectAll: true,
                     },
                     items: {
-                        background: background
-                    }
+                        background: background,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        const containerStyle = (itemContainer as HTMLElement).style;
-                        expect(containerStyle.backgroundColor).toBe(hexToRgb(background));
-                    });
+                        itemContainers.forEach(itemContainer => {
+                            const containerStyle = (itemContainer as HTMLElement).style;
+                            expect(containerStyle.backgroundColor).toBe(hexToRgb(background));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - textSize [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - textSize [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const textSize = 16;
                 dataViewTest.metadata.objects = {
                     items: {
-                        textSize: textSize
-                    }
+                        textSize: textSize,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        if (testData.columnNames.length > 1) {
-                            const itemExpander = itemContainer.firstChild;
+                        itemContainers.forEach(itemContainer => {
+                            if (testData.columnNames.length > 1) {
+                                const itemExpander = itemContainer.firstChild;
 
-                            // Expanded icon styling
-                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
-                        }
+                                // Expanded icon styling
+                                const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement)
+                                    .style;
+                                expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
+                            }
 
-                        const itemContainerChild = itemContainer.lastChild;
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        // Checkbox styling
-                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.height).toBe(measurePixelString(.75 * textSize));
-                        expect(checkboxStyle.width).toBe(measurePixelString(.75 * textSize));
-                        expect(checkboxStyle.marginRight).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
-                        expect(checkboxStyle.marginBottom).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
+                            // Checkbox styling
+                            const checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.height).toBe(measurePixelString(0.75 * textSize));
+                            expect(checkboxStyle.width).toBe(measurePixelString(0.75 * textSize));
+                            expect(checkboxStyle.marginRight).toBe(
+                                measurePixelString(PixelConverter.fromPointToPixel(0.25 * textSize))
+                            );
+                            expect(checkboxStyle.marginBottom).toBe(
+                                measurePixelString(PixelConverter.fromPointToPixel(0.25 * textSize))
+                            );
 
-                        // // Span (label) styling
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
-                    });
+                            // // Span (label) styling
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - fontFamily [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - fontFamily [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontFamily = '"Courier New"';
                 dataViewTest.metadata.objects = {
                     items: {
-                        fontFamily: fontFamily
-                    }
+                        fontFamily: fontFamily,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        const itemContainerChild = itemContainer.lastChild;
+                        itemContainers.forEach(itemContainer => {
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.fontFamily).toBe(fontFamilyString(fontFamily));
-                    });
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.fontFamily).toBe(fontFamilyString(fontFamily));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - fontStyle [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - fontStyle [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontStyle = FontStyle.Italic;
                 dataViewTest.metadata.objects = {
                     items: {
-                        fontStyle: fontStyle
-                    }
+                        fontStyle: fontStyle,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        const itemContainerChild = itemContainer.lastChild;
+                        itemContainers.forEach(itemContainer => {
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.fontStyle).toBe(fontStyleString(fontStyle));
-                    });
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.fontStyle).toBe(fontStyleString(fontStyle));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Item formatting - fontWeight [dataset: ${index + 1}]`, (done) => {
+            it(`Item formatting - fontWeight [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontWeight = FontWeight.Light;
                 dataViewTest.metadata.objects = {
                     items: {
-                        fontWeight: fontWeight
-                    }
+                        fontWeight: fontWeight,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        const itemContainerChild = itemContainer.lastChild;
+                        itemContainers.forEach(itemContainer => {
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.fontWeight).toBe(fontWeight.toString());
-                    });
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.fontWeight).toBe(fontWeight.toString());
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Search settings [dataset: ${index + 1}] =>`, () => {
-            it(`Search formatting - fontColor [dataset: ${index + 1}]`, (done) => {
+            it(`Search formatting - fontColor [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const fontColor = "#0000FF";
                 dataViewTest.metadata.objects = {
                     general: {
-                        selfFilterEnabled: true
+                        selfFilterEnabled: true,
                     },
                     search: {
-                        fontColor: fontColor
-                    }
+                        fontColor: fontColor,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const searchHeader = visualBuilder.element.find(".searchHeader")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const searchHeader = visualBuilder.element.find(".searchHeader")[0];
 
-                    const inputStyle = (searchHeader.children[1] as HTMLElement).style;
-                    expect(inputStyle.color).toBe(hexToRgb(fontColor));
+                        const inputStyle = (searchHeader.children[1] as HTMLElement).style;
+                        expect(inputStyle.color).toBe(hexToRgb(fontColor));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Search formatting - iconColor [dataset: ${index + 1}]`, (done) => {
+            it(`Search formatting - iconColor [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const iconColor = "#0000FF";
                 dataViewTest.metadata.objects = {
                     general: {
-                        selfFilterEnabled: true
+                        selfFilterEnabled: true,
                     },
                     search: {
-                        iconColor: iconColor
-                    }
+                        iconColor: iconColor,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const searchHeader = visualBuilder.element.find(".searchHeader")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const searchHeader = visualBuilder.element.find(".searchHeader")[0];
 
-                    const icons = $(searchHeader).find(".icon").toArray();
-                    icons.forEach((icon) => {
-                        const iconStyle = icon.style;
-                        expect(iconStyle.fill).toBe(hexToRgb(iconColor));
-                    });
+                        const icons = $(searchHeader)
+                            .find(".icon")
+                            .toArray();
+                        icons.forEach(icon => {
+                            const iconStyle = icon.style;
+                            expect(iconStyle.fill).toBe(hexToRgb(iconColor));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Search formatting - background [dataset: ${index + 1}]`, (done) => {
+            it(`Search formatting - background [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const background = "#0000FF";
                 dataViewTest.metadata.objects = {
                     general: {
-                        selfFilterEnabled: true
+                        selfFilterEnabled: true,
                     },
                     search: {
-                        background: background
-                    }
+                        background: background,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const searchHeader = visualBuilder.element.find(".searchHeader")[0];
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const searchHeader = visualBuilder.element.find(".searchHeader")[0];
 
-                    const inputStyle = (searchHeader.children[1] as HTMLElement).style;
-                    expect(inputStyle.backgroundColor).toBe(hexToRgb(background));
+                        const inputStyle = (searchHeader.children[1] as HTMLElement).style;
+                        expect(inputStyle.backgroundColor).toBe(hexToRgb(background));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Search formatting - textSize [dataset: ${index + 1}]`, (done) => {
+            it(`Search formatting - textSize [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const textSize = 16;
                 dataViewTest.metadata.objects = {
                     general: {
-                        selfFilterEnabled: true
+                        selfFilterEnabled: true,
                     },
                     search: {
-                        textSize: textSize
-                    }
+                        textSize: textSize,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const searchHeader = visualBuilder.element.find(".searchHeader");
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const searchHeader = visualBuilder.element.find(".searchHeader");
 
-                    const icons = $(searchHeader).find(".icon").toArray();
-                    icons.forEach((icon) => {
-                        const iconStyle = icon.style;
-                        expect(iconStyle.height).toBe(measurePixelString(Math.ceil(.95 * PixelConverter.fromPointToPixel(textSize)), "px"));
-                        expect(iconStyle.width).toBe(measurePixelString(Math.ceil(.95 * PixelConverter.fromPointToPixel(textSize)), "px"));
-                    });
+                        const icons = $(searchHeader)
+                            .find(".icon")
+                            .toArray();
+                        icons.forEach(icon => {
+                            const iconStyle = icon.style;
+                            expect(iconStyle.height).toBe(
+                                measurePixelString(Math.ceil(0.95 * PixelConverter.fromPointToPixel(textSize)), "px")
+                            );
+                            expect(iconStyle.width).toBe(
+                                measurePixelString(Math.ceil(0.95 * PixelConverter.fromPointToPixel(textSize)), "px")
+                            );
+                        });
 
-                    const inputStyle = (searchHeader[0].children[1] as HTMLElement).style;
-                    expect(inputStyle.fontSize).toBe(fontSizeString(textSize));
+                        const inputStyle = (searchHeader[0].children[1] as HTMLElement).style;
+                        expect(inputStyle.fontSize).toBe(fontSizeString(textSize));
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Zoom mode settings [dataset: ${index + 1}] =>`, () => {
-            it(`Enlarge setting - textSize + 50% [dataset: ${index + 1}]`, (done) => {
+            it(`Enlarge setting - textSize + 50% [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
                 const enLarge = Zoomed.Normal;
-                const textSize = defaultSettings.items.textSize * (1 + (enLarge /  100));
+                const textSize = defaultSettings.items.textSize * (1 + enLarge / 100);
                 dataViewTest.metadata.objects = {
                     mobile: {
                         enable: true,
-                        enLarge: enLarge
-                    }
+                        enLarge: enLarge,
+                    },
                 };
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-                    itemContainers.forEach((itemContainer) => {
-                        if (testData.columnNames.length > 1) {
-                            const itemExpander = itemContainer.firstChild;
+                        itemContainers.forEach(itemContainer => {
+                            if (testData.columnNames.length > 1) {
+                                const itemExpander = itemContainer.firstChild;
 
-                            // Expanded icon styling
-                            const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                            expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
-                        }
+                                // Expanded icon styling
+                                const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement)
+                                    .style;
+                                expect(itemExpanderStyle.fontSize).toBe(fontSizeString(textSize));
+                            }
 
-                        const itemContainerChild = itemContainer.lastChild;
+                            const itemContainerChild = itemContainer.lastChild;
 
-                        // Checkbox styling
-                        const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                        expect(checkboxStyle.height).toBe(measurePixelString(.75 * textSize));
-                        expect(checkboxStyle.width).toBe(measurePixelString(.75 * textSize));
-                        expect(checkboxStyle.marginRight).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
-                        expect(checkboxStyle.marginBottom).toBe(measurePixelString(PixelConverter.fromPointToPixel(.25 * textSize)));
+                            // Checkbox styling
+                            const checkboxStyle = ((itemContainerChild &&
+                                itemContainerChild.firstChild &&
+                                itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                            expect(checkboxStyle.height).toBe(measurePixelString(0.75 * textSize));
+                            expect(checkboxStyle.width).toBe(measurePixelString(0.75 * textSize));
+                            expect(checkboxStyle.marginRight).toBe(
+                                measurePixelString(PixelConverter.fromPointToPixel(0.25 * textSize))
+                            );
+                            expect(checkboxStyle.marginBottom).toBe(
+                                measurePixelString(PixelConverter.fromPointToPixel(0.25 * textSize))
+                            );
 
-                        // // Span (label) styling
-                        const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                        expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
-                    });
+                            // // Span (label) styling
+                            const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement)
+                                .style;
+                            expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
+                        });
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
 
-            it(`Double click title -> enable zoom [dataset: ${index + 1}]`, (done) => {
+            it(`Double click title -> enable zoom [dataset: ${index + 1}]`, done => {
                 const dataViewTest = testData.getDataView();
-                const textSize = defaultSettings.items.textSize * (1 + (defaultSettings.mobile.enLarge /  100));
-                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                    const headerTitle = visualBuilder.element.find(".headerText");
-                    headerTitle.click();
-                    headerTitle.click(); // 'Fake' double click as implementation is needed due different behavior for mobile
+                const textSize = defaultSettings.items.textSize * (1 + defaultSettings.mobile.enLarge / 100);
+                visualBuilder.updateRenderTimeout(
+                    dataViewTest,
+                    () => {
+                        const headerTitle = visualBuilder.element.find(".headerText");
+                        headerTitle.click();
+                        headerTitle.click(); // 'Fake' double click as implementation is needed due different behavior for mobile
 
-                    const visualProperties = visualBuilder.properties[0];
-                    const enableZoom = (visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["enable"] as boolean);
+                        const visualProperties = visualBuilder.properties[0];
+                        const enableZoom =
+                            visualProperties &&
+                            visualProperties.merge &&
+                            visualProperties.merge[0] &&
+                            (visualProperties.merge[0].properties["enable"] as boolean);
 
-                    expect(enableZoom).toBe(true);
+                        expect(enableZoom).toBe(true);
 
-                    done();
-                }, renderTimeout);
+                        done();
+                    },
+                    renderTimeout
+                );
             });
         });
 
         describe(`Slicer interacton [dataset: ${index + 1}] =>`, () => {
             describe(`Header buttons [dataset: ${index + 1}] =>`, () => {
-                it(`Click 'Expand All' [dataset: ${index + 1}]`, (done) => {
+                it(`Click 'Expand All' [dataset: ${index + 1}]`, done => {
                     const dataViewTest = testData.getDataView();
                     const expandedToBe: FullExpanded = testData.getFullExpanded();
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const expandAllButton = visualBuilder.element.find(".slicerHeader").find(".expand");
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const expandAllButton = visualBuilder.element.find(".slicerHeader").find(".expand");
 
-                        if (testData.columnNames.length > 1) {
-                            expandAllButton.click();
-                            const visualProperties = visualBuilder.properties[0];
-                            const expanded: string[] = ((visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["expanded"]) as string).split(",");
+                            if (testData.columnNames.length > 1) {
+                                expandAllButton.click();
+                                const visualProperties = visualBuilder.properties[0];
+                                const expanded: string[] = ((visualProperties &&
+                                    visualProperties.merge &&
+                                    visualProperties.merge[0] &&
+                                    visualProperties.merge[0].properties["expanded"]) as string).split(",");
 
-                            expect(expanded).toEqual(expandedToBe.expanded);
+                                expect(expanded).toEqual(expandedToBe.expanded);
 
-                            dataViewTest.metadata.objects = {
-                                general: {
-                                    expanded: expandedToBe.expanded.join(",")
-                                }
-                            };
+                                dataViewTest.metadata.objects = {
+                                    general: {
+                                        expanded: expandedToBe.expanded.join(","),
+                                    },
+                                };
 
-                            visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                    .toBe(expandedToBe.length);
+                                visualBuilder.updateRenderTimeout(
+                                    dataViewTest,
+                                    () => {
+                                        expect(
+                                            visualBuilder.element.find(".visibleGroup").children(".row").length
+                                        ).toBe(expandedToBe.length);
+                                        done();
+                                    },
+                                    renderTimeout
+                                );
+                            } else {
+                                expect(expandAllButton).toHaveCss({ opacity: "0" });
+
                                 done();
-                            }, renderTimeout);
-                        } else {
-                            expect(expandAllButton).toHaveCss({ opacity: "0" });
-
-                            done();
-                        }
-                    }, renderTimeout);
+                            }
+                        },
+                        renderTimeout
+                    );
                 });
 
-                it(`Click 'Collapse All' [dataset: ${index + 1}]`, (done) => {
+                it(`Click 'Collapse All' [dataset: ${index + 1}]`, done => {
                     const dataViewTest = testData.getDataView();
                     const collapseLength: number = testData.getLevelCount(1);
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const collapseAllButton = visualBuilder.element.find(".slicerHeader").find(".collapse");
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const collapseAllButton = visualBuilder.element.find(".slicerHeader").find(".collapse");
 
-                        if (testData.columnNames.length > 1) {
-                            collapseAllButton.click();
-
-                            visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                    .toBe(collapseLength);
-                                done();
-                            }, renderTimeout);
-                        } else {
-                            expect(collapseAllButton).toHaveCss({ opacity: "0" });
-
-                            done();
-                        }
-                    }, renderTimeout);
-                });
-
-                it(`Click 'Expand All -> 'Collapse All' [dataset: ${index + 1}]`, (done) => {
-                    const dataViewTest = testData.getDataView();
-                    const expandedToBe: FullExpanded = testData.getFullExpanded();
-                    const collapseLength: number = testData.getLevelCount(1);
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const expandAllButton = visualBuilder.element.find(".slicerHeader").find(".expand");
-                        const collapseAllButton = visualBuilder.element.find(".slicerHeader").find(".collapse");
-
-                        if (testData.columnNames.length > 1) {
-                            // Click 'Expand All'
-                            expandAllButton.click();
-                            const visualProperties = visualBuilder.properties[0];
-                            const expanded: string[] = ((visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["expanded"]) as string).split(",");
-
-                            expect(expanded).toEqual(expandedToBe.expanded);
-
-                            dataViewTest.metadata.objects = {
-                                general: {
-                                    expanded: expandedToBe.expanded.join(",")
-                                }
-                            };
-
-                            visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                    .toBe(expandedToBe.length);
-
-                                // Click 'Collapse All'
+                            if (testData.columnNames.length > 1) {
                                 collapseAllButton.click();
-                                // expanded object only removed if there is somthing to collapse
-                                const visualProperties = visualBuilder.properties[1];
-                                const removeExpanded = visualProperties.remove && visualProperties.remove[0];
-                                expect(removeExpanded).not.toBeEmpty();
 
-                                dataViewTest.metadata.objects = undefined;
+                                visualBuilder.updateRenderTimeout(
+                                    dataViewTest,
+                                    () => {
+                                        expect(
+                                            visualBuilder.element.find(".visibleGroup").children(".row").length
+                                        ).toBe(collapseLength);
+                                        done();
+                                    },
+                                    renderTimeout
+                                );
+                            } else {
+                                expect(collapseAllButton).toHaveCss({ opacity: "0" });
 
-                                visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                        .toBe(collapseLength);
-                                    done();
-                                }, renderTimeout);
-                            }, renderTimeout);
-                        } else {
-                            expect(expandAllButton).toHaveCss({ opacity: "0" });
-                            expect(collapseAllButton).toHaveCss({ opacity: "0" });
+                                done();
+                            }
+                        },
+                        renderTimeout
+                    );
+                });
+
+                it(`Click 'Expand All -> 'Collapse All' [dataset: ${index + 1}]`, done => {
+                    const dataViewTest = testData.getDataView();
+                    const expandedToBe: FullExpanded = testData.getFullExpanded();
+                    const collapseLength: number = testData.getLevelCount(1);
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const expandAllButton = visualBuilder.element.find(".slicerHeader").find(".expand");
+                            const collapseAllButton = visualBuilder.element.find(".slicerHeader").find(".collapse");
+
+                            if (testData.columnNames.length > 1) {
+                                // Click 'Expand All'
+                                expandAllButton.click();
+                                const visualProperties = visualBuilder.properties[0];
+                                const expanded: string[] = ((visualProperties &&
+                                    visualProperties.merge &&
+                                    visualProperties.merge[0] &&
+                                    visualProperties.merge[0].properties["expanded"]) as string).split(",");
+
+                                expect(expanded).toEqual(expandedToBe.expanded);
+
+                                dataViewTest.metadata.objects = {
+                                    general: {
+                                        expanded: expandedToBe.expanded.join(","),
+                                    },
+                                };
+
+                                visualBuilder.updateRenderTimeout(
+                                    dataViewTest,
+                                    () => {
+                                        expect(
+                                            visualBuilder.element.find(".visibleGroup").children(".row").length
+                                        ).toBe(expandedToBe.length);
+
+                                        // Click 'Collapse All'
+                                        collapseAllButton.click();
+                                        // expanded object only removed if there is somthing to collapse
+                                        const visualProperties = visualBuilder.properties[1];
+                                        const removeExpanded = visualProperties.remove && visualProperties.remove[0];
+                                        expect(removeExpanded).not.toBeEmpty();
+
+                                        dataViewTest.metadata.objects = undefined;
+
+                                        visualBuilder.updateRenderTimeout(
+                                            dataViewTest,
+                                            () => {
+                                                expect(
+                                                    visualBuilder.element.find(".visibleGroup").children(".row").length
+                                                ).toBe(collapseLength);
+                                                done();
+                                            },
+                                            renderTimeout
+                                        );
+                                    },
+                                    renderTimeout
+                                );
+                            } else {
+                                expect(expandAllButton).toHaveCss({ opacity: "0" });
+                                expect(collapseAllButton).toHaveCss({ opacity: "0" });
+
+                                done();
+                            }
+                        },
+                        renderTimeout
+                    );
+                });
+
+                it(`Click 'Clear All' with no selection [dataset: ${index + 1}]`, done => {
+                    const dataViewTest = testData.getDataView();
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const clearAllButton = visualBuilder.element.find(".slicerHeader").find(".clear");
+
+                            clearAllButton.click();
+
+                            expect(visualBuilder.properties.length).toBe(0);
 
                             done();
-                        }
-                    }, renderTimeout);
+                        },
+                        renderTimeout
+                    );
                 });
 
-                it(`Click 'Clear All' with no selection [dataset: ${index + 1}]`, (done) => {
-                    const dataViewTest = testData.getDataView();
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const clearAllButton = visualBuilder.element.find(".slicerHeader").find(".clear");
-
-                        clearAllButton.click();
-
-                        expect(visualBuilder.properties.length).toBe(0);
-
-                        done();
-                    }, renderTimeout);
-                });
-
-                it(`Click 'Clear All' with all item selected [dataset: ${index + 1}]`, (done) => {
+                it(`Click 'Clear All' with all item selected [dataset: ${index + 1}]`, done => {
                     const dataViewTest = testData.getDataView();
                     const expandedToBe: FullExpanded = testData.getFullExpanded();
                     dataViewTest.metadata.objects = {
                         selection: {
                             singleSelect: false,
-                            selectAll: true
+                            selectAll: true,
                         },
                         general: {
                             expanded: expandedToBe.expanded.join(","),
-                            selectAll: true
-                        }
+                            selectAll: true,
+                        },
                     };
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const clearAllButton = visualBuilder.element.find(".slicerHeader").find(".clear");
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const clearAllButton = visualBuilder.element.find(".slicerHeader").find(".clear");
 
-                        clearAllButton.click();
+                            clearAllButton.click();
 
-                        const visualProperties = visualBuilder.properties[0];
-                        const removeSelectAll = visualProperties.remove && visualProperties.remove[0];
-                        expect(removeSelectAll).not.toBeEmpty();
+                            const visualProperties = visualBuilder.properties[0];
+                            const removeSelectAll = visualProperties.remove && visualProperties.remove[0];
+                            expect(removeSelectAll).not.toBeEmpty();
 
-                        const filter = visualBuilder.filter;
-                        expect(filter).toEqual([]);
+                            const filter = visualBuilder.filter;
+                            expect(filter).toEqual([]);
 
-                        done();
-                    }, renderTimeout);
+                            done();
+                        },
+                        renderTimeout
+                    );
                 });
             });
 
             describe(`Tree interaction [dataset: ${index + 1}] =>`, () => {
-                it(`Expand and collapse first item' [dataset: ${index + 1}]`, (done) => {
+                it(`Expand and collapse first item' [dataset: ${index + 1}]`, done => {
                     if (testData.getExpandedTests().length === 0) {
                         done();
                         return;
                     }
 
                     const dataViewTest = testData.getDataView();
-                    const expandedToBe: ExpandTest  = testData.getExpandedTests()[0];
+                    const expandedToBe: ExpandTest = testData.getExpandedTests()[0];
                     const collapseLength: number = testData.getLevelCount(1);
                     const selector = HierarchySlicer.ItemContainerExpander.selectorName;
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const firstExpander = visualBuilder.element.find(selector)[0];
-                        firstExpander.click();
-                        const visualProperties = visualBuilder.properties[0];
-                        const expanded: string[] = ((visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["expanded"]) as string).split(",");
-
-                        expect(expanded).toEqual(expandedToBe.expanded);
-
-                        dataViewTest.metadata.objects = {
-                            general: {
-                                expanded: expandedToBe.expanded.join(",")
-                            }
-                        };
-
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                .toBe(expandedToBe.number);
-
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
                             const firstExpander = visualBuilder.element.find(selector)[0];
                             firstExpander.click();
+                            const visualProperties = visualBuilder.properties[0];
+                            const expanded: string[] = ((visualProperties &&
+                                visualProperties.merge &&
+                                visualProperties.merge[0] &&
+                                visualProperties.merge[0].properties["expanded"]) as string).split(",");
 
-                            const visualProperties = visualBuilder.properties[1];
-                            const removeExpanded = visualProperties.remove && visualProperties.remove[0];
-                            expect(removeExpanded).not.toBeEmpty();
+                            expect(expanded).toEqual(expandedToBe.expanded);
 
-                            dataViewTest.metadata.objects = undefined;
+                            dataViewTest.metadata.objects = {
+                                general: {
+                                    expanded: expandedToBe.expanded.join(","),
+                                },
+                            };
 
-                            visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                                expect(visualBuilder.element.find(".visibleGroup").children(".row").length)
-                                    .toBe(collapseLength);
-                                done();
-                            }, renderTimeout);
-                        }, renderTimeout);
-                    }, renderTimeout);
+                            visualBuilder.updateRenderTimeout(
+                                dataViewTest,
+                                () => {
+                                    expect(visualBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                        expandedToBe.count
+                                    );
+
+                                    const firstExpander = visualBuilder.element.find(selector)[0];
+                                    firstExpander.click();
+
+                                    const visualProperties = visualBuilder.properties[1];
+                                    const removeExpanded = visualProperties.remove && visualProperties.remove[0];
+                                    expect(removeExpanded).not.toBeEmpty();
+
+                                    dataViewTest.metadata.objects = undefined;
+
+                                    visualBuilder.updateRenderTimeout(
+                                        dataViewTest,
+                                        () => {
+                                            expect(
+                                                visualBuilder.element.find(".visibleGroup").children(".row").length
+                                            ).toBe(collapseLength);
+                                            done();
+                                        },
+                                        renderTimeout
+                                    );
+                                },
+                                renderTimeout
+                            );
+                        },
+                        renderTimeout
+                    );
                 });
             });
 
             describe(`Selection interaction [dataset: ${index + 1}] =>`, () => {
-
                 testData.getSelectedTests().forEach((selectedTest: SelectTest, testIndex: number) => {
-                    it(`Select item: ${selectedTest.description || (selectedTest.clickedDataPoints[0] + 1)}`, (done) => {
+                    it(`Select item: ${selectedTest.description || selectedTest.clickedDataPoints[0] + 1}`, done => {
                         // Items are selected via 'ItemContainerChild'
                         const selector = HierarchySlicer.ItemContainerChild.selectorName;
                         const dataViewTest = testData.getDataView();
                         const expandedToBe = testData.getFullExpanded();
                         const allItemsCnt = testData.getOwnIds().length;
-                        const selectedItemsCnt = selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
+                        const selectedItemsCnt =
+                            selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
                         dataViewTest.metadata.objects = {
                             selection: {
-                                singleSelect: selectedTest.clickedDataPoints.length === 1
+                                singleSelect: selectedTest.clickedDataPoints.length === 1,
                             },
                             general: {
-                                expanded: expandedToBe.expanded.join(",")
-                            }
+                                expanded: expandedToBe.expanded.join(","),
+                            },
                         };
 
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            selectedTest.clickedDataPoints.forEach((dataPoint) => {
-                                const selectedItem = visualBuilder.element.find(selector)[dataPoint];
-                                selectedItem.click();
-                            });
+                        visualBuilder.updateRenderTimeout(
+                            dataViewTest,
+                            () => {
+                                selectedTest.clickedDataPoints.forEach(dataPoint => {
+                                    const selectedItem = visualBuilder.element.find(selector)[dataPoint];
+                                    selectedItem.click();
+                                });
 
-                            const filter: any = (visualBuilder.filter as any);
+                                const filter: any = visualBuilder.filter as any;
 
-                            if (!selectedTest.isSwitched) {
-                                expect(filter.target).toEqual(selectedTest.target);
-                                expect(filter.values).toEqual(selectedTest.values);
-                            }
+                                if (!selectedTest.isSwitched) {
+                                    expect(filter.target).toEqual(selectedTest.target);
+                                    expect(filter.values).toEqual(selectedTest.values);
+                                }
 
-                            const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
+                                const itemCheckBoxes: HTMLElement[] = visualBuilder.element
+                                    .find(".visibleGroup")
+                                    .children(".row")
+                                    .find(".slicerCheckbox")
+                                    .toArray();
 
-                            selectedTest.selectedDataPoints.forEach((dataPoint) => {
-                                expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
-                            });
+                                selectedTest.selectedDataPoints.forEach(dataPoint => {
+                                    expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
+                                });
 
-                            selectedTest.partialDataPoints.forEach((dataPoint) => {
-                                expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
-                            });
+                                selectedTest.partialDataPoints.forEach(dataPoint => {
+                                    expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
+                                });
 
-                            expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
-                                .toBe(selectedTest.selectedDataPoints.length);
+                                expect(
+                                    itemCheckBoxes.filter(element => element.classList.contains("selected")).length
+                                ).toBe(selectedTest.selectedDataPoints.length);
 
-                            expect(itemCheckBoxes.filter((element) => element.classList.contains("partiallySelected")).length)
-                                .toBe(selectedTest.partialDataPoints.length);
+                                expect(
+                                    itemCheckBoxes.filter(element => element.classList.contains("partiallySelected"))
+                                        .length
+                                ).toBe(selectedTest.partialDataPoints.length);
 
-                            expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
-                                .toBe(allItemsCnt - selectedItemsCnt);
+                                expect(
+                                    itemCheckBoxes.filter(
+                                        element =>
+                                            !element.classList.contains("selected") &&
+                                            !element.classList.contains("partiallySelected")
+                                    ).length
+                                ).toBe(allItemsCnt - selectedItemsCnt);
 
-                            done();
-                        }, renderTimeout);
+                                done();
+                            },
+                            renderTimeout
+                        );
                     });
                 });
 
-                it(`Select 'Select All'`, (done) => {
+                it(`Select 'Select All'`, done => {
                     // Items are selected via 'ItemContainerChild'
                     const selector = HierarchySlicer.ItemContainerChild.selectorName;
                     const dataViewTest = testData.getDataView();
@@ -1478,122 +1822,183 @@ describe("HierachySlicer =>", () => {
                     dataViewTest.metadata.objects = {
                         selection: {
                             singleSelect: false,
-                            selectAll: true
+                            selectAll: true,
                         },
                         general: {
-                            expanded: expandedToBe.expanded.join(",")
-                        }
+                            expanded: expandedToBe.expanded.join(","),
+                        },
                     };
 
-                    visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                        const selectedItem = visualBuilder.element.find(selector)[0];
-                        selectedItem.click();
-                        const visualProperties = visualBuilder.properties[0];
-                        const selectedAll = (visualProperties && visualProperties.merge && visualProperties.merge[0] && visualProperties.merge[0].properties["selectAll"] as boolean);
-
-                        expect(selectedAll).toBe(true);
-
-                        // Check render selection before visual callback
-                        const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
-
-                        expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
-                            .toBe(allItemsCnt + 1);
-
-                        expect(itemCheckBoxes.filter((element) => element.classList.contains("partiallySelected")).length)
-                            .toBe(0);
-
-                        expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
-                            .toBe(0);
-
-                        dataViewTest.metadata.objects = {
-                            selection: {
-                                singleSelect: false,
-                                selectAll: true
-                            },
-                            general: {
-                                expanded: expandedToBe.expanded.join(","),
-                                selectAll: true
-                            }
-                        };
-
-                        // Check render selection after callback
-                        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-                            const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
-
-                            expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
-                                .toBe(allItemsCnt + 1);
-
-                            expect(itemCheckBoxes.filter((element) => element.classList.contains("partiallySelected")).length)
-                                .toBe(0);
-
-                            expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
-                                .toBe(0);
-
-                            // Deselect 'Select All'
+                    visualBuilder.updateRenderTimeout(
+                        dataViewTest,
+                        () => {
+                            const selectedItem = visualBuilder.element.find(selector)[0];
                             selectedItem.click();
-                            const visualProperties = visualBuilder.properties[2];
-                            const removeSelectedAll = visualProperties.remove && visualProperties.remove[0];
-                            expect(removeSelectedAll).not.toBeEmpty();
+                            const visualProperties = visualBuilder.properties[0];
+                            const selectedAll =
+                                visualProperties &&
+                                visualProperties.merge &&
+                                visualProperties.merge[0] &&
+                                (visualProperties.merge[0].properties["selectAll"] as boolean);
 
-                            expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
-                                .toBe(allItemsCnt + 1);
+                            expect(selectedAll).toBe(true);
 
-                            done();
-                        }, renderTimeout);
-                    }, renderTimeout);
+                            // Check render selection before visual callback
+                            const itemCheckBoxes: HTMLElement[] = visualBuilder.element
+                                .find(".visibleGroup")
+                                .children(".row")
+                                .find(".slicerCheckbox")
+                                .toArray();
+
+                            expect(
+                                itemCheckBoxes.filter(element => element.classList.contains("selected")).length
+                            ).toBe(allItemsCnt + 1);
+
+                            expect(
+                                itemCheckBoxes.filter(element => element.classList.contains("partiallySelected")).length
+                            ).toBe(0);
+
+                            expect(
+                                itemCheckBoxes.filter(
+                                    element =>
+                                        !element.classList.contains("selected") &&
+                                        !element.classList.contains("partiallySelected")
+                                ).length
+                            ).toBe(0);
+
+                            dataViewTest.metadata.objects = {
+                                selection: {
+                                    singleSelect: false,
+                                    selectAll: true,
+                                },
+                                general: {
+                                    expanded: expandedToBe.expanded.join(","),
+                                    selectAll: true,
+                                },
+                            };
+
+                            // Check render selection after callback
+                            visualBuilder.updateRenderTimeout(
+                                dataViewTest,
+                                () => {
+                                    const itemCheckBoxes: HTMLElement[] = visualBuilder.element
+                                        .find(".visibleGroup")
+                                        .children(".row")
+                                        .find(".slicerCheckbox")
+                                        .toArray();
+
+                                    expect(
+                                        itemCheckBoxes.filter(element => element.classList.contains("selected")).length
+                                    ).toBe(allItemsCnt + 1);
+
+                                    expect(
+                                        itemCheckBoxes.filter(element =>
+                                            element.classList.contains("partiallySelected")
+                                        ).length
+                                    ).toBe(0);
+
+                                    expect(
+                                        itemCheckBoxes.filter(
+                                            element =>
+                                                !element.classList.contains("selected") &&
+                                                !element.classList.contains("partiallySelected")
+                                        ).length
+                                    ).toBe(0);
+
+                                    // Deselect 'Select All'
+                                    selectedItem.click();
+                                    const visualProperties = visualBuilder.properties[2];
+                                    const removeSelectedAll = visualProperties.remove && visualProperties.remove[0];
+                                    expect(removeSelectedAll).not.toBeEmpty();
+
+                                    expect(
+                                        itemCheckBoxes.filter(
+                                            element =>
+                                                !element.classList.contains("selected") &&
+                                                !element.classList.contains("partiallySelected")
+                                        ).length
+                                    ).toBe(allItemsCnt + 1);
+
+                                    done();
+                                },
+                                renderTimeout
+                            );
+                        },
+                        renderTimeout
+                    );
                 });
             });
 
             describe(`Bookmarks [dataset: ${index + 1}] =>`, () => {
                 testData.getSelectedTests().forEach((selectedTest: SelectTest, testIndex: number) => {
-                    it(`Set filter for test: ${selectedTest.description || (selectedTest.clickedDataPoints[0] + 1)}`, (done) => {
+                    it(`Set filter for test: ${selectedTest.description ||
+                        selectedTest.clickedDataPoints[0] + 1}`, done => {
                         const selector = HierarchySlicer.ItemContainerChild.selectorName;
                         const dataViewTest = testData.getDataView();
                         const expandedToBe = testData.getFullExpanded();
                         const allItemsCnt = testData.getOwnIds().length;
-                        const selectedItemsCnt = selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
-                        const filter = [{
-                            target: selectedTest.target,
-                            operator: "In",
-                            values: selectedTest.values,
-                            $schema: "http://powerbi.com/product/schema#tuple",
-                            filterType: 6
-                        }];
+                        const selectedItemsCnt =
+                            selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
+                        const filter = [
+                            {
+                                target: selectedTest.target,
+                                operator: "In",
+                                values: selectedTest.values,
+                                $schema: "http://powerbi.com/product/schema#tuple", // tslint:disable-line: no-http-string
+                                filterType: 6,
+                            },
+                        ];
                         dataViewTest.metadata.objects = {
                             selection: {
-                                singleSelect: selectedTest.clickedDataPoints.length === 1
+                                singleSelect: selectedTest.clickedDataPoints.length === 1,
                             },
                             general: {
                                 expanded: expandedToBe.expanded.join(","),
                                 filter: {
                                     whereItems: selectedTest.whereCondition,
-                                }
-                            }
+                                },
+                            },
                         };
 
-                        visualBuilder.updateRenderTimeoutWithCustomFilter(dataViewTest, () => {
+                        visualBuilder.updateRenderTimeoutWithCustomFilter(
+                            dataViewTest,
+                            () => {
+                                const itemCheckBoxes: HTMLElement[] = visualBuilder.element
+                                    .find(".visibleGroup")
+                                    .children(".row")
+                                    .find(".slicerCheckbox")
+                                    .toArray();
 
-                            const itemCheckBoxes: HTMLElement[] = (visualBuilder.element.find(".visibleGroup").children(".row").find(".slicerCheckbox")).toArray();
+                                selectedTest.selectedDataPoints.forEach(dataPoint => {
+                                    expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
+                                });
 
-                            selectedTest.selectedDataPoints.forEach((dataPoint) => {
-                                expect(itemCheckBoxes[dataPoint]).toHaveClass("selected");
-                            });
+                                selectedTest.partialDataPoints.forEach(dataPoint => {
+                                    expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
+                                });
 
-                            selectedTest.partialDataPoints.forEach((dataPoint) => {
-                                expect(itemCheckBoxes[dataPoint]).toHaveClass("partiallySelected");
-                            });
+                                expect(
+                                    itemCheckBoxes.filter(element => element.classList.contains("selected")).length
+                                ).toBe(selectedTest.selectedDataPoints.length);
 
-                            expect(itemCheckBoxes.filter((element) => element.classList.contains("selected")).length)
-                                .toBe(selectedTest.selectedDataPoints.length);
+                                expect(
+                                    itemCheckBoxes.filter(element => element.classList.contains("partiallySelected"))
+                                        .length
+                                ).toBe(selectedTest.partialDataPoints.length);
 
-                            expect(itemCheckBoxes.filter((element) => element.classList.contains("partiallySelected")).length)
-                                .toBe(selectedTest.partialDataPoints.length);
+                                expect(
+                                    itemCheckBoxes.filter(
+                                        element =>
+                                            !element.classList.contains("selected") &&
+                                            !element.classList.contains("partiallySelected")
+                                    ).length
+                                ).toBe(allItemsCnt - selectedItemsCnt);
 
-                            expect(itemCheckBoxes.filter((element) => !element.classList.contains("selected") && !element.classList.contains("partiallySelected")).length)
-                                .toBe(allItemsCnt - selectedItemsCnt);
-
-                            done();
-                        }, filter, renderTimeout);
+                                done();
+                            },
+                            filter,
+                            renderTimeout
+                        );
                     });
                 });
             });
@@ -1601,14 +2006,12 @@ describe("HierachySlicer =>", () => {
     });
 });
 
-describe('HierarchySlicer in high constrast mode =>', () => {
+describe("HierarchySlicer in high constrast mode =>", () => {
     const highConstrastBackgroundColor: string = "#000000";
     const highConstrastForegroundColor: string = "#00FF00";
     const highConstrastForegroundSelectedColor: string = "#FFFF00";
 
-    let visualBuilder: HierarchySlicerBuilder,
-        testData: HierarchyData,
-        defaultSettings: HierarchySlicerSettings;
+    let visualBuilder: HierarchySlicerBuilder, testData: HierarchyData, defaultSettings: HierarchySlicerSettings;
 
     beforeEach(() => {
         visualBuilder = new HierarchySlicerBuilder(1000, 500);
@@ -1623,230 +2026,268 @@ describe('HierarchySlicer in high constrast mode =>', () => {
         visualBuilder.visualHost.colorPalette.foregroundSelected = { value: highConstrastForegroundSelectedColor };
     });
 
-    it (`Slicer header - fontColor`, (done) => {
+    it(`Slicer header - fontColor`, done => {
         const dataViewTest = testData.getDataView();
         const fontColor = "#FFFFFF";
         dataViewTest.metadata.objects = {
             header: {
-                fontColor: fontColor
-            }
+                fontColor: fontColor,
+            },
         };
 
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-            expect(headerTextStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+                expect(headerTextStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
 
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 
-    it (`Slicer header - backGround`, (done) => {
+    it(`Slicer header - backGround`, done => {
         const dataViewTest = testData.getDataView();
         const background = "#FFFFFF";
         dataViewTest.metadata.objects = {
             header: {
-                background: background
-            }
+                background: background,
+            },
         };
 
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const headerTextStyle = visualBuilder.element.find(".headerText")[0].style;
 
-            expect(headerTextStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
+                expect(headerTextStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
 
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 
-    it(`Item formatting - fontcolor`, (done) => {
+    it(`Item formatting - fontcolor`, done => {
         const dataViewTest = testData.getDataView();
         const fontColor = "#FFFFFF";
         dataViewTest.metadata.objects = {
             items: {
-                fontColor: fontColor
-            }
+                fontColor: fontColor,
+            },
         };
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-            itemContainers.forEach((itemContainer) => {
-                if (testData.columnNames.length > 1) {
-                    const itemExpander = itemContainer.firstChild;
+                itemContainers.forEach(itemContainer => {
+                    if (testData.columnNames.length > 1) {
+                        const itemExpander = itemContainer.firstChild;
 
-                    // Expanded icon styling
-                    const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
-                }
+                        // Expanded icon styling
+                        const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
+                        expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                    }
 
-                const itemContainerChild = itemContainer.lastChild;
+                    const itemContainerChild = itemContainer.lastChild;
 
-                // Checkbox styling
-                const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+                    // Checkbox styling
+                    const checkboxStyle = ((itemContainerChild &&
+                        itemContainerChild.firstChild &&
+                        itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                    expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
-                // // Span (label) styling
-                const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
-            });
+                    // // Span (label) styling
+                    const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
+                    expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+                });
 
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 
-    it(`Item formatting - fontcolor after hover`, (done) => {
+    it(`Item formatting - fontcolor after hover`, done => {
         const dataViewTest = testData.getDataView();
         const hoverColor = "#FF0000";
         const fontColor = "#FFFFFF";
         dataViewTest.metadata.objects = {
             items: {
                 fontColor: fontColor,
-                hoverColor: hoverColor
-            }
+                hoverColor: hoverColor,
+            },
         };
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-            itemContainers.forEach((itemContainer, index) => {
-                if (testData.columnNames.length > 1) {
-                    let itemExpander = itemContainer.firstChild;
+                itemContainers.forEach((itemContainer, index) => {
+                    if (testData.columnNames.length > 1) {
+                        let itemExpander = itemContainer.firstChild;
+                        // Mouseover event
+                        itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
+                        itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+
+                        // Expanded icon styling
+                        let itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
+                        expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+
+                        // Mouseout event
+                        itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseout"));
+                        itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                        // Expanded icon styling
+                        itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
+                        expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                    }
+
+                    let itemContainerChild = itemContainer.lastChild;
                     // Mouseover event
-                    itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
-                    itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                    itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
+                    itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
-                    // Expanded icon styling
-                    let itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                    // Checkbox styling
+                    let checkboxStyle = ((itemContainerChild &&
+                        itemContainerChild.firstChild &&
+                        itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                    expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+
+                    let labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
+                    expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
 
                     // Mouseout event
-                    itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseout'));
-                    itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
-                    // Expanded icon styling
-                    itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
-                }
+                    itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseout"));
+                    itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
-                let itemContainerChild = itemContainer.lastChild;
-                // Mouseover event
-                itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
-                itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                    // Checkbox styling
+                    checkboxStyle = ((itemContainerChild &&
+                        itemContainerChild.firstChild &&
+                        itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                    expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
-                // Checkbox styling
-                let checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+                    labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
+                    expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+                });
 
-                let labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
-
-                // Mouseout event
-                itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseout'));
-                itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
-
-                // Checkbox styling
-                checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
-
-                labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
-            });
-
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 
-    it(`Item formatting - hoverColor`, (done) => {
+    it(`Item formatting - hoverColor`, done => {
         const dataViewTest = testData.getDataView();
         const hoverColor = "#FF0000";
         dataViewTest.metadata.objects = {
             items: {
-                hoverColor: hoverColor
-            }
+                hoverColor: hoverColor,
+            },
         };
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-            itemContainers.forEach((itemContainer, index) => {
-                if (testData.columnNames.length > 1) {
-                    let itemExpander = itemContainer.firstChild;
-                    itemExpander && itemExpander.dispatchEvent(new MouseEvent('mouseover'));
+                itemContainers.forEach((itemContainer, index) => {
+                    if (testData.columnNames.length > 1) {
+                        let itemExpander = itemContainer.firstChild;
+                        itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
 
-                    itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                        itemExpander = visualBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
 
-                    // Expanded icon styling
-                    const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
-                    expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
-                }
+                        // Expanded icon styling
+                        const itemExpanderStyle = ((itemExpander && itemExpander.firstChild) as HTMLElement).style;
+                        expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
+                    }
 
-                let itemContainerChild = itemContainer.lastChild;
-                itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent('mouseover'));
+                    let itemContainerChild = itemContainer.lastChild;
+                    itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
 
-                itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                    itemContainerChild = visualBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
 
-                // // Checkbox styling
-                const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
+                    // // Checkbox styling
+                    const checkboxStyle = ((itemContainerChild &&
+                        itemContainerChild.firstChild &&
+                        itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                    expect(checkboxStyle.borderColor).toBe(hexToRgb(highConstrastForegroundColor));
 
-                const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
-                expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
-            });
+                    const labelStyle = ((itemContainerChild && itemContainerChild.lastChild) as HTMLElement).style;
+                    expect(labelStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
+                });
 
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 
-    it(`Item formatting - selectColor`, (done) => {
+    it(`Item formatting - selectColor`, done => {
         const dataViewTest = testData.getDataView();
         const selectedColor = "#0000FF";
         dataViewTest.metadata.objects = {
             general: {
-                selectAll: true
+                selectAll: true,
             },
             selection: {
-                selectAll: true
+                selectAll: true,
             },
             items: {
-                selectedColor: selectedColor
-            }
+                selectedColor: selectedColor,
+            },
         };
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-            itemContainers.forEach((itemContainer) => {
-                const itemContainerChild = itemContainer.lastChild;
+                itemContainers.forEach(itemContainer => {
+                    const itemContainerChild = itemContainer.lastChild;
 
-                // Checkbox styling
-                const checkboxStyle = ((itemContainerChild && itemContainerChild.firstChild && itemContainerChild.firstChild.lastChild) as HTMLElement).style;
-                expect(checkboxStyle.backgroundColor).toBe(hexToRgb(highConstrastForegroundSelectedColor));
-            });
+                    // Checkbox styling
+                    const checkboxStyle = ((itemContainerChild &&
+                        itemContainerChild.firstChild &&
+                        itemContainerChild.firstChild.lastChild) as HTMLElement).style;
+                    expect(checkboxStyle.backgroundColor).toBe(hexToRgb(highConstrastForegroundSelectedColor));
+                });
 
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 
-    it(`Item formatting - background`, (done) => {
+    it(`Item formatting - background`, done => {
         const dataViewTest = testData.getDataView();
         const background = "#0000FF";
         dataViewTest.metadata.objects = {
             general: {
-                selectAll: true
+                selectAll: true,
             },
             selection: {
-                selectAll: true
+                selectAll: true,
             },
             items: {
-                background: background
-            }
+                background: background,
+            },
         };
-        visualBuilder.updateRenderTimeout(dataViewTest, () => {
-            const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
+        visualBuilder.updateRenderTimeout(
+            dataViewTest,
+            () => {
+                const itemContainers = visualBuilder.element.find(".slicerItemContainer").toArray();
 
-            itemContainers.forEach((itemContainer) => {
-                const containerStyle = (itemContainer as HTMLElement).style;
-                expect(containerStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
-            });
+                itemContainers.forEach(itemContainer => {
+                    const containerStyle = (itemContainer as HTMLElement).style;
+                    expect(containerStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
+                });
 
-            done();
-        }, renderTimeout);
+                done();
+            },
+            renderTimeout
+        );
     });
 });
 
@@ -1874,13 +2315,13 @@ function fontSizeString(fontSize: number) {
 
 function measurePixelString(measure: number, ptpx: string = "px") {
     const numberOfAllDigits = 6;
-    const numberOfDigits = numberOfAllDigits - (measure < 0 ? Math.ceil(measure) : Math.floor(measure)).toString().length;
+    const numberOfDigits =
+        numberOfAllDigits - (measure < 0 ? Math.ceil(measure) : Math.floor(measure)).toString().length;
     return `${Math.round(measure * Math.pow(10, numberOfDigits)) / Math.pow(10, numberOfDigits)}${ptpx}`;
 }
 
-describe('HierarchySlicer specific dataView cases =>', () => {
-    let visualBuilder: HierarchySlicerBuilder,
-        defaultSettings: HierarchySlicerSettings;
+describe("HierarchySlicer specific dataView cases =>", () => {
+    let visualBuilder: HierarchySlicerBuilder, defaultSettings: HierarchySlicerSettings;
 
     beforeEach(() => {
         visualBuilder = new HierarchySlicerBuilder(1000, 500);
@@ -1888,9 +2329,8 @@ describe('HierarchySlicer specific dataView cases =>', () => {
         defaultSettings = new HierarchySlicerSettings();
     });
 
-
     describe(`specific filter case =>`, () => {
-        it(`DataView from on-prem OLAP MD`, (done) => {
+        it(`DataView from on-prem OLAP MD`, done => {
             const options = JSON.parse(`
                 {
                     "viewport": {
@@ -2153,15 +2593,19 @@ describe('HierarchySlicer specific dataView cases =>', () => {
                 }
             `) as DataView;
 
-            visualBuilder.updateRenderTimeout(options, () => {
-                const data = visualBuilder.instance.converter((options as any).dataViews[0], [{}], "");
+            visualBuilder.updateRenderTimeout(
+                options,
+                () => {
+                    const data = visualBuilder.instance.converter((options as any).dataViews[0], [{}], "");
 
-                expect(data.dataPoints.length).toBe(4);
+                    expect(data.dataPoints.length).toBe(4);
 
-                expect(data.dataPoints.filter(d => d.selected).length).toBe(1);
+                    expect(data.dataPoints.filter(d => d.selected).length).toBe(1);
 
-                done();
-            }, renderTimeout);
+                    done();
+                },
+                renderTimeout
+            );
         });
     });
 });

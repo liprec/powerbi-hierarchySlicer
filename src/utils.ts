@@ -25,7 +25,6 @@
  *  THE SOFTWARE.
  */
 
-
 "use strict";
 import powerbi from "powerbi-visuals-api";
 import { IFilterTarget } from "powerbi-models";
@@ -42,24 +41,23 @@ import ValueFormat = valueFormatter.format;
 enum SQExprKind {
     ColumnRef = 2,
     Hierarchy = 6,
-    HierarchyLevel = 7
+    HierarchyLevel = 7,
 }
 
-export function extractFilterColumnTarget(categoryColumn: DataViewCategoryColumn | DataViewMetadataColumn): IFilterTarget {
+export function extractFilterColumnTarget(
+    categoryColumn: DataViewCategoryColumn | DataViewMetadataColumn
+): IFilterTarget {
     // take an expression from source or column metadata
-    let expr: any = categoryColumn && (<any>categoryColumn).source && (<any>categoryColumn).source.expr
-    ? (<any>categoryColumn).source.expr as any
-    : (<any>categoryColumn).expr as any;
+    let expr: any =
+        categoryColumn && (<any>categoryColumn).source && (<any>categoryColumn).source.expr
+            ? ((<any>categoryColumn).source.expr as any)
+            : ((<any>categoryColumn).expr as any);
 
     // take table name from source.entity if column definition is simple
-    let filterTargetTable: string = expr && expr.source && expr.source.entity
-        ? expr.source.entity
-        : null;
+    let filterTargetTable: string = expr && expr.source && expr.source.entity ? expr.source.entity : null;
 
     // take expr.ref as column name if column definition is simple
-    let filterTargetColumn: string = expr && expr.ref
-        ? expr.ref
-        : null;
+    let filterTargetColumn: string = expr && expr.ref ? expr.ref : null;
 
     // special cases
     // when data structure is hierarchical
@@ -75,7 +73,9 @@ export function extractFilterColumnTarget(categoryColumn: DataViewCategoryColumn
         filterTargetTable = expr.arg && expr.arg.arg && expr.arg.arg.entity;
         if (expr.arg && expr.arg.kind === SQExprKind.Hierarchy) {
             if ((<any>categoryColumn).identityExprs && (<any>categoryColumn).identityExprs.length) {
-                const identityExprs = ((<any>categoryColumn).identityExprs[(<any>categoryColumn).identityExprs.length - 1] as any);
+                const identityExprs = (<any>categoryColumn).identityExprs[
+                    (<any>categoryColumn).identityExprs.length - 1
+                ] as any;
                 filterTargetTable = identityExprs.source.entity;
             }
         } else {
@@ -87,19 +87,19 @@ export function extractFilterColumnTarget(categoryColumn: DataViewCategoryColumn
             table: filterTargetTable,
             hierarchy: hierarchy,
             hierarchyLevel: hierarchyLevel,
-            column: filterTargetColumn
+            column: filterTargetColumn,
         };
     }
 
     return {
         table: filterTargetTable,
-        column: filterTargetColumn
+        column: filterTargetColumn,
     };
 }
 
 export function convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDescriptor, full: boolean = false): any {
-    if ((dataType.dateTime) && (full)) {
-       return new Date(rawValue as Date);
+    if (dataType.dateTime && full) {
+        return new Date(rawValue as Date);
     } else if (dataType.numeric) {
         return rawValue as number;
     } else {
@@ -107,7 +107,10 @@ export function convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDes
     }
 }
 
-export function convertAdvancedFilterConditionsToSlicerData(conditions: any, columnDefs: DataViewMetadataColumn[]): string[] {
+export function convertAdvancedFilterConditionsToSlicerData(
+    conditions: any,
+    columnDefs: DataViewMetadataColumn[]
+): string[] {
     if (!conditions || !conditions.values || !conditions.args || !columnDefs) {
         return [];
     }
@@ -118,7 +121,7 @@ export function convertAdvancedFilterConditionsToSlicerData(conditions: any, col
     conditions.values.forEach((valueArray: any) => {
         let res = "";
         valueArray.forEach((value: any, index: number) => {
-            const columnIndex = columnDefs.findIndex((def) => {
+            const columnIndex = columnDefs.findIndex(def => {
                 const expr = def.expr as any;
                 const arg = args[index];
                 const exprColumnName = expr.level ? expr.level : expr.ref;
@@ -133,7 +136,9 @@ export function convertAdvancedFilterConditionsToSlicerData(conditions: any, col
             }
             if (columnIndex !== -1) {
                 const format = columnDefs[columnIndex].format || "g";
-                const dataType: ValueTypeDescriptor = columnDefs[columnIndex] && columnDefs[columnIndex].type || ValueType.fromDescriptor({ text: true });
+                const dataType: ValueTypeDescriptor =
+                    (columnDefs[columnIndex] && columnDefs[columnIndex].type) ||
+                    ValueType.fromDescriptor({ text: true });
                 const labelValue = ValueFormat(convertRawValue(value.value, dataType), format);
                 res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
             }

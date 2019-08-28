@@ -28,8 +28,6 @@
 // powerbi
 import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
-import VisualUpdateType = powerbi.VisualUpdateType;
-import ViewMode = powerbi.ViewMode;
 import IFilter = powerbi.IFilter;
 import FilterAction = powerbi.FilterAction;
 import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
@@ -55,7 +53,12 @@ export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
     }
 
     protected build(options: VisualConstructorOptions): HierarchySlicer {
-        options.host.applyJsonFilter = (filter: IFilter | IFilter[], objectName: string, propertyName: string, action: FilterAction) => {
+        options.host.applyJsonFilter = (
+            filter: IFilter | IFilter[],
+            objectName: string,
+            propertyName: string,
+            action: FilterAction
+        ) => {
             this.filter = filter;
         };
         options.host.persistProperties = (changes: VisualObjectInstancesToPersist) => {
@@ -73,11 +76,16 @@ export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
         this.visual.update({
             dataViews: isArray(dataView) ? dataView : [dataView],
             viewport: this.viewport,
-            jsonFilters: jsonFilters
+            jsonFilters: jsonFilters,
         } as VisualUpdateOptions);
     }
 
-    public updateRenderTimeoutWithCustomFilter(dataViews: DataView[] | DataView, fn: Function, jsonFilters?: IFilter[], timeout?: number): number {
+    public updateRenderTimeoutWithCustomFilter(
+        dataViews: DataView[] | DataView,
+        fn: Function,
+        jsonFilters?: IFilter[],
+        timeout?: number
+    ): number {
         this.update(dataViews, jsonFilters);
         return renderTimeout(fn, timeout);
     }

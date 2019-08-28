@@ -35,25 +35,25 @@ export enum BorderStyle {
     RightOnly,
     TopBottom,
     LeftRight,
-    Frame
+    Frame,
 }
 
 export enum FontWeight {
     Light = 200,
     Normal = 400,
     SemiBold = 600,
-    Bold = 800
+    Bold = 800,
 }
 
 export enum FontStyle {
     Normal,
-    Italic
+    Italic,
 }
 
 export enum HideMembers {
     Never,
     Empty,
-    ParentName
+    ParentName,
 }
 
 export enum Zoomed {

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2018 Jan Pieter Posthuma / DataScenarios
+ * Copyright (c) 2019 Jan Pieter Posthuma / DataScenarios
  *
  * All rights reserved.
  *
@@ -24,7 +24,6 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
-
 
 "use strict";
 

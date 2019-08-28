@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2018 Jan Pieter Posthuma / DataScenarios
+ * Copyright (c) 2019 Jan Pieter Posthuma / DataScenarios
  *
  * All rights reserved.
  *
@@ -30,7 +30,7 @@
 import powerbi from "powerbi-visuals-api";
 import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
-import { IFilterColumnTarget, ITupleFilter, FilterType, Selector } from "powerbi-models";
+import { IFilterColumnTarget, Selector } from "powerbi-models";
 import { select, event, Selection } from "d3-selection";
 
 import * as interfaces from "./interfaces";
@@ -42,24 +42,24 @@ import IFilter = powerbi.IFilter;
 import FilterAction = powerbi.FilterAction;
 import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
 import DataViewPropertyValue = powerbi.DataViewPropertyValue;
-import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
+// import VisualObjectInstancesToPersist = powerbi.VisualObjectInstancesToPersist;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import ISelectionHandler = interactivityBaseService.ISelectionHandler;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
 import IInteractiveBehavior = interactivityBaseService.IInteractiveBehavior;
-import PixelConverter = pixelConverter;
+// import PixelConverter = pixelConverter;
 
 import IHierarchySlicerBehaviorOptions = interfaces.IHierarchySlicerBehaviorOptions;
 import IHierarchySlicerDataPoint = interfaces.IHierarchySlicerDataPoint;
 import HierarchySlicerSettings = settings.HierarchySlicerSettings;
 
-import HideMembers = enums.HideMembers;
-import { HierarchySlicer } from "./hierarchySlicer";
+// import HideMembers = enums.HideMembers;
+// import { HierarchySlicer } from "./hierarchySlicer";
 
 let hierarchySlicerProperties = {
     selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
     filterPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filter" },
-    filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" },
+    filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" }, // tslint:disable-line: prettier
     defaultValue: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "defaultValue" },
     selfFilterEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selfFilterEnabled" },
     mobileViewEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "mobile", propertyName: "enable" },
@@ -88,8 +88,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     public bindEvents(options: IHierarchySlicerBehaviorOptions, selectionHandler: ISelectionHandler): void {
-        let expanders = this.expanders = options.expanders;
-        let slicers: Selection<any, any, any, any> = this.slicers = options.slicerItemContainers;
+        let expanders = (this.expanders = options.expanders);
+        let slicers: Selection<any, any, any, any> = (this.slicers = options.slicerItemContainers);
         this.slicerBodySpinner = options.slicerBodySpinner;
         this.slicerItemLabels = options.slicerItemLabels;
         this.slicerItemInputs = options.slicerItemInputs;
@@ -116,7 +116,10 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             if (this.spinnerTimeoutId) {
                 window.clearTimeout(this.spinnerTimeoutId);
             }
-            this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
+            this.spinnerTimeoutId = window.setTimeout(
+                () => this.addSpinner(expanders, index),
+                this.settings.general.spinnerDelay
+            );
             this.persistExpand();
         });
 
@@ -161,99 +164,113 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             }
             let filterLevel = this.levels;
             if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
-            this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
+            this.spinnerTimeoutId = window.setTimeout(
+                () => this.addSpinner(expanders, index),
+                this.settings.general.spinnerDelay
+            );
             let selected = d.partialSelected ? !d.selected : d.selected;
             let selectionDataPoints = this.fullTree;
             if (d.ownId === "selectAll") {
-                selectionDataPoints.forEach(function(dp) { dp.selected = !selected; });
+                selectionDataPoints.forEach(function(dp) {
+                    dp.selected = !selected;
+                });
                 this.renderSelection(true);
                 this.persistSelectAll(!selected);
                 this.persistFilter([], 1);
                 return;
             }
-            selectionDataPoints = selectionDataPoints.filter((d) => d.ownId !== "selectAll");
-            if (this.settings.selection.singleSelect) { // single select value -> start with empty selection tree
-                selectionDataPoints.forEach((dp) => { dp.selected = false; dp.partialSelected = false; });
+            selectionDataPoints = selectionDataPoints.filter(d => d.ownId !== "selectAll");
+            if (this.settings.selection.singleSelect) {
+                // single select value -> start with empty selection tree
+                selectionDataPoints.forEach(dp => {
+                    dp.selected = false;
+                    dp.partialSelected = false;
+                });
             }
             d.selected = !selected; // Toggle selection
             d.partialSelected = false; // Current member: never partialSelected
-            if (!selected) { // Select member logic
+            if (!selected) {
+                // Select member logic
                 selectionDataPoints
-                    .filter((dp) => dp.parentId.indexOf(d.ownId) > -1) // All children
-                    .forEach((dp) => dp.selected = true );
-                HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId)
-                    .forEach((dp) => {
-                        if (!dp.selected) {
-                            dp.selected = true;
-                        }
-                        const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
-                        if (children.length === children.filter((c) => c.selected).length) { // All children selected?
-                            dp.partialSelected = this.settings.general.searching;
-                        } else {
-                            dp.partialSelected = true;
-                        }
-                    });
+                    .filter(dp => dp.parentId.indexOf(d.ownId) > -1) // All children
+                    .forEach(dp => (dp.selected = true));
+                HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId).forEach(dp => {
+                    if (!dp.selected) {
+                        dp.selected = true;
+                    }
+                    const children = selectionDataPoints.filter(c => c.parentId.indexOf(dp.ownId) > -1);
+                    if (children.length === children.filter(c => c.selected).length) {
+                        // All children selected?
+                        dp.partialSelected = this.settings.general.searching;
+                    } else {
+                        dp.partialSelected = true;
+                    }
+                });
             } else if (!d.isLeaf) {
                 selectionDataPoints
-                    .filter((dp) => dp.parentId.indexOf(d.ownId) >= 0)
-                    .forEach((dp) => dp.selected = (selected === dp.selected) ? !selected : dp.selected);
+                    .filter(dp => dp.parentId.indexOf(d.ownId) >= 0)
+                    .forEach(dp => (dp.selected = selected === dp.selected ? !selected : dp.selected));
             }
-            if (selected) { // Deselect member logic
+            if (selected) {
+                // Deselect member logic
                 selectionDataPoints
-                    .filter((dp) => dp.parentId.indexOf(d.ownId) > -1)
-                    .forEach((dp) => dp.selected = false);
-                HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId)
-                    .forEach((dp) => {
-                        const children = selectionDataPoints.filter((c) => c.parentId.indexOf(dp.ownId) > -1);
-                        if (children.filter((c) => c.selected).length === 0) { // All children deselected?
-                            dp.selected = false;
-                            dp.partialSelected = false;
-                        } else {
-                            dp.selected = true;
-                            dp.partialSelected = true;
-                        }
+                    .filter(dp => dp.parentId.indexOf(d.ownId) > -1)
+                    .forEach(dp => (dp.selected = false));
+                HierarchySlicerWebBehavior.getParentDataPoints(selectionDataPoints, d.parentId).forEach(dp => {
+                    const children = selectionDataPoints.filter(c => c.parentId.indexOf(dp.ownId) > -1);
+                    if (children.filter(c => c.selected).length === 0) {
+                        // All children deselected?
+                        dp.selected = false;
+                        dp.partialSelected = false;
+                    } else {
+                        dp.selected = true;
+                        dp.partialSelected = true;
+                    }
                 });
             }
-            filterLevel = selectionDataPoints.filter((d) => d.partialSelected)
-                    .reduce((s, d) => Math.max(d.level, s), -1) + 1;
+            filterLevel =
+                selectionDataPoints.filter(d => d.partialSelected).reduce((s, d) => Math.max(d.level, s), -1) + 1;
 
             this.renderSelection(true);
-            this.persistSelectAll(selectionDataPoints.filter((d) => d.selected).length === selectionDataPoints.length);
+            this.persistSelectAll(selectionDataPoints.filter(d => d.selected).length === selectionDataPoints.length);
             this.applyFilter(filterLevel);
             if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
         // HEADER EVENTS
         slicerCollapse.on("click", (d: IHierarchySlicerDataPoint) => {
-            if (this.dataPoints.filter((d) => d.isExpand).length > 0) {
+            if (this.dataPoints.filter(d => d.isExpand).length > 0) {
                 (select(".simplebar-content").node() as HTMLElement).scrollTop = 0;
 
-                this.dataPoints.forEach((d) => d.isExpand = false);
+                this.dataPoints.forEach(d => (d.isExpand = false));
                 this.persistExpand();
             }
         });
 
         slicerExpand.on("click", (d: IHierarchySlicerDataPoint) => {
-            if (this.dataPoints.filter((d) => !d.isExpand && !d.isLeaf).length > 0) {
-                this.dataPoints.filter((d) => !d.isLeaf).forEach((d) => d.isExpand = true);
+            if (this.dataPoints.filter(d => !d.isExpand && !d.isLeaf).length > 0) {
+                this.dataPoints.filter(d => !d.isLeaf).forEach(d => (d.isExpand = true));
                 this.persistExpand();
             }
         });
 
         slicerClear.on("click", (d: IHierarchySlicerDataPoint) => {
-            if (this.dataPoints.filter((d) => d.selected).length === 0) return;
+            if (this.dataPoints.filter(d => d.selected).length === 0) return;
             if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
-            this.spinnerTimeoutId = window.setTimeout(() => this.addSpinner(expanders, 0), this.settings.general.spinnerDelay);
+            this.spinnerTimeoutId = window.setTimeout(
+                () => this.addSpinner(expanders, 0),
+                this.settings.general.spinnerDelay
+            );
             this.selectionHandler.handleClearSelection();
             this.persistSelectAll(false);
             this.persistFilter([]);
             if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
         });
 
-        slicerHeaderText.on("click", (d) => {
+        slicerHeaderText.on("click", d => {
             if (!doubleTap) {
                 doubleTap = true;
-                setTimeout(() => doubleTap = false, 300 );
+                setTimeout(() => (doubleTap = false), 300);
                 return false;
             }
             event.preventDefault();
@@ -265,19 +282,22 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
     private addSpinner(expanders: Selection<any, any, any, any>, index: number) {
         const currentExpander = expanders.filter((expander, i) => index === i);
-        const currentExpanderHtml = (currentExpander.node() as HTMLElement);
+        const currentExpanderHtml = currentExpander.node() as HTMLElement;
         const size = Math.min(currentExpanderHtml.clientHeight, currentExpanderHtml.clientWidth);
         const scale = size / 25.0;
         currentExpander.select(".icon").remove();
         const container = currentExpander.select(".spinner-icon").style("display", "inline");
-        const spinner = container.append("div").classed("powerbi-spinner", true)
+        const spinner = container
+            .append("div")
+            .classed("powerbi-spinner", true)
             .style("transform", `scale(${scale})`)
             .style("margin-left", "0")
             .style("vertical-align", "middle")
             .style("line-height", `${currentExpanderHtml.clientHeight}px`)
             .attr("ng-if", "viewModel.showProgressBar")
             .attr("delay", "100")
-            .append("div").classed("spinner", true);
+            .append("div")
+            .classed("spinner", true);
         for (let i = 0; i < 5; i++) {
             spinner.append("div").classed("circle", true);
         }
@@ -285,41 +305,26 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
     private renderMouseover(): void {
         this.slicerItemLabels.style("color", (d: IHierarchySlicerDataPoint) => {
-                if (d.mouseOver)
-                    return this.settings.items.hoverColor;
-                else if (d.mouseOut) {
-                    if (d.selected)
-                        return this.settings.items.fontColor;
-                    else
-                        return this.settings.items.fontColor;
-                }
-                else
-                    return this.settings.items.fontColor; // fallback
-            });
+            if (d.mouseOver) return this.settings.items.hoverColor;
+            else if (d.mouseOut) {
+                if (d.selected) return this.settings.items.fontColor;
+                else return this.settings.items.fontColor;
+            } else return this.settings.items.fontColor; // fallback
+        });
         this.slicerItemInputs.selectAll("span").style("border-color", (d: IHierarchySlicerDataPoint) => {
-                if (d.mouseOver)
-                    return this.settings.items.hoverColor;
-                else if (d.mouseOut) {
-                    if (d.selected)
-                        return this.settings.items.fontColor;
-                    else
-                        return this.settings.items.fontColor;
-                }
-                else
-                    return this.settings.items.fontColor; // fallback
-            });
+            if (d.mouseOver) return this.settings.items.hoverColor;
+            else if (d.mouseOut) {
+                if (d.selected) return this.settings.items.fontColor;
+                else return this.settings.items.fontColor;
+            } else return this.settings.items.fontColor; // fallback
+        });
         this.expanders.selectAll(".icon").style("fill", (d: IHierarchySlicerDataPoint) => {
-                if (d.mouseOver)
-                    return this.settings.items.hoverColor;
-                else if (d.mouseOut) {
-                    if (d.selected)
-                        return this.settings.items.fontColor;
-                    else
-                        return this.settings.items.fontColor;
-                }
-                else
-                    return this.settings.items.fontColor; // fallback
-            });
+            if (d.mouseOver) return this.settings.items.hoverColor;
+            else if (d.mouseOut) {
+                if (d.selected) return this.settings.items.fontColor;
+                else return this.settings.items.fontColor;
+            } else return this.settings.items.fontColor; // fallback
+        });
     }
 
     public renderSelection(hasSelection: boolean): void {
@@ -330,30 +335,27 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             if (input) {
                 input.property("checked", false);
             }
-        }
-        else {
+        } else {
             this.styleSlicerInputs(this.slicers, hasSelection);
         }
     }
 
     public styleSlicerInputs(slicers: Selection<any, any, any, any>, hasSelection: boolean) {
         let settings = this.settings;
-        slicers.each(function (d: IHierarchySlicerDataPoint) {
+        slicers.each(function(d: IHierarchySlicerDataPoint) {
             let slicerItem: HTMLElement = this.getElementsByTagName("div")[0];
             let shouldCheck: boolean = d.selected;
             let partialCheck: boolean = d.partialSelected;
             let input = slicerItem.getElementsByTagName("input")[0];
-            if (input)
-                input.checked = shouldCheck;
+            if (input) input.checked = shouldCheck;
 
             if (shouldCheck && partialCheck) {
                 slicerItem.classList.remove("selected");
                 slicerItem.classList.add("partiallySelected");
-            } else if (shouldCheck && (!partialCheck)) {
+            } else if (shouldCheck && !partialCheck) {
                 slicerItem.classList.remove("partiallySelected");
                 slicerItem.classList.add("selected");
-            } else
-                slicerItem.classList.remove("selected");
+            } else slicerItem.classList.remove("selected");
 
             let slicerSpan: HTMLElement = slicerItem.getElementsByTagName("span")[0];
             slicerSpan.style.borderColor = d.selected ? settings.items.selectedColor : settings.items.fontColor;
@@ -368,11 +370,11 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         }
 
         const targets: any = [];
-        const dataPoints = this.dataPoints.filter((d) => d.ownId !== "selectAll");
+        const dataPoints = this.dataPoints.filter(d => d.ownId !== "selectAll");
 
         dataPoints.forEach((dataPoint: IHierarchySlicerDataPoint) => {
-            const filterTarget = (<IFilterColumnTarget>dataPoint.filterTarget);
-            if ((dataPoint.selected) && dataPoint.level <= levels) {
+            const filterTarget = <IFilterColumnTarget>dataPoint.filterTarget;
+            if (dataPoint.selected && dataPoint.level <= levels) {
                 if (targets.indexOf(filterTarget) === -1) {
                     targets.push(filterTarget);
                 }
@@ -388,8 +390,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                     let grandParents = getParent(parent);
                     grandParents.push(parent);
                     return grandParents;
-                }
-                else {
+                } else {
                     return [parent];
                 }
             }
@@ -397,13 +398,19 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         };
 
         // create table from tree
-        let filterValues: any[] = filterDataPoints.map((dataPoint: IHierarchySlicerDataPoint) => { // TupleValueType
+        let filterValues: any[] = filterDataPoints.map((dataPoint: IHierarchySlicerDataPoint) => {
+            // TupleValueType
             let parents: IHierarchySlicerDataPoint[] = getParent(dataPoint);
             parents.push(dataPoint);
-            return parents.map( dataPoint => {
-                return <any>{ // ITupleElementValue
+            return parents.map(dataPoint => {
+                return <any>{
+                    // ITupleElementValue
                     // need to pass correct value type
-                    value: dataPoint.isEmpty ? null : (dataPoint.dataType.numeric ? Number(dataPoint.value) : dataPoint.value)
+                    value: dataPoint.isEmpty
+                        ? null
+                        : dataPoint.dataType.numeric
+                        ? Number(dataPoint.value)
+                        : dataPoint.value,
                 };
             });
         });
@@ -412,8 +419,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             target: targets,
             operator: "In",
             values: filterValues,
-            $schema: "http://powerbi.com/product/schema#tuple",
-            filterType: 6
+            $schema: "http://powerbi.com/product/schema#tuple", // tslint:disable-line: no-http-string
+            filterType: 6,
         };
 
         if (!filterValues.length || !filterValues.length) {
@@ -423,9 +430,12 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         this.persistFilter(filterInstance);
     }
 
-    public static getParentDataPoints(dataPoints: IHierarchySlicerDataPoint[], parentId: string): IHierarchySlicerDataPoint[] {
-        let parent: IHierarchySlicerDataPoint[] = dataPoints.filter((d) => d.ownId === parentId);
-        if (!parent || (parent.length === 0)) {
+    public static getParentDataPoints(
+        dataPoints: IHierarchySlicerDataPoint[],
+        parentId: string
+    ): IHierarchySlicerDataPoint[] {
+        let parent: IHierarchySlicerDataPoint[] = dataPoints.filter(d => d.ownId === parentId);
+        if (!parent || parent.length === 0) {
             return [];
         } else if (parent[0].level === 0) {
             return parent;
@@ -444,11 +454,12 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             objectName: "general",
             selector: Selector,
             properties: {
-                filterValues: ""
+                filterValues: "",
             },
         };
-        this.hostServices.persistProperties({ remove: [ instance ] });
-        this.hostServices.applyJsonFilter(filter,
+        this.hostServices.persistProperties({ remove: [instance] });
+        this.hostServices.applyJsonFilter(
+            filter,
             hierarchySlicerProperties.filterPropertyIdentifier.objectName,
             hierarchySlicerProperties.filterPropertyIdentifier.propertyName,
             action
@@ -456,17 +467,20 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private persistExpand() {
-        const expanded = this.dataPoints.filter((d) => d.isExpand).map((d) => d.ownId).join(",");
+        const expanded = this.dataPoints
+            .filter(d => d.isExpand)
+            .map(d => d.ownId)
+            .join(",");
 
         const instance: VisualObjectInstance = {
             objectName: "general",
             selector: Selector,
             properties: {
-                expanded: expanded
+                expanded: expanded,
             },
         };
 
-        this.hostServices.persistProperties(expanded !== "" ? { merge: [ instance ] } : { remove: [ instance ] });
+        this.hostServices.persistProperties(expanded !== "" ? { merge: [instance] } : { remove: [instance] });
     }
 
     private persistSelectAll(selectAll: boolean) {
@@ -474,10 +488,10 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             objectName: "general",
             selector: Selector,
             properties: {
-                selectAll: true
+                selectAll: true,
             },
         };
-        this.hostServices.persistProperties(selectAll ? { merge: [ instance ] } : { remove: [ instance ] });
+        this.hostServices.persistProperties(selectAll ? { merge: [instance] } : { remove: [instance] });
     }
 
     private toggleMobileView(currentStatus: boolean) {
@@ -488,6 +502,6 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             selector: Selector,
             properties: properties,
         };
-        this.hostServices.persistProperties({ merge: [ instance ] });
+        this.hostServices.persistProperties({ merge: [instance] });
     }
 }
