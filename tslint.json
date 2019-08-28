@@ -1,5 +1,8 @@
 {
+    "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
+    "extends": ["tslint-plugin-prettier", "tslint-config-prettier"],
     "rules": {
+        "prettier": true,
         "class-name": true,
         "comment-format": [
             true,
