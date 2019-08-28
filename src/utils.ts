@@ -122,19 +122,21 @@ export function convertAdvancedFilterConditionsToSlicerData(conditions: any, col
                 const expr = def.expr as any;
                 const arg = args[index];
                 const exprColumnName = expr.level ? expr.level : expr.ref;
-                const exprTableName = expr.source ? expr.source.entity : expr.arg.arg.entity;
                 const argColumnName = arg.level ? arg.level : arg.ref;
-                const argTableName = arg.source ? arg.source.entity : arg.arg.arg.entity;
+
+                const exprTableName = expr.source ? expr.source.entity : expr.arg.hierarchy;
+                const argTableName = arg.source ? arg.source.entity : arg.arg.hierarchy;
                 return exprColumnName === argColumnName && exprTableName === argTableName;
             });
             if (value.value===null) {
                 result.push(res);
             }
-
-            const format = columnDefs[columnIndex].format || "g";
-            const dataType: ValueTypeDescriptor = columnDefs[columnIndex] && columnDefs[columnIndex].type || ValueType.fromDescriptor({ text: true });
-            const labelValue = ValueFormat(convertRawValue(value.value, dataType), format)
-            res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
+            if (columnIndex !== -1) {
+                const format = columnDefs[columnIndex].format || "g";
+                const dataType: ValueTypeDescriptor = columnDefs[columnIndex] && columnDefs[columnIndex].type || ValueType.fromDescriptor({ text: true });
+                const labelValue = ValueFormat(convertRawValue(value.value, dataType), format)
+                res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
+            }
         });
 
         result.push(res);

@@ -362,38 +362,22 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     public applyFilter(levels: number): void {
-        if (this.dataPoints.length === 0) { // Called without data
+        // Called without data
+        if (this.dataPoints.length === 0) {
             return;
         }
 
-        const tablesAndColumns: any = {};
+        const targets: any = [];
         const dataPoints = this.dataPoints.filter((d) => d.ownId !== "selectAll");
 
         dataPoints.forEach((dataPoint: IHierarchySlicerDataPoint) => {
             const filterTarget = (<IFilterColumnTarget>dataPoint.filterTarget);
             if ((dataPoint.selected) && dataPoint.level <= levels) {
-                if (!tablesAndColumns[filterTarget.table]) {
-                    tablesAndColumns[filterTarget.table] = {};
+                if (targets.indexOf(filterTarget) === -1) {
+                    targets.push(filterTarget)
                 }
-
-                if (!tablesAndColumns[filterTarget.table][filterTarget.column]) {
-                    tablesAndColumns[filterTarget.table][filterTarget.column] = [];
-                }
-
-                tablesAndColumns[filterTarget.table][filterTarget.column].push(dataPoint);
             }
         });
-
-        const targets: any = [];
-        Object.keys(tablesAndColumns).forEach(table =>
-            Object.keys(tablesAndColumns[table]).forEach(column => {
-                targets.push({
-                    column: column,
-                    table: table
-                });
-            }
-            )
-        );
 
         let filterDataPoints: IHierarchySlicerDataPoint[] = dataPoints.filter(d => d.selected && d.level === levels);
 
