@@ -73,6 +73,7 @@ export interface SelectTest {
     values: ITupleElementValue[][];
     selectedDataPoints: number[];
     partialDataPoints: number[];
+    whereCondition?: string;
 }
 
 enum SQExprKind {
@@ -158,51 +159,50 @@ export abstract class HierarchyData extends TestDataViewBuilder {
 
     public getDataView(columnNames?: string[], emptyValues: boolean = false): DataView {
         const columns = this.columnNames.map((field, index) => {
-            let arg = undefined;
-            let level = undefined;
-            let source = undefined;
-            let ref = undefined;
+            let expr;
             if (this.fieldsKind === SQExprKind.HierarchyLevel) {
-                arg = {
-                    arg: {
-                        entity: this.tableName,
-                        kind: 0
-                    },
-                    hierarchy: this.hierarchyName,
-                    kind: 6
-                };
-                level = field;
-            }
-            if (this.fieldsKind === SQExprKind.ColumnRef) {
-                source = {
-                    entity: this.tableName,
-                    kind: 0
-                };
-                ref = field.replace(' ', '');
-            }
-            if (this.fieldsKind === SQExprKind.PropertyVariationSource) {
-                arg = {
+                expr = {
                     arg: {
                         arg: {
                             entity: this.tableName,
                             kind: 0
                         },
-                        name: "Variation",
-                        property: (this.hierarchyName as any).replace('Hierarchy', ''),
-                        kind: 5
+                        hierarchy: this.hierarchyName,
+                        kind: 6
                     },
-                    hierarchy: this.hierarchyName,
-                    kind: 6
+                    level: field,
+                    kind: this.fieldsKind
                 };
-                level = field;
             }
-            const expr = {
-                arg: arg,
-                ref: ref,
-                level: level,
-                source: source,
-                kind: this.fieldsKind === SQExprKind.PropertyVariationSource ? SQExprKind.HierarchyLevel : this.fieldsKind
-            };
+            if (this.fieldsKind === SQExprKind.ColumnRef) {
+                expr = {
+                    source: {
+                        entity: this.tableName,
+                        kind: 0
+                    },
+                    ref: field.replace(' ', ''),
+                    kind: this.fieldsKind
+                };
+            }
+            if (this.fieldsKind === SQExprKind.PropertyVariationSource) {
+                expr = {
+                    arg: {
+                        arg: {
+                            arg: {
+                                entity: this.tableName,
+                                kind: 0
+                            },
+                            name: "Variation",
+                            property: (this.hierarchyName as any).replace('Hierarchy', ''),
+                            kind: 5
+                        },
+                        hierarchy: this.hierarchyName,
+                        kind: 6,
+                    },
+                    level: field,
+                    kind: 7
+                };
+            }
             return {
                 roles: { Fields: true },
                 type: this.columnTypes[index],
@@ -255,6 +255,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
 }
 
 export class HierarchyDataSet1 extends HierarchyData {
+    public tableName: string = "DataSet1";
     public columnNames: string[] =
         ["Level 1", "Level 2", "Level 3", "Value"];
     public tableValues = [
@@ -382,7 +383,7 @@ export class HierarchyDataSet1 extends HierarchyData {
 }
 
 export class HierarchyDataSet2 extends HierarchyData {
-    public tableName: string = "Hierarchy";
+    public tableName: string = "DataSet2";
     public columnNames: string[] =
         ["Level 1", "Level 2"];
     public tableValues = [
@@ -557,7 +558,7 @@ export class HierarchyDataSet3 extends HierarchyData {
 }
 
 export class HierarchyDataSet4 extends HierarchyData {
-    public tableName: string = "Hierarchy";
+    public tableName: string = "DataSet3";
     public columnNames: string[] =
         ["Parent", "Child"];
     public tableValues = [
@@ -680,7 +681,7 @@ export class HierarchyDataSet4 extends HierarchyData {
 }
 
 export class HierarchyDataSet5 extends HierarchyData {
-    public tableName: string = "Hierarchy";
+    public tableName: string = "DataSet5";
     public columnNames: string[] =
         ["Parent", "Child"];
     public tableValues = [
@@ -772,7 +773,7 @@ export class HierarchyDataSet5 extends HierarchyData {
 }
 
 export class HierarchyDataSet6 extends HierarchyData {
-    public tableName: string = "Sales";
+    public tableName: string = "DataSet6";
     public hierarchyName = "Hierarchy";
     public columnNames: string[] =
         ["Parent", "Child"];
@@ -816,7 +817,9 @@ export class HierarchyDataSet6 extends HierarchyData {
                 target: [
                     {
                         column: this.columnNames[0].replace(' ', ''),
-                        table: this.tableName
+                        table: this.tableName,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[0].replace(' ', ''),
                     }
                 ],
                 values: [
@@ -825,7 +828,61 @@ export class HierarchyDataSet6 extends HierarchyData {
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2 ],
-                partialDataPoints: []
+                partialDataPoints: [],
+                whereCondition: JSON.parse(`
+                    [
+                        {
+                            "condition": {
+                                "_kind": 10,
+                                "args": [
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "DataSet6",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Parent",
+                                        "kind": 7
+                                    }
+                                ],
+                                "values": [
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "",
+                                            "typeEncodedValue": "''",
+                                            "valueEncoded": "''",
+                                            "kind": 17
+                                        }
+                                    ]
+                                ],
+                                "kind": 10
+                            }
+                        }
+                    ]
+                `)
             },
             {
                 description: `'${this.getValue(0, 0)}' and ${this.getValue(1, 1)}`,
@@ -833,11 +890,15 @@ export class HierarchyDataSet6 extends HierarchyData {
                 target: [
                     {
                         column: this.columnNames[0].replace(' ', ''),
-                        table: this.tableName
+                        table: this.tableName,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[0].replace(' ', ''),
                     },
                     {
                         column: this.columnNames[1].replace(' ', ''),
-                        table: this.tableName
+                        table: this.tableName,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[1].replace(' ', ''),
                     }
                 ],
                 values: [
@@ -855,7 +916,191 @@ export class HierarchyDataSet6 extends HierarchyData {
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 4 ],
-                partialDataPoints: [ 3 ]
+                partialDataPoints: [ 3 ],
+                whereCondition: JSON.parse(`
+                    [
+                        {
+                            "condition": {
+                                "_kind": 10,
+                                "args": [
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "DataSet6",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Parent",
+                                        "kind": 7
+                                    },
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "DataSet6",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Child",
+                                        "kind": 7
+                                    }
+                                ],
+                                "values": [
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "",
+                                            "typeEncodedValue": "''",
+                                            "valueEncoded": "''",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "2",
+                                            "typeEncodedValue": "'2'",
+                                            "valueEncoded": "'2'",
+                                            "kind": 17
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "",
+                                            "typeEncodedValue": "''",
+                                            "valueEncoded": "''",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "6",
+                                            "typeEncodedValue": "'6'",
+                                            "valueEncoded": "'6'",
+                                            "kind": 17
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "1",
+                                            "typeEncodedValue": "'1'",
+                                            "valueEncoded": "'1'",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "1",
+                                            "typeEncodedValue": "'1'",
+                                            "valueEncoded": "'1'",
+                                            "kind": 17
+                                        }
+                                    ]
+                                ],
+                                "kind": 10
+                            }
+                        }
+                    ]
+                `)
             }
         ];
     }
@@ -867,7 +1112,7 @@ export class HierarchyDataSet6 extends HierarchyData {
 
 export class HierarchyDataSet7 extends HierarchyData {
     public dataSource = DataSourceKind.MD;
-    public tableName = "Organization";
+    public tableName: string = "DataSet7";
     public hierarchyName = "Organizations";
     public columnNames = ["Organization Level 01", "Organization Level 02", "Organization Level 03", "Organization Level 04"];
     public tableValues = [
@@ -930,7 +1175,9 @@ export class HierarchyDataSet7 extends HierarchyData {
                 target: [
                     {
                         column: this.columnNames[0],
-                        table: this.tableName
+                        table: this.tableName,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[0],
                     }
                 ],
                 values: [
@@ -939,7 +1186,61 @@ export class HierarchyDataSet7 extends HierarchyData {
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27 ],
-                partialDataPoints: []
+                partialDataPoints: [],
+                whereCondition: JSON.parse(`
+                    [
+                        {
+                            "condition": {
+                                "_kind": 10,
+                                "args": [
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "DataSet7",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Organizations",
+                                            "kind": 6
+                                        },
+                                        "level": "Organization Level 01",
+                                        "kind": 7
+                                    }
+                                ],
+                                "values": [
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "AdventureWorks Cycle",
+                                            "typeEncodedValue": "'AdventureWorks Cycle'",
+                                            "valueEncoded": "'AdventureWorks Cycle'",
+                                            "kind": 17
+                                        }
+                                    ]
+                                ],
+                                "kind": 10
+                            }
+                        }
+                    ]
+                `)
             },
             {
                 description: `${this.getValue(4, 1)}`,
@@ -947,11 +1248,15 @@ export class HierarchyDataSet7 extends HierarchyData {
                 target: [
                     {
                         column: this.columnNames[0],
-                        table: this.tableName
+                        table: this.tableName,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[0],
                     },
                     {
                         column: this.columnNames[1],
-                        table: this.tableName
+                        table: this.tableName,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[1],
                     }
                 ],
                 values: [
@@ -961,7 +1266,99 @@ export class HierarchyDataSet7 extends HierarchyData {
                     ]
                 ],
                 selectedDataPoints: [ 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 ],
-                partialDataPoints: [ 0 ]
+                partialDataPoints: [ 0 ],
+                whereCondition: JSON.parse(`
+                    [
+                        {
+                            "condition": {
+                                "_kind": 10,
+                                "args": [
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "DataSet7",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Organizations",
+                                            "kind": 6
+                                        },
+                                        "level": "Organization Level 01",
+                                        "kind": 7
+                                    },
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "DataSet7",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Organizations",
+                                            "kind": 6
+                                        },
+                                        "level": "Organization Level 02",
+                                        "kind": 7
+                                    }
+                                ],
+                                "values": [
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "AdventureWorks Cycle",
+                                            "typeEncodedValue": "'AdventureWorks Cycle'",
+                                            "valueEncoded": "'AdventureWorks Cycle'",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "North America Operations",
+                                            "typeEncodedValue": "'North America Operations'",
+                                            "valueEncoded": "'North America Operations'",
+                                            "kind": 17
+                                        }
+                                    ]
+                                ],
+                                "kind": 10
+                            }
+                        }
+                    ]
+                `)
             }
         ];
     }
@@ -973,7 +1370,7 @@ export class HierarchyDataSet7 extends HierarchyData {
 
 export class HierarchyDataSet8 extends HierarchyData {
     public dataSource = DataSourceKind.Native;
-    public tableName = "Sales";
+    public tableName: string = "LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca";
     public hierarchyName = "Date Hierarchy";
     public columnNames = ["Year", "Month", "Date"];
     public tableValues = [ // TODO: Wrong row order due missing 'sort by column' in tests
@@ -998,7 +1395,7 @@ export class HierarchyDataSet8 extends HierarchyData {
         ValueType.fromDescriptor({ numeric: true })
     ];
     public columnFormat = [
-        undefined, undefined, undefined, undefined
+        undefined, undefined, undefined
     ];
     public fieldsKind = SQExprKind.PropertyVariationSource;
 
@@ -1035,7 +1432,9 @@ export class HierarchyDataSet8 extends HierarchyData {
                 target: [
                     {
                         column: this.columnNames[0],
-                        table: this.tableGuid
+                        table: this.tableGuid,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[0],
                     }
                 ],
                 values: [
@@ -1044,7 +1443,60 @@ export class HierarchyDataSet8 extends HierarchyData {
                     ]
                 ],
                 selectedDataPoints: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 ],
-                partialDataPoints: []
+                partialDataPoints: [],
+                whereCondition: JSON.parse(`
+                    [
+                        {
+                            "condition": {
+                                "_kind": 10,
+                                "args": [
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Date Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Year",
+                                        "kind": 7
+                                    }
+                                ],
+                                "values": [
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 260,
+                                                "category": null,
+                                                "primitiveType": 4,
+                                                "extendedType": 260,
+                                                "categoryString": null,
+                                                "text": false,
+                                                "numeric": true,
+                                                "integer": true,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": 2018,
+                                            "valueEncoded": "1028L",
+                                            "kind": 17
+                                        }
+                                    ]
+                                ],
+                                "kind": 10
+                            }
+                        }
+                    ]
+                `)
             },
             {
                 description: `${this.getValue(0, 1)} ${this.getValue(0, 2)}, ${this.getValue(0, 0)} and ${this.getValue(2, 1)} ${this.getValue(2, 2)}, ${this.getValue(2, 0)}`,
@@ -1052,15 +1504,21 @@ export class HierarchyDataSet8 extends HierarchyData {
                 target: [
                     {
                         column: this.columnNames[0],
-                        table: this.tableGuid
+                        table: this.tableGuid,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[0],
                     },
                     {
                         column: this.columnNames[1],
-                        table: this.tableGuid
+                        table: this.tableGuid,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[1],
                     },
                     {
                         column: this.columnNames[2],
-                        table: this.tableGuid
+                        table: this.tableGuid,
+                        hierarchy: this.hierarchyName,
+                        hierarchyLevel: this.columnNames[2],
                     }
                 ],
                 values: [
@@ -1076,7 +1534,201 @@ export class HierarchyDataSet8 extends HierarchyData {
                     ]
                 ],
                 selectedDataPoints: [ 2, 5 ],
-                partialDataPoints: [ 0, 1, 4 ]
+                partialDataPoints: [ 0, 1, 4 ],
+                whereCondition: JSON.parse(`
+                    [
+                        {
+                            "condition": {
+                                "_kind": 10,
+                                "args": [
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Date Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Year",
+                                        "kind": 7
+                                    },
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Date Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Month",
+                                        "kind": 7
+                                    },
+                                    {
+                                        "_kind": 7,
+                                        "arg": {
+                                            "_kind": 6,
+                                            "arg": {
+                                                "_kind": 0,
+                                                "entity": "LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca",
+                                                "variable": "d",
+                                                "kind": 0
+                                            },
+                                            "hierarchy": "Date Hierarchy",
+                                            "kind": 6
+                                        },
+                                        "level": "Date",
+                                        "kind": 7
+                                    }
+                                ],
+                                "values": [
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 260,
+                                                "category": null,
+                                                "primitiveType": 4,
+                                                "extendedType": 260,
+                                                "categoryString": null,
+                                                "text": false,
+                                                "numeric": true,
+                                                "integer": true,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": 2018,
+                                            "valueEncoded": "2018L",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "April",
+                                            "typeEncodedValue": "'April'",
+                                            "valueEncoded": "'April'",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 260,
+                                                "category": null,
+                                                "primitiveType": 4,
+                                                "extendedType": 260,
+                                                "categoryString": null,
+                                                "text": false,
+                                                "numeric": true,
+                                                "integer": true,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": 1,
+                                            "valueEncoded": "1L",
+                                            "kind": 17
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": 2018,
+                                            "valueEncoded": "2018L",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 1,
+                                                "category": null,
+                                                "primitiveType": 1,
+                                                "extendedType": 1,
+                                                "categoryString": null,
+                                                "text": true,
+                                                "numeric": false,
+                                                "integer": false,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": "February",
+                                            "typeEncodedValue": "'February'",
+                                            "valueEncoded": "'February'",
+                                            "kind": 17
+                                        },
+                                        {
+                                            "_kind": 17,
+                                            "type": {
+                                                "underlyingType": 260,
+                                                "category": null,
+                                                "primitiveType": 4,
+                                                "extendedType": 260,
+                                                "categoryString": null,
+                                                "text": false,
+                                                "numeric": true,
+                                                "integer": true,
+                                                "bool": false,
+                                                "dateTime": false,
+                                                "duration": false,
+                                                "binary": false,
+                                                "none": false
+                                            },
+                                            "value": 1,
+                                            "valueEncoded": "1L",
+                                            "kind": 17
+                                        }
+                                    ]
+                                ],
+                                "kind": 10
+                            }
+                        }
+                    ]
+                `)
             }
         ];
     }

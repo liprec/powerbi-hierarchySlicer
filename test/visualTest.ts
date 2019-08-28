@@ -1564,7 +1564,10 @@ describe("HierachySlicer =>", () => {
                                 singleSelect: selectedTest.clickedDataPoints.length === 1
                             },
                             general: {
-                                expanded: expandedToBe.expanded.join(",")
+                                expanded: expandedToBe.expanded.join(","),
+                                filter: {
+                                    whereItems: selectedTest.whereCondition,
+                                }
                             }
                         };
 
@@ -1874,3 +1877,291 @@ function measurePixelString(measure: number, ptpx: string = "px") {
     const numberOfDigits = numberOfAllDigits - (measure < 0 ? Math.ceil(measure) : Math.floor(measure)).toString().length;
     return `${Math.round(measure * Math.pow(10, numberOfDigits)) / Math.pow(10, numberOfDigits)}${ptpx}`;
 }
+
+describe('HierarchySlicer specific dataView cases =>', () => {
+    let visualBuilder: HierarchySlicerBuilder,
+        defaultSettings: HierarchySlicerSettings;
+
+    beforeEach(() => {
+        visualBuilder = new HierarchySlicerBuilder(1000, 500);
+        visualBuilder.element.find(".slicerContainer").addClass("hasSelection"); // Select visual
+        defaultSettings = new HierarchySlicerSettings();
+    });
+
+
+    describe(`specific filter case =>`, () => {
+        it(`DataView from on-prem OLAP MD`, (done) => {
+            const options = JSON.parse(`
+                {
+                    "viewport": {
+                        "width": 441,
+                        "height": 264,
+                        "scale": 1
+                    },
+                    "dataViews": [
+                        {
+                            "tree": null,
+                            "table": {
+                                "columns": [
+                                    {
+                                        "roles": {
+                                            "Fields": true
+                                        },
+                                        "type": {
+                                            "underlyingType": 1,
+                                            "category": null,
+                                            "primitiveType": 1,
+                                            "extendedType": 1,
+                                            "categoryString": null,
+                                            "text": true,
+                                            "numeric": false,
+                                            "integer": false,
+                                            "bool": false,
+                                            "dateTime": false,
+                                            "duration": false,
+                                            "binary": false,
+                                            "none": false
+                                        },
+                                        "displayName": "FY Year",
+                                        "queryName": "Date.Time Period.FY Year",
+                                        "expr": {
+                                            "_kind": 7,
+                                            "arg": {
+                                                "_kind": 6,
+                                                "arg": {
+                                                    "_kind": 0,
+                                                    "entity": "Date",
+                                                    "variable": "d",
+                                                    "kind": 0
+                                                },
+                                                "hierarchy": "Time Period",
+                                                "kind": 6
+                                            },
+                                            "level": "FY Year",
+                                            "kind": 7
+                                        },
+                                        "index": 0,
+                                        "identityExprs": [
+                                            {
+                                                "_kind": 2,
+                                                "source": {
+                                                    "_kind": 0,
+                                                    "entity": "Date",
+                                                    "kind": 0
+                                                },
+                                                "ref": "FY Year.UniqueName",
+                                                "kind": 2
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "identity": [
+                                    {
+                                        "identityIndex": 0
+                                    },
+                                    {
+                                        "identityIndex": 1
+                                    },
+                                    {
+                                        "identityIndex": 2
+                                    },
+                                    {
+                                        "identityIndex": 3
+                                    }
+                                ],
+                                "identityFields": [
+                                    {
+                                        "_kind": 2,
+                                        "source": {
+                                            "_kind": 0,
+                                            "entity": "Date",
+                                            "kind": 0
+                                        },
+                                        "ref": "FY Year.UniqueName",
+                                        "kind": 2
+                                    }
+                                ],
+                                "rows": [
+                                    [
+                                        "FY2018"
+                                    ],
+                                    [
+                                        "FY2019"
+                                    ],
+                                    [
+                                        "FY2020"
+                                    ],
+                                    [
+                                        "Unknown"
+                                    ]
+                                ]
+                            },
+                            "matrix": null,
+                            "single": null,
+                            "metadata": {
+                                "columns": [
+                                    {
+                                        "roles": {
+                                            "Fields": true
+                                        },
+                                        "type": {
+                                            "underlyingType": 1,
+                                            "category": null,
+                                            "primitiveType": 1,
+                                            "extendedType": 1,
+                                            "categoryString": null,
+                                            "text": true,
+                                            "numeric": false,
+                                            "integer": false,
+                                            "bool": false,
+                                            "dateTime": false,
+                                            "duration": false,
+                                            "binary": false,
+                                            "none": false
+                                        },
+                                        "displayName": "FY Year",
+                                        "queryName": "Date.Time Period.FY Year",
+                                        "expr": {
+                                            "_kind": 7,
+                                            "arg": {
+                                                "_kind": 6,
+                                                "arg": {
+                                                    "_kind": 0,
+                                                    "entity": "Date",
+                                                    "variable": "d",
+                                                    "kind": 0
+                                                },
+                                                "hierarchy": "Time Period",
+                                                "kind": 6
+                                            },
+                                            "level": "FY Year",
+                                            "kind": 7
+                                        },
+                                        "index": 0,
+                                        "identityExprs": [
+                                            {
+                                                "_kind": 2,
+                                                "source": {
+                                                    "_kind": 0,
+                                                    "entity": "Date",
+                                                    "kind": 0
+                                                },
+                                                "ref": "FY Year.UniqueName",
+                                                "kind": 2
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "objects": {
+                                    "general": {
+                                        "filter": {
+                                            "fromValue": {
+                                                "items": {
+                                                    "d": {
+                                                        "entity": "Date"
+                                                    }
+                                                },
+                                                "usedNames": {
+                                                    "d": true
+                                                }
+                                            },
+                                            "whereItems": [
+                                                {
+                                                    "condition": {
+                                                        "_kind": 10,
+                                                        "args": [
+                                                            {
+                                                                "_kind": 7,
+                                                                "arg": {
+                                                                    "_kind": 6,
+                                                                    "arg": {
+                                                                        "_kind": 0,
+                                                                        "entity": "Date",
+                                                                        "variable": "d",
+                                                                        "kind": 0
+                                                                    },
+                                                                    "hierarchy": "Time Period",
+                                                                    "kind": 6
+                                                                },
+                                                                "level": "FY Year",
+                                                                "kind": 7
+                                                            }
+                                                        ],
+                                                        "values": [
+                                                            [
+                                                                {
+                                                                    "_kind": 17,
+                                                                    "type": {
+                                                                        "underlyingType": 1,
+                                                                        "category": null,
+                                                                        "primitiveType": 1,
+                                                                        "extendedType": 1,
+                                                                        "categoryString": null,
+                                                                        "text": true,
+                                                                        "numeric": false,
+                                                                        "integer": false,
+                                                                        "bool": false,
+                                                                        "dateTime": false,
+                                                                        "duration": false,
+                                                                        "binary": false,
+                                                                        "none": false
+                                                                    },
+                                                                    "value": "FY2020",
+                                                                    "typeEncodedValue": "'FY2020'",
+                                                                    "valueEncoded": "'FY2020'",
+                                                                    "kind": 17
+                                                                }
+                                                            ]
+                                                        ],
+                                                        "kind": 10
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "categorical": null
+                        }
+                    ],
+                    "viewMode": 1,
+                    "editMode": 0,
+                    "isInFocus": false,
+                    "operationKind": 0,
+                    "jsonFilters": [
+                        {
+                            "$schema": "http://powerbi.com/product/schema#tuple",
+                            "target": [
+                                {
+                                    "table": "Date",
+                                    "column": "FY Year"
+                                }
+                            ],
+                            "filterType": 6,
+                            "operator": "In",
+                            "values": [
+                                [
+                                    {
+                                        "value": "FY2020"
+                                    }
+                                ]
+                            ]
+                        }
+                    ],
+                    "type": 2,
+                    "updateId": "540e1812-0aeb-9ba2-e3e6-cd69e32a6881"
+                }
+            `) as DataView;
+
+            visualBuilder.updateRenderTimeout(options, () => {
+                const data = visualBuilder.instance.converter((options as any).dataViews[0], [{}], "");
+                
+                expect(data.dataPoints.length).toBe(4);
+
+                expect(data.dataPoints.filter(d => d.selected).length).toBe(1);
+
+                done();
+            }, renderTimeout);
+        });
+    });
+});
