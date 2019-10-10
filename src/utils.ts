@@ -119,8 +119,11 @@ export function convertAdvancedFilterConditionsToSlicerData(
 
     const args = conditions.args;
     conditions.values.forEach((valueArray: any) => {
-        let res = "";
+        let res: any[] = [];
         valueArray.forEach((value: any, index: number) => {
+            if (value.value === null) {
+                result.push("");
+            }
             const columnIndex = columnDefs.findIndex(def => {
                 const expr = def.expr as any;
                 const arg = args[index];
@@ -131,20 +134,26 @@ export function convertAdvancedFilterConditionsToSlicerData(
                 const argTableName = arg.source ? arg.source.entity : arg.arg.hierarchy;
                 return exprColumnName === argColumnName && exprTableName === argTableName;
             });
-            if (value.value === null) {
-                result.push(res);
-            }
             if (columnIndex !== -1) {
                 const format = columnDefs[columnIndex].format || "g";
                 const dataType: ValueTypeDescriptor =
                     (columnDefs[columnIndex] && columnDefs[columnIndex].type) ||
                     ValueType.fromDescriptor({ text: true });
                 const labelValue = ValueFormat(convertRawValue(value.value, dataType), format);
-                res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
+                // res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
+                res.push({
+                    index: columnIndex,
+                    value: "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex,
+                });
             }
         });
 
-        result.push(res);
+        const r = res
+            .sort((r1, r2) => r1.index - r2.index)
+            .map(r => r.value)
+            .join("_");
+
+        result.push(r);
     });
 
     return result;
