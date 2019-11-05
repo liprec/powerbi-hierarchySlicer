@@ -365,12 +365,12 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
     public applyFilter(levels: number): void {
         // Called without data
-        if (this.dataPoints.length === 0) {
+        if (this.fullTree.length === 0) {
             return;
         }
 
         const targets: any = [];
-        const dataPoints = this.dataPoints.filter(d => d.ownId !== "selectAll");
+        const dataPoints = this.fullTree.filter(d => d.ownId !== "selectAll");
 
         dataPoints.forEach((dataPoint: IHierarchySlicerDataPoint) => {
             const filterTarget = <IFilterColumnTarget>dataPoint.filterTarget;
