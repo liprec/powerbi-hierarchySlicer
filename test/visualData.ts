@@ -74,6 +74,8 @@ export interface SelectTest {
     selectedDataPoints: number[];
     partialDataPoints: number[];
     whereCondition?: string;
+    hideMember?: number;
+    hideMembersOffset?: number;
 }
 
 enum SQExprKind {
@@ -451,6 +453,34 @@ export class HierarchyDataSet2 extends HierarchyData {
                 ],
                 selectedDataPoints: [0, 1, 2, 3, 4, 5, 6],
                 partialDataPoints: [],
+            },
+            {
+                description: `${this.getValue(1, 1)} and ${this.getValue(3, 0)} with ragged hierarchy`,
+                clickedDataPoints: [1, 4],
+                target: [
+                    {
+                        column: this.columnNames[0].replace(" ", ""),
+                        table: this.tableName,
+                    },
+                    {
+                        column: this.columnNames[1].replace(" ", ""),
+                        table: this.tableName,
+                    },
+                ],
+                values: [
+                    [
+                        { value: this.getValue(0, 0) as PrimitiveValueType },
+                        { value: this.getValue(1, 1) as PrimitiveValueType }
+                    ],
+                    [
+                        { value: this.getValue(3, 0) as PrimitiveValueType },
+                        { value: this.getValue(3, 1) as PrimitiveValueType }
+                    ],
+                ],
+                selectedDataPoints: [1, 4, 5],
+                partialDataPoints: [0],
+                hideMember: 1,
+                hideMembersOffset: 1,
             },
         ];
     }

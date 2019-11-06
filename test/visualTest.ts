@@ -1750,10 +1750,14 @@ describe("HierachySlicer =>", () => {
                         const expandedToBe = testData.getFullExpanded();
                         const allItemsCnt = testData.getOwnIds().length;
                         const selectedItemsCnt =
-                            selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
+                            selectedTest.selectedDataPoints.length +
+                            selectedTest.partialDataPoints.length +
+                            ((<number>selectedTest.hideMembersOffset) | 0);
+                        const hideMembers = <number>selectedTest.hideMember;
                         dataViewTest.metadata.objects = {
                             selection: {
                                 singleSelect: selectedTest.clickedDataPoints.length === 1,
+                                hideMembers,
                             },
                             general: {
                                 expanded: expandedToBe.expanded.join(","),
@@ -1938,7 +1942,10 @@ describe("HierachySlicer =>", () => {
                         const expandedToBe = testData.getFullExpanded();
                         const allItemsCnt = testData.getOwnIds().length;
                         const selectedItemsCnt =
-                            selectedTest.selectedDataPoints.length + selectedTest.partialDataPoints.length;
+                            selectedTest.selectedDataPoints.length +
+                            selectedTest.partialDataPoints.length +
+                            ((<number>selectedTest.hideMembersOffset) | 0);
+                        const hideMembers = <number>selectedTest.hideMember;
                         const filter = [
                             {
                                 target: selectedTest.target,
@@ -1951,6 +1958,7 @@ describe("HierachySlicer =>", () => {
                         dataViewTest.metadata.objects = {
                             selection: {
                                 singleSelect: selectedTest.clickedDataPoints.length === 1,
+                                hideMembers,
                             },
                             general: {
                                 expanded: expandedToBe.expanded.join(","),
