@@ -470,11 +470,11 @@ export class HierarchyDataSet2 extends HierarchyData {
                 values: [
                     [
                         { value: this.getValue(0, 0) as PrimitiveValueType },
-                        { value: this.getValue(1, 1) as PrimitiveValueType }
+                        { value: this.getValue(1, 1) as PrimitiveValueType },
                     ],
                     [
                         { value: this.getValue(3, 0) as PrimitiveValueType },
-                        { value: this.getValue(3, 1) as PrimitiveValueType }
+                        { value: this.getValue(3, 1) as PrimitiveValueType },
                     ],
                 ],
                 selectedDataPoints: [1, 4, 5],
