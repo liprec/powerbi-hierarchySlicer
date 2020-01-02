@@ -28,12 +28,15 @@
 import powerbi from "powerbi-visuals-api";
 import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
+import { IFilter, TupleFilter } from "powerbi-models";
+import { assignWith, filter, forEach } from "lodash-es";
 
 import DataView = powerbi.DataView;
 import DataViewValueColumn = powerbi.DataViewValueColumn;
 import PrimitiveValue = powerbi.PrimitiveValue;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import ISelectionId = powerbi.visuals.ISelectionId;
+import ISelectionIdBuilder = powerbi.visuals.ISelectionIdBuilder;
 
 import PixelConverter = pixelConverter;
 import TextProperties = textMeasurementService.TextProperties;
@@ -44,9 +47,9 @@ import { HierarchySlicer } from "../src/hierarchySlicer";
 import { HierarchySlicerBuilder } from "./visualBuilder";
 import { FullExpanded, ExpandTest, SelectTest, HierarchyData, HierarchyDataSet1, HierarchyDataSet2, HierarchyDataSet3, HierarchyDataSet4, HierarchyDataSet5, HierarchyDataSet6, HierarchyDataSet7, HierarchyDataSet8 } from "./visualData"; // tslint:disable-line: prettier
 import { HierarchySlicerSettings } from "../src/settings";
-import { IFilter, TupleFilter } from "powerbi-models";
 import { FontStyle, FontWeight, BorderStyle, Zoomed } from "../src/enums";
-import { assignWith, filter, forEach } from "lodash-es";
+import { converter } from "../src/converter";
+import { IHierarchySlicerDataPoint } from "../src/interfaces";
 
 const hideMembers: number[] = [0, 1, 2];
 const renderTimeout: number = 125;
@@ -79,7 +82,7 @@ describe("HierachySlicer =>", () => {
                 visualBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const data = visualBuilder.instance.converter(dataViewTest, [], "");
+                        const data = converter(dataViewTest, [], "", defaultSettings, undefined);
 
                         expect(data.dataPoints.map(dataPoint => dataPoint.ownId)).toEqual(testOwnIds);
 
@@ -2604,11 +2607,32 @@ describe("HierarchySlicer specific dataView cases =>", () => {
             visualBuilder.updateRenderTimeout(
                 options,
                 () => {
-                    const data = visualBuilder.instance.converter((options as any).dataViews[0], [{}], "");
+                    const data = converter((options as any).dataViews[0], [{}], "", defaultSettings, undefined);
 
                     expect(data.dataPoints.length).toBe(4);
 
-                    expect(data.dataPoints.filter(d => d.selected).length).toBe(1);
+                    expect(data.dataPoints.filter((d: IHierarchySlicerDataPoint) => d.selected).length).toBe(1);
+
+                    done();
+                },
+                renderTimeout
+            );
+        });
+    });
+
+    describe(`rename SSAS MD column =>`, () => {
+        it(`DataView from on-prem OLAP MD`, done => {
+            const options = JSON.parse(`
+            `) as DataView;
+
+            visualBuilder.updateRenderTimeout(
+                options,
+                () => {
+                    const data = converter((options as any).dataViews[0], [{}], "", defaultSettings, undefined);
+
+                    expect(data.dataPoints.length).toBe(4);
+
+                    expect(data.dataPoints.filter((d: IHierarchySlicerDataPoint) => d.selected).length).toBe(1);
 
                     done();
                 },

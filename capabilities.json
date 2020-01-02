@@ -504,8 +504,12 @@
     },
     "tooltips": {
         "supportedTypes": {
-            "default": true
-        }
+            "default": true,
+            "canvas": true
+        },
+        "roles": [
+            "tooltips"
+        ]
     },
     "supportsHighlight": true,
     "suppressDefaultTitle": true,

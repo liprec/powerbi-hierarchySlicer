@@ -28,12 +28,11 @@
 "use strict";
 import powerbi from "powerbi-visuals-api";
 import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
-import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
+import { textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import { IMargin, CssConstants } from "powerbi-visuals-utils-svgutils";
 import { pixelConverter } from "powerbi-visuals-utils-typeutils";
 import { ITooltipServiceWrapper, createTooltipServiceWrapper, TooltipEventArgs, } from "powerbi-visuals-utils-tooltiputils"; // tslint:disable-line: prettier
-import { valueType } from "powerbi-visuals-utils-typeutils";
-import { IFilterTarget, IFilterColumnTarget, Selector } from "powerbi-models";
+import { Selector } from "powerbi-models";
 import { select, Selection } from "d3-selection";
 
 import { isEqual } from "lodash-es";
@@ -41,29 +40,33 @@ import { isEqual } from "lodash-es";
 import "core-js/stable";
 import "./matchesPolyfill";
 
-import "../style/hierarchySlicer.less";
-
-import * as interfaces from "./interfaces";
-import * as settings from "./settings";
-import * as webBehavior from "./hierarchySlicerWebBehavior";
-import * as treeView from "./hierarchySlicerTreeView";
-import * as enums from "./enums";
-import { extractFilterColumnTarget, convertAdvancedFilterConditionsToSlicerData, convertRawValue } from "./utils";
+import {
+    IHierarchySlicerData,
+    IHierarchySlicerDataPoint,
+    IHierarchySlicerTreeView,
+    IHierarchySlicerTreeViewOptions,
+    IHierarchySlicerBehaviorOptions,
+} from "./interfaces";
+import { HierarchySlicerSettings } from "./settings";
+import { HierarchySlicerWebBehavior } from "./hierarchySlicerWebBehavior";
+import { HierarchySlicerTreeViewFactory } from "./hierarchySlicerTreeView";
+import { BorderStyle, FontStyle, HideMembers, TraceEvents } from "./enums";
+import { checkMobile } from "./utils";
+import { PerfTimer } from "./perfTimer";
+import { converter } from "./converter";
+import { Graphics } from "./graphics";
 
 import DataView = powerbi.DataView;
-import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
 import IViewport = powerbi.IViewport;
 import IFilter = powerbi.IFilter;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumeration = powerbi.VisualObjectInstanceEnumeration;
-import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
-import DataViewTableRow = powerbi.DataViewTableRow;
+import ISelectionIdBuilder = powerbi.visuals.ISelectionIdBuilder;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
-import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
@@ -71,62 +74,14 @@ import createInteractivitySelectionService = interactivitySelectionService.creat
 import PixelConverter = pixelConverter;
 import ClassAndSelector = CssConstants.ClassAndSelector;
 import createClassAndSelector = CssConstants.createClassAndSelector;
-import ValueFormat = valueFormatter.format;
 import TextProperties = textMeasurementService.TextProperties;
 import TextMeasurementService = textMeasurementService.textMeasurementService;
-import ValueType = valueType.ValueType;
 
-import IHierarchySlicerBehaviorOptions = interfaces.IHierarchySlicerBehaviorOptions;
-import IHierarchySlicerTreeView = interfaces.IHierarchySlicerTreeView;
-import IHierarchySlicerTreeViewOptions = interfaces.IHierarchySlicerTreeViewOptions;
-import IHierarchySlicerDataPoint = interfaces.IHierarchySlicerDataPoint;
-import IHierarchySlicerData = interfaces.IHierarchySlicerData;
-import HierarchySlicerSettings = settings.HierarchySlicerSettings;
-import HierarchySlicerWebBehavior = webBehavior.HierarchySlicerWebBehavior;
-import HierarchySlicerTreeViewFactory = treeView.HierarchySlicerTreeViewFactory;
+const Icons = Graphics.Icons;
 
-import BorderStyle = enums.BorderStyle;
-import FontStyle = enums.FontStyle;
-import HideMembers = enums.HideMembers;
+import "../style/hierarchySlicer.less";
 
 export class HierarchySlicer implements IVisual {
-    // MDL icons
-    private IconSet = {
-        expandAll:
-            '<svg  width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 18h-6v6h-2v-6h-6v-2h6v-6h2v6h6v2z"/><path d="M0 0h24v24H0z" fill="none"/></svg>',
-        collapseAll:
-            '<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 18h-14v-2h14v2z"/><path d="M0 0h24v24H0z" fill="none"/></svg>',
-        clearAll:
-            '<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M5 15h14v-2h-14v2zm-2 4h14v-2h-14v2zm-2 4h14v-2h-14v2z"/><path d="M0 0h24v24H0z" fill="none"/></svg>',
-        collapse:
-            '<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M9 5l7 7l-7 7Z" /><path d="M0 0h24v24H0z" fill="none"/></svg>',
-        expand:
-            '<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M17 9l0 10l-10 0Z" /><path d="M0 0h24v24H0z" fill="none"/></svg>',
-        checkboxTick:
-            '<svg width="100%" height="100%" viewBox="0 0 1 1"><path d="M 0.04038059,0.6267767 0.14644661,0.52071068 0.42928932,0.80355339 0.3232233,0.90961941 z M 0.21715729,0.80355339 0.85355339,0.16715729 0.95961941,0.2732233 0.3232233,0.90961941 z" style="fill:#ffffff;fill-opacity:1;stroke:none" /></svg>',
-        search:
-            '<svg  width="100%" height="100%" viewBox="0 0 24 24"><path d="M15.75 15q1.371 0 2.602-0.521t2.168-1.459 1.459-2.168 0.521-2.602-0.521-2.602-1.459-2.168-2.168-1.459-2.602-0.521-2.602 0.521-2.168 1.459-1.459 2.168-0.521 2.602 0.521 2.602 1.459 2.168 2.168 1.459 2.602 0.521zM7.5 8.25q0-3.41 1.98-5.391t3.568-2.42 3.85-0.439 4.242 1.98 2.42 3.568 0.439 3.85-1.98 4.242-3.568 2.42-2.701 0.439q-2.93 0-5.273-1.91l-9.199 9.188q-0.223 0.223-0.527 0.223t-0.527-0.223-0.223-0.527 0.223-0.527l9.188-9.199q-1.91-2.344-1.91-5.273z"/><path d="M0 0h24v24H0z" fill="none"/></svg>',
-        delete:
-            '<svg  width="100%" height="100%" viewBox="0 0 24 24"><path d="M10.889 10l8.926 8.936-0.879 0.879-8.936-8.926-8.936 8.926-0.879-0.879 8.926-8.936-8.926-8.936 0.879-0.879 8.936 8.926 8.936-8.926 0.879 0.879z"/><path d="M0 0h24v24H0z" fill="none"/></svg>',
-    };
-    // Slicer watermark
-    private SVGs = {
-        watermark: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" x="0px" y="0px" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve" enable-background="new 0 0 400 300">
-        <rect fill="#f4f4f4" x="-0.1" y="0" width="400.1" height="300" />
-        <rect fill="#d0d2d3" x="11.8" y="17.7" width="34.7" height="15.3" />
-        <line fill="none" stroke="#d0d2d3" stroke-miterlimit="10" x1="3.4" y1="44.3" x2="389.4" y2="44.3" />
-        <g><rect fill="#d0d2d3" x="34.1" y="57" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="12.8" y="55" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="44.1" y="81" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="22.8" y="79" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="44.1" y="105" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="22.8" y="103" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="34.1" y="129" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="12.8" y="127" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="44.1" y="153" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="22.8" y="151" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="54.1" y="177" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="32.8" y="175" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="54.1" y="201" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="32.8" y="199" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="44.1" y="225" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="22.8" y="223" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="34.1" y="249" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="12.8" y="247" width="11.3" height="11.3" /></g>
-        <g><rect fill="#d0d2d3" x="44.1" y="273" width="33.8" height="7.7" /><rect fill="none" stroke="#d0d2d3" stroke-miterlimit="10" stroke-width="2" x="22.8" y="271" width="11.3" height="11.3" /></g>
-        </svg>`,
-    };
     private root: HTMLElement;
     private searchHeader: Selection<any, any, any, any>;
     private searchInput: Selection<HTMLInputElement, any, any, any>;
@@ -155,6 +110,7 @@ export class HierarchySlicer implements IVisual {
     private landingPageRemoved: boolean;
     private landingPage: Selection<any, any, any, any>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
+    private selectionBuilder: ISelectionIdBuilder;
 
     public static DefaultFontFamily: string = "Segoe UI, Tahoma, Verdana, Geneva, sans-serif";
     public static DefaultFontSizeInPt: number = 11;
@@ -179,325 +135,6 @@ export class HierarchySlicer implements IVisual {
     public static HeaderSpinner: ClassAndSelector = createClassAndSelector("headerSpinner");
     public static Input: ClassAndSelector = createClassAndSelector("slicerCheckbox");
 
-    public converter(
-        dataView: DataView | undefined,
-        jsonFilters: IFilter[] | undefined,
-        searchText: string
-    ): IHierarchySlicerData {
-        if (
-            !dataView ||
-            !dataView.table ||
-            !dataView.table.rows ||
-            !(dataView.table.rows.length > 0) ||
-            !dataView.table.columns ||
-            !(dataView.table.columns.length > 0)
-        ) {
-            return {
-                dataPoints: [],
-                fullTree: [],
-                settings: <HierarchySlicerSettings>HierarchySlicerSettings.getDefault(),
-                levels: -1,
-            };
-        }
-
-        const rawColumns = dataView.table && dataView.table.columns;
-        const hierarchyRows: DataViewMetadataColumn[] = dataView.metadata.columns.filter((c: DataViewMetadataColumn) =>
-            c.roles ? c.roles["Fields"] : false
-        ); // Filter out 'Values' level
-        const hierarchyRowIndex: (number | undefined)[] = hierarchyRows.map(c => c.index);
-        const rows: DataViewTableRow[] = dataView.table.rows.map(r => hierarchyRowIndex.map((i: number) => r[i]));
-        const columns: DataViewMetadataColumn[] = hierarchyRowIndex.map((i: number) => rawColumns[i]);
-        const columnsMetadata = hierarchyRowIndex.map((i: number) => dataView.metadata.columns[i]);
-        const columnFilters: IFilterTarget[] = columns.map((c: DataViewMetadataColumn) => extractFilterColumnTarget(c));
-        const levels = hierarchyRows.length - 1;
-        let dataPoints: IHierarchySlicerDataPoint[] = [];
-        let fullTree: IHierarchySlicerDataPoint[] = [];
-        let identityValues: string[] = [];
-        let iValues: any[][] = [];
-        let selectedIds: string[] = [];
-        let expandedIds: string[] = [];
-        let order: number = 0;
-        let isRagged: boolean = false;
-        let parentIndex: number[] = [];
-        if (jsonFilters) {
-            if (jsonFilters.length > 0) {
-                if (!(columnFilters[0] as any).hierarchyLevel) {
-                    const jFilter = jsonFilters[0] as any;
-                    selectedIds = jFilter.values.map(
-                        (values: any | any[]) =>
-                            "|~" +
-                            (Array.isArray(values)
-                                ? values
-                                      .map((value, index) => {
-                                          const columnIndex = columnFilters.findIndex((filter: IFilterColumnTarget) =>
-                                              isEqual(filter, jFilter.target[index])
-                                          );
-                                          const format = columnIndex > -1 ? columns[columnIndex].format : undefined;
-                                          return {
-                                              value:
-                                                  ValueFormat(value.value, format).replace(/,/g, "") +
-                                                  "-" +
-                                                  columnIndex.toString(),
-                                              index: columnIndex,
-                                          };
-                                      })
-                                      .sort((dp1, dp2) => dp1.index - dp2.index)
-                                      .map(dp => dp.value)
-                                      .join("_|~")
-                                : ValueFormat(values, columns[0].format).replace(/,/g, "") + "-0")
-                    );
-                } else {
-                    // fallback scenario due to missing info in jsonFilter
-                    const filter: any =
-                        dataView.metadata &&
-                        dataView.metadata.objects &&
-                        dataView.metadata.objects.general &&
-                        dataView.metadata.objects.general.filter;
-                    if (filter && filter.whereItems && filter.whereItems[0] && filter.whereItems[0].condition) {
-                        // convert advanced filter conditions list to HierarchySlicer selected values format
-                        selectedIds = convertAdvancedFilterConditionsToSlicerData(
-                            filter.whereItems[0].condition,
-                            columns
-                        );
-                    }
-                }
-            } else if (this.settings.general.filterValues && this.settings.general.filterValues !== "") {
-                selectedIds = this.settings.general.filterValues.split(",");
-            }
-        }
-        expandedIds = this.settings.general.expanded.split(",");
-        this.settings.header.defaultTitle = dataView.metadata.columns[0].displayName;
-
-        if (this.settings.selection.selectAll) {
-            const dataPointSelectAll: IHierarchySlicerDataPoint = {
-                identity: "selectAll",
-                selected: false,
-                value: this.settings.selection.selectAllLabel,
-                label: this.settings.selection.selectAllLabel,
-                level: 0,
-                isEmpty: false,
-                dataType: ValueType.fromDescriptor({ text: true }),
-                selectable: true,
-                partialSelected: false,
-                isLeaf: true,
-                isExpand: false,
-                isHidden: false,
-                isRagged: false,
-                isSearch: false,
-                ownId: "selectAll",
-                parentId: "none",
-                searchStr: "",
-                orderArray: [0, 0, -1],
-                order: -2,
-            };
-            dataPoints.push(dataPointSelectAll);
-        }
-        for (let r = 0; r < rows.length; r++) {
-            let parentId: string = "";
-            let parentSearchStr: string = "";
-            let rowValuePrev: string | number | Date | null = null;
-            let toolTip: VisualTooltipDataItem[] = [];
-            isRagged = false;
-            for (let c = 0; c < rows[r].length; c++) {
-                if (r === 0) {
-                    iValues.push([]);
-                }
-
-                let columnFormat: string = (columns[c] && columns[c].format) || "g";
-                let dataType: ValueTypeDescriptor =
-                    (columns[c] && columns[c].type) || ValueType.fromDescriptor({ text: true });
-                let rowValue: string | number | Date | null = convertRawValue(rows[r][c], dataType, true);
-                let labelValueId: string = ValueFormat(convertRawValue(rows[r][c], dataType), columnFormat);
-                let labelValue: string;
-
-                rowValue = this.settings.selection.emptyString && rowValue === "" ? null : rowValue;
-                switch (this.settings.selection.hideMembers) {
-                    case HideMembers.Empty:
-                        isRagged = rowValue === null;
-                        labelValue = ValueFormat(rowValue, columnFormat);
-                        break;
-                    case HideMembers.ParentName:
-                        isRagged = r + c > 0 && rowValue === rowValuePrev;
-                        labelValue = ValueFormat(rowValue, columnFormat);
-                        rowValuePrev = rowValue;
-                        break;
-                    case HideMembers.Never:
-                    default:
-                        labelValue =
-                            rowValue === null
-                                ? this.settings.selection.emptyLeafLabel ||
-                                  this.settings.selection.emptyLeafLabelDefault
-                                : ValueFormat(rowValue, columnFormat);
-                }
-
-                let ownId: string =
-                    parentId + (parentId === "" ? "" : "_") + "|~" + labelValueId.replace(/,/g, "") + "-" + c;
-                let searchStr: string = parentSearchStr + labelValue.replace(/,/g, "");
-                let isLeaf: boolean = c === levels;
-                const filterTarget: IFilterTarget = columnFilters[c];
-                const selected: boolean =
-                    this.settings.general.selectAll || selectedIds.filter(d => ownId.indexOf(d) > -1).length > 0;
-                toolTip = toolTip.concat([
-                    { displayName: columns[c].displayName, value: labelValue } as VisualTooltipDataItem,
-                ]);
-
-                const selectionId = undefined;
-
-                let dataPoint: IHierarchySlicerDataPoint = {
-                    filterTarget: filterTarget,
-                    identity: ownId, // Some unique value to 'trick' the interactivityService with overrideSelectionFromData
-                    selected: selected,
-                    value: labelValueId,
-                    label: labelValue,
-                    dataType: dataType,
-                    isEmpty: rows[r][c] === null,
-                    tooltip: toolTip,
-                    level: c,
-                    selectable: true,
-                    partialSelected: false,
-                    isLeaf: isLeaf,
-                    isExpand: expandedIds === [] ? false : expandedIds.filter(d => d === ownId).length > 0 || false,
-                    isHidden: c === 0 ? false : true, // Default true. Real status based on the expanded properties of parent(s)
-                    isRagged: isRagged,
-                    ownId: ownId,
-                    parentId: parentId,
-                    searchStr: searchStr,
-                    isSearch: this.settings.search.addSelection ? selected : false,
-                    orderArray: [],
-                    order: -1,
-                    selectionId: selectionId,
-                };
-
-                parentId = ownId;
-                parentSearchStr = searchStr;
-                if (identityValues.indexOf(ownId) === -1) {
-                    if (iValues[c].indexOf(ownId)) {
-                        iValues[c].push(ownId);
-                    }
-                    dataPoint.orderArray = ownId
-                        .split("_|~")
-                        .map(
-                            (d: string, i: number, t: string[]) => 1 + iValues[i].indexOf(t.slice(0, i + 1).join("_|~"))
-                        ) // Lookup indexes of ownIds
-                        .concat(Array.from({ length: levels - c }, () => 0)); // Stuff array to zero's
-                    identityValues.push(ownId);
-                    dataPoints.push(dataPoint);
-                }
-            }
-        }
-        dataPoints.forEach((d: IHierarchySlicerDataPoint) => {
-            d.order =
-                d.order === -2
-                    ? -1
-                    : d.orderArray.reduce((t: any, c: any, i: number) => t * (iValues[i].length + 1) + c, 0);
-        });
-        dataPoints.sort((d1: IHierarchySlicerDataPoint, d2: IHierarchySlicerDataPoint) => d1.order - d2.order);
-
-        // Determine partiallySelected
-        for (let l = levels; l >= 1; l--) {
-            const selectedNodes = dataPoints.filter(d => d.selected && d.level === l);
-            if (selectedNodes.length > 0) {
-                for (let n = 0; n < selectedNodes.length; n++) {
-                    const parents = dataPoints
-                        .filter(d => d.ownId === selectedNodes[n].parentId)
-                        .filter((value, index, self) => self.indexOf(value) === index); // Make unique
-                    for (let p = 0; p < parents.length; p++) {
-                        const children = dataPoints.filter(d => d.parentId === parents[p].ownId);
-                        if (children.length > children.filter(d => d.selected && !d.partialSelected).length) {
-                            parents[p].partialSelected = true;
-                            parents[p].selected = true;
-                        }
-                        if (children.length === children.filter(d => d.selected && !d.partialSelected).length) {
-                            parents[p].selected = true;
-                        }
-                    }
-                }
-            }
-        }
-        // Store fullTree including hidden ragged members
-        fullTree = dataPoints;
-        // New leafs excluding ragged members
-        if (dataPoints.filter((d: IHierarchySlicerDataPoint) => d.isRagged === true).length > 0) {
-            dataPoints = dataPoints.filter((d: IHierarchySlicerDataPoint) => d.isRagged === false);
-            for (let l = 0; l <= levels - 1; l++) {
-                const parents = dataPoints.filter((d: IHierarchySlicerDataPoint) => d.level === l);
-                parents.forEach(
-                    (d: IHierarchySlicerDataPoint) =>
-                        (d.isLeaf =
-                            dataPoints.filter((dp: IHierarchySlicerDataPoint) => dp.parentId === d.ownId).length === 0)
-                );
-            }
-        }
-
-        // Set isHidden property
-        let parentRootNodes: IHierarchySlicerDataPoint[] = [];
-        let parentRootNodesTemp: IHierarchySlicerDataPoint[] = [];
-        let parentRootNodesTotal: IHierarchySlicerDataPoint[] = [];
-        for (let l = 0; l < levels; l++) {
-            let expandedRootNodes = dataPoints.filter((d: IHierarchySlicerDataPoint) => d.isExpand && d.level === l);
-            if (expandedRootNodes.length > 0) {
-                for (let n = 0; n < expandedRootNodes.length; n++) {
-                    parentRootNodesTemp = parentRootNodes.filter(
-                        (p: IHierarchySlicerDataPoint) => expandedRootNodes[n].parentId === p.ownId
-                    ); // Is parent expanded?
-                    if (l === 0 || parentRootNodesTemp.length > 0) {
-                        parentRootNodesTotal = parentRootNodesTotal.concat(expandedRootNodes[n]);
-                        dataPoints
-                            .filter(
-                                (d: IHierarchySlicerDataPoint) =>
-                                    d.parentId === expandedRootNodes[n].ownId && d.level === l + 1
-                            )
-                            .forEach((d: IHierarchySlicerDataPoint) => (d.isHidden = false));
-                    }
-                }
-            }
-            parentRootNodes = parentRootNodesTotal;
-        }
-
-        if (this.settings.general.selfFilterEnabled && searchText && searchText.length > 2) {
-            this.settings.general.searching = true;
-            searchText = searchText.toLowerCase();
-            dataPoints
-                .filter((d: IHierarchySlicerDataPoint) => d.ownId !== "selectAll")
-                .filter((d: IHierarchySlicerDataPoint) => d.searchStr.toLowerCase().indexOf(searchText) >= 0)
-                .map((d: IHierarchySlicerDataPoint) => (d.isSearch = true));
-            dataPoints
-                .filter((d: IHierarchySlicerDataPoint) => d.isSearch)
-                .forEach((d: IHierarchySlicerDataPoint) =>
-                    HierarchySlicerWebBehavior.getParentDataPoints(dataPoints, d.parentId).map(
-                        dp => (dp.isSearch = true)
-                    )
-                );
-            dataPoints = dataPoints
-                .filter((d: IHierarchySlicerDataPoint) => d.isSearch)
-                .filter(
-                    (d: IHierarchySlicerDataPoint, index: number, self: IHierarchySlicerDataPoint[]) =>
-                        self.indexOf(d) === index
-                )
-                .sort((d1: IHierarchySlicerDataPoint, d2: IHierarchySlicerDataPoint) => d1.order - d2.order);
-        } else {
-            this.settings.general.searching = false;
-        }
-
-        // Select All level
-        if (this.settings.selection.selectAll && !this.settings.general.searching) {
-            const selected = dataPoints.filter((d: IHierarchySlicerDataPoint) => d.selected).length;
-            dataPoints[0].selected = selected > 0 ? true : false;
-            dataPoints[0].partialSelected =
-                selected === 0 ||
-                dataPoints.filter((d: IHierarchySlicerDataPoint) => d.selected).length === dataPoints.length
-                    ? false
-                    : true;
-        }
-        return {
-            dataPoints: dataPoints,
-            fullTree: fullTree,
-            settings: this.settings,
-            levels: levels,
-            hasSelectionOverride: true,
-        };
-    }
-
     constructor(options: VisualConstructorOptions) {
         this.root = options.element;
         this.hostServices = options.host;
@@ -505,6 +142,7 @@ export class HierarchySlicer implements IVisual {
         this.behavior = new HierarchySlicerWebBehavior();
         this.interactivityService = createInteractivitySelectionService(options.host);
         this.tooltipServiceWrapper = createTooltipServiceWrapper(this.hostServices.tooltipService, this.root);
+        this.selectionBuilder = this.hostServices.createSelectionIdBuilder();
 
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
@@ -564,12 +202,12 @@ export class HierarchySlicer implements IVisual {
 
     private renderHeader(rootContainer: Selection<any, any, any, any>): void {
         const headerButtonData = [
-            { title: "Clear", class: HierarchySlicer.Clear.className, icon: this.IconSet.clearAll, level: 0 },
-            { title: "Expand all", class: HierarchySlicer.Expand.className, icon: this.IconSet.expandAll, level: 1 },
+            { title: "Clear", class: HierarchySlicer.Clear.className, icon: Icons.clearAll, level: 0 },
+            { title: "Expand all", class: HierarchySlicer.Expand.className, icon: Icons.expandAll, level: 1 },
             {
                 title: "Collapse all",
                 class: HierarchySlicer.Collapse.className,
-                icon: this.IconSet.collapseAll,
+                icon: Icons.collapseAll,
                 level: 1,
             },
         ];
@@ -597,6 +235,8 @@ export class HierarchySlicer implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
+        console.log(options);
+        let timer = PerfTimer.start(TraceEvents.update);
         this.handleLandingPage(options);
         if (!options || !options.dataViews || !options.dataViews[0] || !options.viewport) {
             return;
@@ -628,6 +268,7 @@ export class HierarchySlicer implements IVisual {
             resetScrollbarPosition = !HierarchySlicer.hasSameTableIdentity(existingDataView, this.dataView);
         }
         this.updateInternal(resetScrollbarPosition);
+        timer();
     }
 
     private static hasSameTableIdentity(dataView1: DataView, dataView2: DataView): boolean {
@@ -659,13 +300,15 @@ export class HierarchySlicer implements IVisual {
         this.updateSettings();
         this.updateSlicerBodyDimensions();
 
-        const data = (this.data = this.converter(
+        const data = (this.data = converter(
             this.dataView,
             this.jsonFilters,
-            (this.searchInput.node() as HTMLInputElement).value
+            (this.searchInput.node() as HTMLInputElement).value,
+            this.settings,
+            this.selectionBuilder
         ));
         this.maxLevels = this.data.levels + 1;
-
+        this.settings = data.settings;
         if (data.dataPoints.length === 0) {
             this.treeView.empty();
             return;
@@ -799,7 +442,7 @@ export class HierarchySlicer implements IVisual {
                 )
             )
             .style("fill", this.settings.items.fontColor)
-            .html(d => (d.isExpand ? this.IconSet.expand : this.IconSet.collapse));
+            .html(d => (d.isExpand ? Icons.expand : Icons.collapse));
 
         expandCollapse
             .selectAll(".spinner-icon")
@@ -891,8 +534,14 @@ export class HierarchySlicer implements IVisual {
 
         this.tooltipServiceWrapper.addTooltip(
             this.slicerBody.selectAll(".row"),
-            (tooltipEvent: TooltipEventArgs<any>) => tooltipEvent.data && tooltipEvent.data.tooltip,
-            (tooltipEvent: TooltipEventArgs<any>) => tooltipEvent.data && tooltipEvent.data.selectedId
+            (tooltipEvent: TooltipEventArgs<any>) =>
+                !checkMobile(window.clientInformation.userAgent)
+                    ? tooltipEvent.data && tooltipEvent.data.tooltip
+                    : undefined,
+            (tooltipEvent: TooltipEventArgs<any>) =>
+                !checkMobile(window.clientInformation.userAgent)
+                    ? tooltipEvent.data && tooltipEvent.data.selectionId
+                    : undefined
         );
     }
 
@@ -1124,7 +773,7 @@ export class HierarchySlicer implements IVisual {
                     Math.ceil(0.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
                 )
             )
-            .html(this.IconSet.search)
+            .html(Icons.search)
             .on("click", () => {
                 this.hostServices.persistProperties({
                     merge: [
@@ -1179,7 +828,7 @@ export class HierarchySlicer implements IVisual {
                     Math.ceil(0.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
                 )
             )
-            .html(this.IconSet.delete)
+            .html(Icons.delete)
             .on("click", () => {
                 (this.searchInput.node() as HTMLInputElement).value = "";
                 this.hostServices.persistProperties({
@@ -1242,7 +891,7 @@ export class HierarchySlicer implements IVisual {
         const div = document.createElement("div");
 
         div.classList.add("watermark");
-        div.innerHTML = this.SVGs.watermark; // tslint:disable-line: no-inner-html
+        div.innerHTML = Icons.watermark; // tslint:disable-line: no-inner-html
         return div;
     }
 

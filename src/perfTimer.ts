@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2018 Jan Pieter Posthuma / DataScenarios
+ * Copyright (c) 2019 Jan Pieter Posthuma / DataScenarios
  *
  * All rights reserved.
  *
@@ -27,42 +27,28 @@
 
 "use strict";
 
-export enum BorderStyle {
-    None,
-    BottomOnly,
-    TopOnly,
-    LeftOnly,
-    RightOnly,
-    TopBottom,
-    LeftRight,
-    Frame,
-}
+export class PerfTimer {
+    public static start(name: string) {
+        const enabled = typeof console !== "undefined";
+        let performance: Performance = window.performance;
+        if (!performance || !performance.mark || !enabled) return () => {};
+        if (console.time) console.time(name);
+        let startMark: string = "Begin " + name;
+        performance.mark(startMark);
+        console.log(startMark);
+        return () => {
+            let end: string = "End " + name;
+            performance.mark(end);
+            // NOTE: Chromium supports performance.mark but not performance.measure.
+            if (performance.measure) performance.measure(name, startMark, end);
+            if (console.timeEnd) console.timeEnd(name);
+        };
+    }
 
-export enum FontWeight {
-    Light = 200,
-    Normal = 400,
-    SemiBold = 600,
-    Bold = 800,
-}
-
-export enum FontStyle {
-    Normal,
-    Italic,
-}
-
-export enum HideMembers {
-    Never,
-    Empty,
-    ParentName,
-}
-
-export enum Zoomed {
-    Small = 25,
-    Normal = 50,
-    Large = 100,
-}
-
-export enum TraceEvents {
-    convertor = "HierarchySlicer1458836712039: Convertor method",
-    update = "HierarchySlicer1458836712039: Update method",
+    public static logTime(action: any) {
+        // Desktop"s old Chromium doesn"t support use of Performance Markers yet
+        let start: number = Date.now();
+        action();
+        return Date.now() - start;
+    }
 }

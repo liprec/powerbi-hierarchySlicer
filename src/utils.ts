@@ -27,9 +27,10 @@
 
 "use strict";
 import powerbi from "powerbi-visuals-api";
-import { IFilterTarget } from "powerbi-models";
+import { IFilterTarget, IFilterColumnTarget } from "powerbi-models";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { valueType } from "powerbi-visuals-utils-typeutils";
+import { isEqual } from "lodash-es";
 
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
 import PrimitiveValue = powerbi.PrimitiveValue;
@@ -42,6 +43,60 @@ enum SQExprKind {
     ColumnRef = 2,
     Hierarchy = 6,
     HierarchyLevel = 7,
+}
+
+export function parseFilter(
+    jsonFilters: powerbi.IFilter[] | undefined,
+    columnFilters: IFilterTarget[],
+    columns: powerbi.DataViewMetadataColumn[],
+    dataView: powerbi.DataView,
+    filterValues: string | undefined
+) {
+    if (jsonFilters) {
+        if (jsonFilters.length > 0) {
+            if (!(columnFilters[0] as any).hierarchyLevel) {
+                const jFilter = jsonFilters[0] as any;
+                return jFilter.values.map(
+                    (values: any | any[]) =>
+                        "|~" +
+                        (Array.isArray(values)
+                            ? values
+                                  .map((value, index) => {
+                                      const columnIndex = columnFilters.findIndex((filter: IFilterColumnTarget) =>
+                                          isEqual(filter, jFilter.target[index])
+                                      );
+                                      const format = columnIndex > -1 ? columns[columnIndex].format : undefined;
+                                      return {
+                                          value:
+                                              ValueFormat(value.value, format).replace(/,/g, "") +
+                                              "-" +
+                                              columnIndex.toString(),
+                                          index: columnIndex,
+                                      };
+                                  })
+                                  .sort((dp1, dp2) => dp1.index - dp2.index)
+                                  .map(dp => dp.value)
+                                  .join("_|~")
+                            : ValueFormat(values, columns[0].format).replace(/,/g, "") + "-0")
+                );
+            } else {
+                // fallback scenario due to missing info in jsonFilter
+                const filter: any =
+                    dataView.metadata &&
+                    dataView.metadata.objects &&
+                    dataView.metadata.objects.general &&
+                    dataView.metadata.objects.general.filter;
+                if (filter && filter.whereItems && filter.whereItems[0] && filter.whereItems[0].condition) {
+                    // convert advanced filter conditions list to HierarchySlicer selected values format
+                    return convertAdvancedFilterConditionsToSlicerData(filter.whereItems[0].condition, columns);
+                }
+            }
+        } else if (filterValues && filterValues !== "") {
+            // Legacy version
+            return filterValues.split(",");
+        }
+    }
+    return [];
 }
 
 export function extractFilterColumnTarget(
@@ -157,4 +212,8 @@ export function convertAdvancedFilterConditionsToSlicerData(
     });
 
     return result;
+}
+
+export function checkMobile(userAgent: string): boolean {
+    return userAgent.indexOf("PBIMobile") !== -1;
 }
