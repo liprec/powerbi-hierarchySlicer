@@ -27,32 +27,11 @@
 
 "use strict";
 
-export class PerfTimer {
-    public static start(name: string, enabled: boolean = false) {
-        let performance: Performance = window.performance;
-        if (!performance || !performance.mark || !enabled) return () => {};
-        if (console.time) console.time(name);
-        let startMark: string = name + " start";
-        performance.mark(startMark);
-        console.log(startMark);
-        return () => {
-            let end: string = name + " end";
-            performance.mark(end);
-            // NOTE: Chromium supports performance.mark but not performance.measure.
-            if (performance.measure) performance.measure(name, startMark, end);
-            if (console.timeEnd) console.timeEnd(name);
-        };
-    }
+import { TestparseOwnId, TestparseExpand, TestparseOldOwnId, TestparseNewOwnId } from "./visualUnitTestUtils";
 
-    public static logTime(action: any) {
-        // Desktop"s old Chromium doesn"t support use of Performance Markers yet
-        let start: number = Date.now();
-        action();
-        return Date.now() - start;
-    }
-
-    public static logMsg(message: string, enabled: boolean = false) {
-        if (!enabled) return () => {};
-        console.log(message);
-    }
+export function UnitTestUtils() {
+    TestparseOldOwnId();
+    TestparseNewOwnId();
+    TestparseOwnId();
+    TestparseExpand();
 }

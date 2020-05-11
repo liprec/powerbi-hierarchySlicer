@@ -1,0 +1,17 @@
+<svg width="100%" height="100%" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 10H190V110H180V50H20V190H10V10Z" fill="#3A3A38"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M180 110V50H20V190H130V170L110 150V110H180ZM40 70H60V90H40V70ZM90 120H110V100H90V120ZM110 150H90V170H110V150Z" fill="#FAFAFA"/>
+<path d="M20 20H180V40H20V20Z" fill="#C8C6C4"/>
+<path d="M80 140H110V150H90V170H110V150L120 160V180H80V140Z" fill="#7C7C7C"/>
+<rect x="90" y="150" width="20" height="20" fill="#716961" fill-opacity="0.25"/>
+<path d="M80 90H120V110H110V100H90V120H110V130H80V90Z" fill="#7C7C7C"/>
+<path d="M90 100H110V120H90V100Z" fill="#716961" fill-opacity="0.25"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M70 60H30V100H70V60ZM60 90H40V70H60V90Z" fill="#7C7C7C"/>
+<rect x="40" y="70" width="20" height="20" fill="#716961" fill-opacity="0.25"/>
+<rect x="46.0004" y="158" width="24" height="12" fill="#7C7C7C"/>
+<rect x="44.0002" y="144" width="12" height="26" fill="#7C7C7C"/>
+<rect x="46.0004" y="118" width="24" height="12" fill="#7C7C7C"/>
+<rect x="44.0002" y="104" width="12" height="26" fill="#7C7C7C"/>
+<path d="M200 145V120H120V145L140 165V200H180V165L200 145Z" fill="#FAFAFA"/>
+<path d="M200 120V145L180 165V200H140V165L120 145V120H200ZM190 130H130V140L150 160V190H170V160L190 140V130Z" fill="#3A3A38"/>
+</svg>

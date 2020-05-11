@@ -64,7 +64,6 @@ export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
         options.host.persistProperties = (changes: VisualObjectInstancesToPersist) => {
             this.properties.push(changes);
         };
-
         return new HierarchySlicer(options);
     }
 

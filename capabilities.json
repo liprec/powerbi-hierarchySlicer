@@ -18,24 +18,25 @@
                 "max": 1
             }
         }],
-        "table": {
+        "matrix": {
             "rows": {
-                "select": [{
-                        "for": {
-                            "in": "Fields"
-                        }
+                    "for": {
+                        "in": "Fields"
                     },
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 30000
+                        }
+                    }    
+                },
+            "values": {
+                "select": [
                     {
                         "for": {
                             "in": "Values"
                         }
                     }
-                ],
-                "dataReductionAlgorithm": {
-                    "window": {
-                        "count": 30000
-                    }
-                }
+                ]
             }
         }
     }],
@@ -76,16 +77,45 @@
                             "searchEnabled": true
                         }
                     }
+                },
+                "telemetry": {
+                    "displayName": "Telemetry",
+                    "description": "Enable telemetry logging",
+                    "type": {
+                        "bool": true
+                    }
                 }
             }
         },
         "selection": {
-            "displayName": "Selection",
+            "displayName": "Selection controls",
             "properties": {
                 "singleSelect": {
                     "displayName": "Single Select",
                     "type": {
                         "bool": true
+                    }
+                },
+                "ctrlSelect": {
+                    "displayName": "Multi-select with CTRL",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "selectionType": {
+                    "displayName": "Selection type",
+                    "description": "- Standard: children are included in selection (if applicable)\n- Leafs only: only leafs/lowest level are selectable",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Standard",
+                                "value": "0"
+                            },
+                            {
+                                "displayName": "Leafs only",
+                                "value": "1"
+                            }
+                        ]
                     }
                 },
                 "hideMembers": {
@@ -328,6 +358,27 @@
                         }
                     }
                 },
+                "checkBoxColor": {
+                    "displayName": "Checkbox color",
+                    "description": "Color of the checkbox",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "scrollbarColor": {
+                    "displayName": "Scrollbar color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "background": {
                     "displayName": "Background",
                     "type": {
@@ -426,6 +477,17 @@
                         }
                     }
                 },
+                "lineColor": {
+                    "displayName": "Line color",
+                    "description": "Color of the line",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "background": {
                     "displayName": "Background",
                     "description": "Background color of the searchbox",
@@ -500,6 +562,52 @@
                     }
                 }
             }
+        },
+        "tooltipSettings": {
+            "displayName": "Tooltip settings",
+            "description": "Additional options to configure the Tooltips",
+            "properties": {
+                "icon": {
+                    "displayName": "Icon",
+                    "description": "Choose which icon should be drawn to show tooltips",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "None",
+                                "value": "0"
+                            },
+                            {
+                                "displayName": "Information",
+                                "value": "1"
+                            },
+                            {
+                                "displayName": "Triangle",
+                                "value": "2"
+                            },
+                            {
+                                "displayName": "Horizontal dots",
+                                "value": "3"
+                            },
+                            {
+                                "displayName": "Vertical dots",
+                                "value": "4"
+                            }
+                        ]
+                    }
+
+                },
+                "color": {
+                    "displayName": "Icon color",
+                    "description": "Color of the tooltip icons",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "tooltips": {
@@ -514,6 +622,7 @@
     "supportsHighlight": true,
     "suppressDefaultTitle": true,
     "supportsLandingPage": true,
+    "supportsKeyboardFocus": false,
     "supportsSynchronizingFilterState": true,
     "sorting": {
         "default": {}

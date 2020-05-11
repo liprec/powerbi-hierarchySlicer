@@ -17,10 +17,11 @@
         "strictBindCallApply": true,
         "strictNullChecks": true,
         "strictFunctionTypes": false,
-        "strictPropertyInitialization": false
+        "strictPropertyInitialization": false,
+        "forceConsistentCasingInFileNames": true,
+        "importHelpers": true,
+        "removeComments": true,
+        "strict": true
     },
-    "files": [
-        "src/hierarchySlicer.ts",
-        "test/visualTest.ts"
-    ]
+    "files": ["src/hierarchySlicer.ts", "test/visualTest.ts"]
 }

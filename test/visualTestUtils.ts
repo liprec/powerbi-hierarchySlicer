@@ -26,33 +26,33 @@
  */
 
 "use strict";
+import { FontStyle } from "../src/enums";
 
-export class PerfTimer {
-    public static start(name: string, enabled: boolean = false) {
-        let performance: Performance = window.performance;
-        if (!performance || !performance.mark || !enabled) return () => {};
-        if (console.time) console.time(name);
-        let startMark: string = name + " start";
-        performance.mark(startMark);
-        console.log(startMark);
-        return () => {
-            let end: string = name + " end";
-            performance.mark(end);
-            // NOTE: Chromium supports performance.mark but not performance.measure.
-            if (performance.measure) performance.measure(name, startMark, end);
-            if (console.timeEnd) console.timeEnd(name);
-        };
-    }
+export function hexToRgb(hex: string): string {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})` : "";
+}
 
-    public static logTime(action: any) {
-        // Desktop"s old Chromium doesn"t support use of Performance Markers yet
-        let start: number = Date.now();
-        action();
-        return Date.now() - start;
-    }
+export function fontFamilyString(fontFamily: string) {
+    return fontFamily.replace(/'/g, '"');
+}
 
-    public static logMsg(message: string, enabled: boolean = false) {
-        if (!enabled) return () => {};
-        console.log(message);
+export function fontStyleString(fontStyle: FontStyle) {
+    switch (fontStyle) {
+        case FontStyle.Normal:
+            return "normal";
+        case FontStyle.Italic:
+            return "italic";
     }
+}
+
+export function fontSizeString(fontSize: number) {
+    return `${fontSize}pt`;
+}
+
+export function measurePixelString(measure: number, ptpx: string = "px") {
+    const numberOfAllDigits = 6;
+    const numberOfDigits =
+        numberOfAllDigits - (measure < 0 ? Math.ceil(measure) : Math.floor(measure)).toString().length;
+    return `${Math.round(measure * Math.pow(10, numberOfDigits)) / Math.pow(10, numberOfDigits)}${ptpx}`;
 }

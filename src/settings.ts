@@ -31,7 +31,7 @@ import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
-import { BorderStyle, FontStyle, FontWeight, HideMembers, Zoomed } from "./enums";
+import { BorderStyle, FontStyle, FontWeight, HideMembers, Zoomed, SelectionType, TooltipIcon } from "./enums";
 
 const fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif";
 
@@ -42,10 +42,11 @@ export class HierarchySlicerSettings extends DataViewObjectsParser {
     public items: SlicerTextSettings = new SlicerTextSettings();
     public search: SearchSettings = new SearchSettings();
     public mobile: MobileSettings = new MobileSettings();
+    public tooltipSettings: TooltipSettings = new TooltipSettings();
 }
 
 class GeneralSettings {
-    public selectAll: boolean = false;
+    public selectAll: boolean = false; // Select All status
     public filterValues: string | undefined = undefined;
     public expanded: string = "";
     public selfFilterEnabled: boolean = false;
@@ -53,16 +54,19 @@ class GeneralSettings {
     public filter: string = "";
     public spinnerDelay: number = 250;
     public maxDataPoints: number = 30000;
+    public telemetry: boolean = false;
 }
 
 class SelectionSettings {
-    public singleSelect: boolean = true;
+    public singleSelect: boolean = false;
+    public ctrlSelect: boolean = true;
+    public selectionType: SelectionType = SelectionType.All;
     public emptyLeafs: boolean | undefined = undefined;
     public hideMembers: HideMembers = HideMembers.Never;
     public emptyLeafLabel: string = "";
     public emptyString: boolean = true;
     public emptyLeafLabelDefault: string = "(Blank)";
-    public selectAll: boolean = false;
+    public selectAll: boolean = false; // Select All node
     public selectAllLabel: string = "Select All";
 }
 
@@ -71,7 +75,7 @@ class HeaderSettings {
     public title: string = "";
     public defaultTitle: string = "";
     public restatement: boolean = false;
-    public fontColor: string = "#666666";
+    public fontColor: string = ""; // "#666666";
     public background: string = "";
     public outline: BorderStyle = BorderStyle.None;
     public textSize: number = 10;
@@ -80,14 +84,16 @@ class HeaderSettings {
     public fontWeight: number = FontWeight.Normal;
     public borderBottomWidth: number = 1;
     public outlineWeight: number = 1;
-    public outlineColor: string = "#A6A6A6";
+    public outlineColor: string = ""; // "#A6A6A6";
     public textSizeZoomed: number = 10;
 }
 
 class SlicerTextSettings {
-    public fontColor: string = "#888888";
-    public hoverColor: string = "#222222";
-    public selectedColor: string = "#444444";
+    public fontColor: string = ""; // = "#888888";
+    public checkBoxColor: string = ""; // = "#333333";
+    public hoverColor: string = ""; // "#222222";
+    public selectedColor: string = ""; // "#444444";
+    public scrollbarColor: string = "";
     public background: string = "";
     public textSize: number = 10;
     public fontFamily: string = fontFamily;
@@ -98,8 +104,9 @@ class SlicerTextSettings {
 
 class SearchSettings {
     public addSelection: boolean = true;
-    public fontColor: string = "#808080";
-    public iconColor: string = "#666666";
+    public fontColor: string = ""; // "#808080";
+    public iconColor: string = ""; // "#666666";
+    public lineColor: string = ""; // "#C8C8C8"
     public background: string = "";
     public fontFamily: string = fontFamily;
     public textSize: number = 10;
@@ -112,4 +119,9 @@ class MobileSettings {
     public focus: boolean = true;
     public enLarge: number = Zoomed.Normal;
     public zoomed: boolean = false;
+}
+
+class TooltipSettings {
+    public icon: number = TooltipIcon.None;
+    public color: string = ""; // = "#C8C8C8";
 }

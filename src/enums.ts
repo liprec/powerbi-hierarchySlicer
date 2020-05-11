@@ -62,7 +62,38 @@ export enum Zoomed {
     Large = 100,
 }
 
+export enum UpdateType {
+    Reload = 0,
+    Bookmark = 1,
+    Config = 2,
+    Refresh = 3,
+}
+
+export enum SearchFilter {
+    Exact = 0,
+    Wildcard = 1,
+    Start = 2,
+    End = 3,
+}
+
+export enum SelectionType {
+    All = 0,
+    Leaf = 1,
+    Parent = 2,
+}
+
+export enum TooltipIcon {
+    None = 0,
+    Info = 1,
+    Triangle = 2,
+    HorizontalDots = 3,
+    VerticalDots = 4,
+}
+
 export enum TraceEvents {
-    convertor = "HierarchySlicer1458836712039: Convertor method",
-    update = "HierarchySlicer1458836712039: Update method",
+    convertor = "HierarchySlicer: Convertor method",
+    update = "HierarchySlicer: Update method",
+    enterSelection = "HierarchySlicer: onEnterSelection method",
+    updateSelection = "HierarchySlicer: onUpdateSelection method",
+    // custom = "HierarchySlicer: custom event",
 }

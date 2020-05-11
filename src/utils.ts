@@ -27,15 +27,22 @@
 
 "use strict";
 import powerbi from "powerbi-visuals-api";
-import { IFilterTarget, IFilterColumnTarget } from "powerbi-models";
+import { IFilterTarget, IFilterColumnTarget, Selector } from "powerbi-models";
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { valueType } from "powerbi-visuals-utils-typeutils";
-import { isEqual } from "lodash-es";
+import { Selection } from "d3-selection";
+import { isArray } from "lodash-es";
 
+import { HierarchySlicerProperties, IHierarchySlicerDataPoint } from "./interfaces";
+
+import IFilter = powerbi.IFilter;
+import FilterAction = powerbi.FilterAction;
+import DataViewMetadata = powerbi.DataViewMetadata;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
-import PrimitiveValue = powerbi.PrimitiveValue;
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
+import VisualObjectInstance = powerbi.VisualObjectInstance;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ValueType = valueType.ValueType;
 import ValueFormat = valueFormatter.format;
 
@@ -46,57 +53,102 @@ enum SQExprKind {
 }
 
 export function parseFilter(
-    jsonFilters: powerbi.IFilter[] | undefined,
+    jsonFilters: IFilter[] | undefined,
     columnFilters: IFilterTarget[],
-    columns: powerbi.DataViewMetadataColumn[],
-    dataView: powerbi.DataView,
+    metadata: DataViewMetadata,
     filterValues: string | undefined
-) {
+): string[][] {
     if (jsonFilters) {
         if (jsonFilters.length > 0) {
             if (!(columnFilters[0] as any).hierarchyLevel) {
                 const jFilter = jsonFilters[0] as any;
-                return jFilter.values.map(
-                    (values: any | any[]) =>
-                        "|~" +
-                        (Array.isArray(values)
-                            ? values
-                                  .map((value, index) => {
-                                      const columnIndex = columnFilters.findIndex((filter: IFilterColumnTarget) =>
-                                          isEqual(filter, jFilter.target[index])
-                                      );
-                                      const format = columnIndex > -1 ? columns[columnIndex].format : undefined;
-                                      return {
-                                          value:
-                                              ValueFormat(value.value, format).replace(/,/g, "") +
-                                              "-" +
-                                              columnIndex.toString(),
-                                          index: columnIndex,
-                                      };
-                                  })
-                                  .sort((dp1, dp2) => dp1.index - dp2.index)
-                                  .map(dp => dp.value)
-                                  .join("_|~")
-                            : ValueFormat(values, columns[0].format).replace(/,/g, "") + "-0")
-                );
+                return jFilter.values.map((filter: any) => {
+                    if (isArray(filter)) {
+                        return filter.map((v: any, i) => {
+                            const {
+                                dataType,
+                                format,
+                            }: { dataType: powerbi.ValueTypeDescriptor; format: string } = getDataTypeAndFormat(
+                                metadata,
+                                i
+                            );
+                            return ValueFormat(convertRawValue(v.value, dataType), format);
+                        });
+                    } else {
+                        const {
+                            dataType,
+                            format,
+                        }: { dataType: powerbi.ValueTypeDescriptor; format: string } = getDataTypeAndFormat(
+                            metadata,
+                            0
+                        );
+                        return [ValueFormat(convertRawValue(filter, dataType), format)];
+                    }
+                });
             } else {
                 // fallback scenario due to missing info in jsonFilter
-                const filter: any =
-                    dataView.metadata &&
-                    dataView.metadata.objects &&
-                    dataView.metadata.objects.general &&
-                    dataView.metadata.objects.general.filter;
+                const filter: any = metadata.objects && metadata.objects.general && metadata.objects.general.filter;
                 if (filter && filter.whereItems && filter.whereItems[0] && filter.whereItems[0].condition) {
+                    let columns = getHierarchyColumns(metadata);
                     // convert advanced filter conditions list to HierarchySlicer selected values format
                     return convertAdvancedFilterConditionsToSlicerData(filter.whereItems[0].condition, columns);
                 }
             }
         } else if (filterValues && filterValues !== "") {
             // Legacy version
-            return filterValues.split(",");
+            return filterValues.split(",").map(filterValue => parseOldOwnId(filterValue));
         }
     }
     return [];
+}
+
+function getDataTypeAndFormat(metadata: powerbi.DataViewMetadata, level: number) {
+    const nodeMetadata = metadata.columns[level];
+    const format: string = nodeMetadata.format || "g";
+    const dataType: ValueTypeDescriptor =
+        nodeMetadata.type || ValueType.fromDescriptor(<valueType.IValueTypeDescriptor>{ text: true });
+    return { dataType, format };
+}
+
+export function getHierarchyColumns(
+    metadata: powerbi.DataViewMetadata,
+    levels: powerbi.DataViewHierarchyLevel[] = []
+): powerbi.DataViewMetadataColumn[] {
+    const columnMetadata = metadata.columns.filter((c: DataViewMetadataColumn) =>
+        c.roles ? c.roles["Fields"] : false
+    );
+    if (levels.length === 0) {
+        return columnMetadata;
+    } else {
+        return levels.map(level => level.sources[0]);
+    }
+}
+
+export function parseExpand(expand: string): string[][] {
+    if (expand === "") return [];
+    const expanded: string[] = expand.split(",");
+    return expanded.map(e => parseOwnId(e));
+}
+
+export function parseOwnId(ownId: string): string[] {
+    if (ownId.endsWith("~|")) {
+        return parseNewOwnId(ownId);
+    } else {
+        return parseOldOwnId(ownId);
+    }
+}
+
+export function parseNewOwnId(ownId: string): string[] {
+    return ownId.substr(2, ownId.length - 4).split("~|~");
+}
+
+export function parseOldOwnId(ownId: string): string[] {
+    const parts: string[] = ownId.substr(2).split("_|~");
+    return parts.map(part => part.split("-")[0]);
+}
+
+export function wildcardFilter(value: string, rule: string) {
+    return new RegExp("^" + rule.split("*").join(".*") + "$").test(value);
 }
 
 export function extractFilterColumnTarget(
@@ -152,7 +204,11 @@ export function extractFilterColumnTarget(
     };
 }
 
-export function convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDescriptor, full: boolean = false): any {
+export function convertRawValue(
+    rawValue: string | number | boolean | Date | undefined,
+    dataType: ValueTypeDescriptor,
+    full: boolean = false
+): any {
     if (dataType.dateTime && full) {
         return new Date(rawValue as Date);
     } else if (dataType.numeric) {
@@ -165,19 +221,19 @@ export function convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDes
 export function convertAdvancedFilterConditionsToSlicerData(
     conditions: any,
     columnDefs: DataViewMetadataColumn[]
-): string[] {
+): string[][] {
     if (!conditions || !conditions.values || !conditions.args || !columnDefs) {
         return [];
     }
 
-    let result: string[] = [];
+    let result: string[][] = [];
 
     const args = conditions.args;
     conditions.values.forEach((valueArray: any) => {
         let res: any[] = [];
         valueArray.forEach((value: any, index: number) => {
             if (value.value === null) {
-                result.push("");
+                result.push([""]);
             }
             const columnIndex = columnDefs.findIndex(def => {
                 const expr = def.expr as any;
@@ -195,25 +251,90 @@ export function convertAdvancedFilterConditionsToSlicerData(
                     (columnDefs[columnIndex] && columnDefs[columnIndex].type) ||
                     ValueType.fromDescriptor({ text: true });
                 const labelValue = ValueFormat(convertRawValue(value.value, dataType), format);
-                // res += (res === "" ? "" : "_") + "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex;
                 res.push({
                     index: columnIndex,
-                    value: "|~" + labelValue.replace(/,/g, "") + "-" + columnIndex,
+                    value: labelValue.replace(/,/g, ""),
                 });
             }
         });
 
-        const r = res
-            .sort((r1, r2) => r1.index - r2.index)
-            .map(r => r.value)
-            .join("_");
+        const r = res.sort((r1, r2) => r1.index - r2.index).map(r => r.value);
 
         result.push(r);
     });
-
     return result;
 }
 
 export function checkMobile(userAgent: string): boolean {
     return userAgent.indexOf("PBIMobile") !== -1;
+}
+
+export function getCommonLevel(selectionDataPoints: IHierarchySlicerDataPoint[]): number {
+    return selectionDataPoints.filter(d => d.partialSelected).reduce((s, d) => Math.max(d.level, s), -1) + 1;
+}
+
+export function applyFilter(
+    hostServices: IVisualHost,
+    tree: IHierarchySlicerDataPoint[],
+    columnFilters: IFilterTarget[],
+    levels: number
+): any {
+    // Called without data
+    if (tree.length === 0) {
+        return;
+    }
+
+    const targets: IFilterTarget[] = columnFilters.slice(0, levels + 1);
+    const dataPoints = tree.filter(d => d.ownId !== ["selectAll"]);
+    const filterDataPoints: IHierarchySlicerDataPoint[] = dataPoints.filter(d => d.selected && d.level === levels);
+
+    // create table from tree
+    let filterValues: any[] = filterDataPoints.map((dataPoint: IHierarchySlicerDataPoint) => {
+        // TupleValueType
+        return dataPoint.value.map(value => {
+            return <any>{
+                // ITupleElementValue
+                value,
+            };
+        });
+    });
+
+    let filterInstance: any = {
+        $schema: "http://powerbi.com/product/schema#tuple", // tslint:disable-line: no-http-string
+        target: targets,
+        filterType: 6,
+        operator: "In",
+        values: filterValues,
+    };
+
+    if (!filterValues.length || !filterValues.length) {
+        persistFilter(hostServices, [], 1);
+        return;
+    }
+
+    persistFilter(hostServices, filterInstance);
+
+    return filterInstance;
+}
+
+export function persistFilter(
+    hostServices: IVisualHost,
+    filter: IFilter | IFilter[],
+    action: FilterAction = FilterAction.merge
+) {
+    // make sure that the old method of storing the filter is deleted
+    const instance: VisualObjectInstance = {
+        objectName: "general",
+        selector: Selector,
+        properties: {
+            filterValues: "",
+        },
+    };
+    hostServices.persistProperties({ remove: [instance] });
+    hostServices.applyJsonFilter(
+        filter,
+        HierarchySlicerProperties.filterPropertyIdentifier.objectName,
+        HierarchySlicerProperties.filterPropertyIdentifier.propertyName,
+        action
+    );
 }

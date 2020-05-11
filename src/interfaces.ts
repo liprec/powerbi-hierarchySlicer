@@ -34,8 +34,9 @@ import { Selection } from "d3-selection";
 import * as settings from "./settings";
 
 import IViewport = powerbi.IViewport;
+import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
 import ValueTypeDescriptor = powerbi.ValueTypeDescriptor;
-import ISelectionId = powerbi.visuals.ISelectionId;
+import CustomVisualOpaqueIdentity = powerbi.visuals.CustomVisualOpaqueIdentity;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import SelectableDataPoint = interactivitySelectionService.SelectableDataPoint;
@@ -46,11 +47,10 @@ import InteractivityServiceOptions = interactivityBaseService.InteractivityServi
 import HierarchySlicerSettings = settings.HierarchySlicerSettings;
 
 export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
-    value: string;
+    value: (string | number | null)[];
     label: string;
-    isEmpty: boolean;
-    dataType: ValueTypeDescriptor;
     tooltip?: VisualTooltipDataItem[];
+    nodeIdentity?: CustomVisualOpaqueIdentity[];
     level: number;
     mouseOver?: boolean;
     mouseOut?: boolean;
@@ -61,21 +61,15 @@ export interface IHierarchySlicerDataPoint extends SelectableDataPoint {
     isExpand: boolean;
     isHidden: boolean;
     isRagged: boolean;
-    ownId: string;
-    parentId: string;
-    searchStr: string;
-    isSearch: boolean;
-    orderArray: any[];
-    order: number;
-    filterTarget?: IFilterTarget;
-    selectionId?: ISelectionId;
+    ownId: string[];
+    parentId: string[];
 }
 
 export interface IHierarchySlicerData {
     dataPoints: IHierarchySlicerDataPoint[];
     fullTree: IHierarchySlicerDataPoint[];
+    columnFilters: IFilterTarget[];
     hasSelectionOverride?: boolean;
-    settings: HierarchySlicerSettings;
     levels: number;
 }
 
@@ -91,13 +85,11 @@ export interface IHierarchySlicerBehaviorOptions extends IBehaviorOptions<IHiera
     slicerExpand: Selection<any, any, any, any>;
     slicerCollapse: Selection<any, any, any, any>;
     slicerHeaderText: Selection<any, any, any, any>;
-    dataPoints: IHierarchySlicerDataPoint[];
     fullTree: IHierarchySlicerDataPoint[];
     interactivityService: IInteractivityService<IHierarchySlicerDataPoint>;
-    interactivityServiceOptions: InteractivityServiceOptions;
+    columnFilters: IFilterTarget[];
     slicerSettings: HierarchySlicerSettings;
     levels: number;
-    dataView: powerbi.DataView;
 }
 
 export interface IHierarchySlicerTreeViewOptions {
@@ -120,4 +112,14 @@ export interface IHierarchySlicerTreeView {
     render(): void;
     empty(): void;
     getRealRowHeight(): number;
+    isScrollbarVisible(): boolean;
 }
+
+export const HierarchySlicerProperties = {
+    selectionPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selection" },
+    filterPropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filter" },
+    filterValuePropertyIdentifier: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "filterValues" }, // tslint:disable-line: prettier
+    defaultValue: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "defaultValue" },
+    selfFilterEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "general", propertyName: "selfFilterEnabled" },
+    mobileViewEnabled: <DataViewObjectPropertyIdentifier>{ objectName: "mobile", propertyName: "enable" },
+};

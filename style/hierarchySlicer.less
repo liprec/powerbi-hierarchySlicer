@@ -343,12 +343,12 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   justify-content: space-between;
   -webkit-align-items: center;
   width: calc(100% - 2px);
-  border: 1px solid #212121;
+  border-bottom: 1px solid #212121;
 }
 
 .slicerHeaderContainer .searchHeader .search {
   cursor: pointer;
-  margin: 4px 4px 0px 4px;
+  margin: 4px 4px 2px 2px;
   flex: 0 0 auto;
   -webkit-flex: 0 0 auto;
   color: #212121;
@@ -363,6 +363,7 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   border-style: none;
   padding: 0;
   margin-right: 4px;
+  outline: none;
 }
 
 .slicerHeaderContainer .searchHeader input::-ms-clear {
@@ -399,10 +400,10 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   span.checkbox::before {
   content: "";
   height: 80%;
-  width: 50%;
+  width: 30%;
   position: relative;
   display: inline-block;
-  margin: -2px 0 0 3px;
+  margin: -20% 0% 0% 40%;
   border-right: 2px solid #fff;
   border-bottom: 2px solid #fff;
   transform: rotate(45deg);
@@ -416,9 +417,23 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   position: relative;
   display: block;
   margin: 20% 0 0 20%;
-  background-color: #c8c8c8;
-  box-shadow: 0px 0px 2px #c8c8c8;
+  background-color: currentColor; // #c8c8c8;
+  // box-shadow: 0px 0px 2px #c8c8c8;
   border: none;
+  border-radius: inherit;
+}
+
+.slicerContainer .slicerCheckbox.selected span.radiobutton::before {
+  content: "";
+  height: 60%;
+  width: 60%;
+  position: relative;
+  display: block;
+  margin: 20% 0 0 20%;
+  background-color: currentColor; // #c8c8c8;
+  // box-shadow: 0px 0px 2px #c8c8c8;
+  border: none;
+  border-radius: inherit;
 }
 
 .slicerContainer .slicerCheckbox.partiallySelected span.checkbox {
@@ -457,7 +472,7 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   width: 9px;
   height: 9px;
   border: 2px solid #c8c8c8;
-  box-shadow: inset 0px 0px 1px #c8c8c8;
+  // box-shadow: inset 0px 0px 1px #c8c8c8;
   // margin-left: 0px !important;
   // margin-right: 4px !important;
 }
@@ -469,6 +484,10 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
 
 .slicerContainer .slicerCheckbox input {
   display: none;
+}
+
+.radiobutton {
+  border-radius: 100%;
 }
 
 input[type="checkbox"],
@@ -500,7 +519,6 @@ textarea {
   font-size: 14px;
   flex: 1 0 0px;
   -webkit-flex: 1 0 0px;
-  color: rgb(102, 102, 102);
 }
 
 .slicerContainer .slicerItemContainer * {
@@ -531,6 +549,20 @@ textarea {
 
 .icon-left {
   float: left;
+  cursor: pointer;
+  display: flex;
+  width: 12px;
+  height: 12px;
+  font-style: normal;
+  visibility: hidden;
+  align-items: flex-end;
+  padding: 0;
+  background-color: inherit;
+  border-style: none;
+}
+
+.icon-right {
+  float: right;
   cursor: pointer;
   display: flex;
   width: 12px;
@@ -581,9 +613,8 @@ textarea {
   display: inline-block !important;
 }
 
-.delete {
-  padding-right: 4px;
-  margin-top: 5px;
+.searchType {
+  margin: 0px 1px 0px 1px;
 }
 
 .slicerItemContainerChild {
@@ -682,8 +713,7 @@ textarea {
   display: block;
   height: 100%; /* Required for horizontal native scrollbar to not appear if parent is taller than natural height */
   width: auto;
-  visibility: visible;
-  overflow: scroll; /* Scroll on this element otherwise element can't have a padding applied properly */
+  visibility: visible; 
   max-width: 100%; /* Not required for horizontal scroll to trigger */
   max-height: 100%; /* Needed for vertical scroll to trigger */
 }
@@ -747,7 +777,8 @@ textarea {
 .simplebar-scrollbar:before {
   position: absolute;
   content: "";
-  background: black;
+  // background: black;
+  background: currentColor;
   border-radius: 7px;
   left: 0;
   right: 0;
@@ -756,9 +787,13 @@ textarea {
 }
 
 .simplebar-track .simplebar-scrollbar.simplebar-visible:before {
-  /* When hovered, remove all transitions from drag handle */
   opacity: 0.5;
   transition: opacity 0s linear;
+}
+
+.hasSelection:hover .hiddenicon .simplebar-track .simplebar-scrollbar.simplebar-visible:before,
+.slicerContainer.hasSelection:hover .simplebar-track .simplebar-scrollbar.simplebar-visible:before {
+  opacity: 1;
 }
 
 .simplebar-track.simplebar-vertical {
