@@ -48,5 +48,6 @@
     "titleBar.border": "#f2c811"
   },
   "peacock.color": "#f2c811",
-  "peacock.affectActivityBar": false
+  "peacock.affectActivityBar": false,
+  "editor.formatOnSave": true
 }
