@@ -170,6 +170,7 @@ export class HierarchyDataSet2 extends HierarchyData {
         ]; // tslint:disable-line: prettier
     }
 
+    // tslint:disable-next-line: max-func-body-length
     public getDataView(): DataView {
         return <DataView>JSON.parse(`
         {

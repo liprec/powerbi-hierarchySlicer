@@ -28,7 +28,7 @@
 "use strict";
 
 export class PerfTimer {
-    public static start(name: string, enabled: boolean = false) {
+    public static START(name: string, enabled: boolean = false) {
         let performance: Performance = window.performance;
         if (!performance || !performance.mark || !enabled) return () => {};
         if (console.time) console.time(name);
@@ -44,14 +44,14 @@ export class PerfTimer {
         };
     }
 
-    public static logTime(action: any) {
+    public static LOGTIME(action: any) {
         // Desktop"s old Chromium doesn"t support use of Performance Markers yet
         let start: number = Date.now();
         action();
         return Date.now() - start;
     }
 
-    public static logMsg(message: string, enabled: boolean = false) {
+    public static LOGMSG(message: string, enabled: boolean = false) {
         if (!enabled) return () => {};
         console.log(message);
     }

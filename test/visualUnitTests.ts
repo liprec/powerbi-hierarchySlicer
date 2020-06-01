@@ -27,11 +27,11 @@
 
 "use strict";
 
-import { TestparseOwnId, TestparseExpand, TestparseOldOwnId, TestparseNewOwnId } from "./visualUnitTestUtils";
+import { testparseOwnId, testparseExpand, testparseOldOwnId, testparseNewOwnId } from "./visualUnitTestUtils";
 
-export function UnitTestUtils() {
-    TestparseOldOwnId();
-    TestparseNewOwnId();
-    TestparseOwnId();
-    TestparseExpand();
+export function visualUnitTests() {
+    testparseOldOwnId();
+    testparseNewOwnId();
+    testparseOwnId();
+    testparseExpand();
 }

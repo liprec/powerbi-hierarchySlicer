@@ -31,7 +31,7 @@ import { interactivityBaseService, interactivitySelectionService } from "powerbi
 import { IFilterTarget } from "powerbi-models";
 import { Selection } from "d3-selection";
 
-import * as settings from "./settings";
+import * as settings from "./hierarchySlicerSettings";
 
 import IViewport = powerbi.IViewport;
 import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;

@@ -46,7 +46,7 @@ import {
     getCommonLevel,
     applyFilter,
 } from "./utils";
-import { HierarchySlicerSettings } from "./settings";
+import { HierarchySlicerSettings } from "./hierarchySlicerSettings";
 
 import DataView = powerbi.DataView;
 import IFilter = powerbi.IFilter;
@@ -59,7 +59,7 @@ import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import CustomVisualOpaqueIdentity = powerbi.visuals.CustomVisualOpaqueIdentity;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ValueType = valueType.ValueType;
-import ValueFormat = valueFormatter.format;
+import format = valueFormatter.format;
 
 export function converter(
     dataView: DataView | undefined,
@@ -68,7 +68,7 @@ export function converter(
     searchFilter: SearchFilter,
     settings: HierarchySlicerSettings
 ): IHierarchySlicerData | undefined {
-    let timer = PerfTimer.start(TraceEvents.convertor, settings.general.telemetry);
+    let timer = PerfTimer.START(TraceEvents.convertor, settings.general.telemetry);
     if (checkEmptyDataset(dataView)) {
         timer();
         return;
@@ -166,7 +166,7 @@ function parseNodes(
     let dataPoints: IHierarchySlicerDataPoint[] = [];
     nodes.forEach((node: DataViewMatrixNode) => {
         const nodeMetadata = metadata.columns[level];
-        const format: string = nodeMetadata.format || "g";
+        const formatstring: string = nodeMetadata.format || "g";
         const dataType: ValueTypeDescriptor =
             nodeMetadata.type || ValueType.fromDescriptor(<valueType.IValueTypeDescriptor>{ text: true });
         let label: string;
@@ -175,24 +175,24 @@ function parseNodes(
         switch (settings.selection.hideMembers) {
             case HideMembers.Empty:
                 isRagged = rawValue === null;
-                label = ValueFormat(rawValue, format);
+                label = format(rawValue, formatstring);
                 break;
             case HideMembers.ParentName:
                 isRagged = level > 0 && rawValue === parentRawValue;
-                label = ValueFormat(rawValue, format);
+                label = format(rawValue, formatstring);
                 break;
             case HideMembers.Never:
             default:
                 label =
                     rawValue === null
                         ? settings.selection.emptyLeafLabel || settings.selection.emptyLeafLabelDefault
-                        : ValueFormat(rawValue, format);
+                        : format(rawValue, formatstring);
         }
-        const valueString: string = ValueFormat(convertRawValue(node.value, dataType), format);
+        const valueString: string = format(convertRawValue(node.value, dataType), formatstring);
         const isLeaf: boolean = node.children === undefined;
         const id: string[] = parentId.concat([valueString]);
         const tooltip: VisualTooltipDataItem[] = parentTooltip.concat([
-            { displayName: nodeMetadata.displayName, value: label } as VisualTooltipDataItem,
+            <VisualTooltipDataItem>{ displayName: nodeMetadata.displayName, value: label },
         ]);
         const nodeIdentity = parentIdentity.concat(<CustomVisualOpaqueIdentity>node.identity);
         const value: (string | number | null)[] = parentValue.concat([

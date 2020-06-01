@@ -47,7 +47,7 @@ export class HierarchySlicerSettings extends DataViewObjectsParser {
 
 class GeneralSettings {
     public selectAll: boolean = false; // Select All status
-    public filterValues: string | undefined = undefined;
+    public filterValues: string | undefined = undefined; // tslint:disable-line: no-unnecessary-field-initialization
     public expanded: string = "";
     public selfFilterEnabled: boolean = false;
     public searching: boolean = false;
@@ -61,7 +61,7 @@ class SelectionSettings {
     public singleSelect: boolean = false;
     public ctrlSelect: boolean = true;
     public selectionType: SelectionType = SelectionType.All;
-    public emptyLeafs: boolean | undefined = undefined;
+    public emptyLeafs: boolean | undefined = undefined; // tslint:disable-line: no-unnecessary-field-initialization
     public hideMembers: HideMembers = HideMembers.Never;
     public emptyLeafLabel: string = "";
     public emptyString: boolean = true;

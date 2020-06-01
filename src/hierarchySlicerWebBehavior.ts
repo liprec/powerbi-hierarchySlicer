@@ -34,7 +34,7 @@ import { select, event, Selection } from "d3-selection";
 import { isEqual } from "lodash-es";
 
 import * as interfaces from "./interfaces";
-import * as settings from "./settings";
+import * as settings from "./hierarchySlicerSettings";
 
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IFilter = powerbi.IFilter;
@@ -76,6 +76,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         this.filterInstance = filterInstance;
     }
 
+    // tslint:disable-next-line: max-func-body-length
     public bindEvents(options: IHierarchySlicerBehaviorOptions, selectionHandler: ISelectionHandler): void {
         let expanders = (this.expanders = options.expanders);
         let slicers: Selection<any, any, any, any> = (this.slicers = options.slicerItemContainers);
@@ -144,8 +145,9 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             }
         });
 
+        // tslint:disable-next-line: max-func-body-length
         slicers.on("click", (d: IHierarchySlicerDataPoint, index: number) => {
-            (event as MouseEvent).preventDefault();
+            (<MouseEvent>event).preventDefault();
             if (!d.selectable) {
                 return;
             }
@@ -201,7 +203,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             if (
                 siblings.length > 1 &&
                 siblings.length === siblings.filter(sibling => sibling.selected && !sibling.partialSelected).length &&
-                (this.settings.selection.singleSelect || !(event as MouseEvent).ctrlKey) &&
+                (this.settings.selection.singleSelect || !(<MouseEvent>event).ctrlKey) &&
                 !(!this.settings.selection.singleSelect && !this.settings.selection.ctrlSelect)
             ) {
                 selected = true;
@@ -209,7 +211,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             selectionDataPoints = selectionDataPoints.filter(d => d.ownId !== ["selectAll"]);
             const singleSelect =
                 this.settings.selection.singleSelect ||
-                (this.settings.selection.ctrlSelect && !(event as MouseEvent).ctrlKey);
+                (this.settings.selection.ctrlSelect && !(<MouseEvent>event).ctrlKey);
             if (singleSelect) {
                 // single select value -> start with empty selection tree
                 selectionDataPoints.forEach(dp => {
@@ -262,7 +264,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             // Get highest selected level in common for all datapoints
             filterLevel = getCommonLevel(selectionDataPoints);
 
-            this.ctrlPressed = (event as MouseEvent).ctrlKey;
+            this.ctrlPressed = (<MouseEvent>event).ctrlKey;
             this.renderSelection(true);
             this.persistSelectAll(selectionDataPoints.filter(d => d.selected).length === selectionDataPoints.length);
             this.filterInstance.push(applyFilter(this.hostServices, this.fullTree, this.columnFilters, filterLevel));
@@ -272,7 +274,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         // HEADER EVENTS
         slicerCollapse.on("click", (d: IHierarchySlicerDataPoint) => {
             if (this.dataPoints.filter(d => d.isExpand).length > 0) {
-                (select(".simplebar-content").node() as HTMLElement).scrollTop = 0;
+                (<HTMLElement>select(".simplebar-content").node()).scrollTop = 0;
 
                 this.dataPoints.forEach(d => (d.isExpand = false));
                 this.persistExpand();
@@ -317,7 +319,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
     private addSpinner(expanders: Selection<any, any, any, any>, index: number) {
         const currentExpander = expanders.filter((expander, i) => index === i);
-        const currentExpanderHtml = currentExpander.node() as HTMLElement;
+        const currentExpanderHtml = <HTMLElement>currentExpander.node();
         const size = Math.min(currentExpanderHtml.clientHeight, currentExpanderHtml.clientWidth);
         const scale = size / 25.0;
         currentExpander.select(".icon").style("display", "none");
@@ -462,7 +464,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     //     this.persistFilter(filterInstance);
     // }
 
-    public static getParentDataPoints(
+    public static GETPARENTDATAPOINTS(
         dataPoints: IHierarchySlicerDataPoint[],
         parentId: string[]
     ): IHierarchySlicerDataPoint[] {
@@ -474,7 +476,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         } else {
             let returnParents: IHierarchySlicerDataPoint[] = [];
 
-            returnParents = returnParents.concat(parent, this.getParentDataPoints(dataPoints, parent[0].parentId));
+            returnParents = returnParents.concat(parent, this.GETPARENTDATAPOINTS(dataPoints, parent[0].parentId));
 
             return returnParents;
         }
