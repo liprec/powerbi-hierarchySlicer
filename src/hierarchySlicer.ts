@@ -81,6 +81,7 @@ import { Graphics } from "./graphics";
 import DataView = powerbi.DataView;
 import IViewport = powerbi.IViewport;
 import IFilter = powerbi.IFilter;
+import IVisualEventService = powerbi.extensibility.IVisualEventService;
 import DataViewMatrix = powerbi.DataViewMatrix;
 import VisualUpdateType = powerbi.VisualUpdateType;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
@@ -124,6 +125,7 @@ export class HierarchySlicer implements IVisual {
     private data: IHierarchySlicerData;
     private treeView: IHierarchySlicerTreeView;
     private rowHeight: number;
+    private events: IVisualEventService;
     private isInFocus: boolean;
     private slicerContainer: Selection<any, any, any, any>;
     private slicerHeaderContainer: Selection<any, any, any, any>;
@@ -170,6 +172,8 @@ export class HierarchySlicer implements IVisual {
 
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
+
+        this.events = options.host.eventService;
     }
 
     private init(options: VisualUpdateOptions): void {
@@ -265,6 +269,7 @@ export class HierarchySlicer implements IVisual {
 
     public update(options: VisualUpdateOptions) {
         let timer = PerfTimer.START(TraceEvents.update, this.settings && this.settings.general.telemetry);
+        this.events.renderingStarted(options);
         this.handleLandingPage(options);
         if (!options || !options.dataViews || !options.dataViews[0] || !options.viewport) {
             timer();
@@ -310,6 +315,7 @@ export class HierarchySlicer implements IVisual {
         this.viewport = options.viewport;
 
         this.updateInternal(resetScrollbarPosition, updateType, searchText);
+        this.events.renderingFinished(options);
         timer();
     }
 
