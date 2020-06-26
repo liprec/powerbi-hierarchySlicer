@@ -864,7 +864,6 @@ export class HierarchySlicer implements IVisual {
 
     private getRowHeight(): number {
         return (
-            this.rowHeight ||
             textMeasurementService.estimateSvgTextHeight(
                 this.getTextProperties(this.settings.items.fontFamily, this.settings.items.textSizeZoomed)
             )
