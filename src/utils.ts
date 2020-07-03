@@ -124,8 +124,13 @@ export function getHierarchyColumns(
 }
 
 export function parseExpand(expand: string): string[][] {
-    if (expand === "") return [];
-    const expanded: string[] = expand.split(",");
+    let expanded: string[]
+    if (expand === "") return [];   
+    if (expand.endsWith("~|")) {
+        expanded = expand.split("*|*") // New ids
+    } else {
+        expanded = expand.split(",") // Old ids
+    }
     return expanded.map(e => parseOwnId(e));
 }
 

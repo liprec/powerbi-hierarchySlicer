@@ -183,7 +183,7 @@ describe("HierachySlicer default rendering =>", () => {
             const expandedToBe: FullExpanded = testData.getFullExpanded();
             dataViewTest.metadata.objects = {
                 general: {
-                    expanded: expandedToBe.expanded.join(","),
+                    expanded: expandedToBe.expanded.join("*|*"),
                 },
             };
             vBuilder.updateRenderTimeout(
@@ -290,7 +290,7 @@ describe("HierachySlicer data interactions =>", () => {
                     dataViewTest.metadata.objects = {
                         general: {
                             selfFilterEnabled: true,
-                            expanded: expandedToBe.expanded.join(","),
+                            expanded: expandedToBe.expanded.join("*|*"),
                         },
                     };
 
@@ -359,7 +359,7 @@ describe("HierachySlicer data interactions =>", () => {
                     dataViewTest.metadata.objects = {
                         general: {
                             selfFilterEnabled: true,
-                            expanded: expandedToBe.expanded.join(","),
+                            expanded: expandedToBe.expanded.join("*|*"),
                         },
                         selection: {
                             singleSelect: false,
@@ -402,7 +402,7 @@ describe("HierachySlicer data interactions =>", () => {
                         const dataViewTest = testData.getDataView();
                         dataViewTest.metadata.objects = {
                             general: {
-                                expanded: expandedTest.expanded.join(","),
+                                expanded: expandedTest.expanded.join("*|*"),
                             },
                         };
                         vBuilder.updateRenderTimeout(
@@ -425,7 +425,7 @@ describe("HierachySlicer data interactions =>", () => {
                         const dataViewTest = testData.getDataView();
                         dataViewTest.metadata.objects = {
                             general: {
-                                expanded: expandedTest.expanded.join(","),
+                                expanded: expandedTest.expanded.join("*|*"),
                             },
                             selection: {
                                 singleSelect: false,
@@ -455,7 +455,7 @@ describe("HierachySlicer data interactions =>", () => {
                         const dataViewTest = testData.getDataView();
                         dataViewTest.metadata.objects = {
                             general: {
-                                expanded: expandedTest.expanded.join(","),
+                                expanded: expandedTest.expanded.join("*|*"),
                             },
                             selection: {
                                 hideMembers: hideMember,
@@ -486,7 +486,7 @@ describe("HierachySlicer data interactions =>", () => {
                 const testValue: ExpandTest = testData.getExpandedTests()[0];
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: testValue.expanded.join(","),
+                        expanded: testValue.expanded.join("*|*"),
                     },
                     selection: {
                         emptyLeafs: false,
@@ -515,7 +515,7 @@ describe("HierachySlicer data interactions =>", () => {
                 const testValue: ExpandTest = testData.getExpandedTests()[0];
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: testValue.expanded.join(","),
+                        expanded: testValue.expanded.join("*|*"),
                     },
                     selection: {
                         emptyLeafs: true,
@@ -539,7 +539,7 @@ describe("HierachySlicer data interactions =>", () => {
                 const emptyLeafLabel = "xxxxxxx";
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: expandedToBe.expanded.join(","),
+                        expanded: expandedToBe.expanded.join("*|*"),
                     },
                     selection: {
                         emptyLeafLabel: emptyLeafLabel,
@@ -568,7 +568,7 @@ describe("HierachySlicer data interactions =>", () => {
                 const emptyLeafLabel = "xxxxxxx";
                 dataViewTest.metadata.objects = {
                     general: {
-                        expanded: expandedToBe.expanded.join(","),
+                        expanded: expandedToBe.expanded.join("*|*"),
                     },
                     selection: {
                         emptyLeafLabel: emptyLeafLabel,
@@ -596,7 +596,7 @@ describe("HierachySlicer data interactions =>", () => {
                 dataViewTest.metadata.objects = {
                     general: {
                         selfFilterEnabled: true,
-                        expanded: expandedToBe.expanded.join(","),
+                        expanded: expandedToBe.expanded.join("*|*"),
                     },
                     selection: {
                         singleSelect: false,
@@ -623,7 +623,7 @@ describe("HierachySlicer data interactions =>", () => {
                 dataViewTest.metadata.objects = {
                     general: {
                         selfFilterEnabled: true,
-                        expanded: expandedToBe.expanded.join(","),
+                        expanded: expandedToBe.expanded.join("*|*"),
                     },
                     selection: {
                         singleSelect: false,
@@ -651,7 +651,7 @@ describe("HierachySlicer data interactions =>", () => {
                 dataViewTest.metadata.objects = {
                     general: {
                         selfFilterEnabled: true,
-                        expanded: expandedToBe.expanded.join(","),
+                        expanded: expandedToBe.expanded.join("*|*"),
                     },
                     selection: {
                         singleSelect: false,
@@ -797,7 +797,7 @@ describe("HierachySlicer data interactions =>", () => {
             //             singleSelect: true,
             //         },
             //         general: {
-            //             expanded: expandedToBe.expanded.join(","),
+            //             expanded: expandedToBe.expanded.join("*|*"),
             //         },
             //         header: {
             //             show: true,
@@ -1660,13 +1660,13 @@ describe("HierachySlicer data interactions =>", () => {
                                 const expanded: string[] = (<string>(visualProperties &&
                                     visualProperties.merge &&
                                     visualProperties.merge[0] &&
-                                    visualProperties.merge[0].properties["expanded"])).split(",");
+                                    visualProperties.merge[0].properties["expanded"])).split("*|*");
 
                                 expect(expanded).toEqual(expandedToBe.expanded);
 
                                 dataViewTest.metadata.objects = {
                                     general: {
-                                        expanded: expandedToBe.expanded.join(","),
+                                        expanded: expandedToBe.expanded.join("*|*"),
                                     },
                                 };
 
@@ -1738,13 +1738,13 @@ describe("HierachySlicer data interactions =>", () => {
                                 const expanded: string[] = (<string>(visualProperties &&
                                     visualProperties.merge &&
                                     visualProperties.merge[0] &&
-                                    visualProperties.merge[0].properties["expanded"])).split(",");
+                                    visualProperties.merge[0].properties["expanded"])).split("*|*");
 
                                 expect(expanded).toEqual(expandedToBe.expanded);
 
                                 dataViewTest.metadata.objects = {
                                     general: {
-                                        expanded: expandedToBe.expanded.join(","),
+                                        expanded: expandedToBe.expanded.join("*|*"),
                                     },
                                 };
 
@@ -1814,7 +1814,7 @@ describe("HierachySlicer data interactions =>", () => {
                             selectAll: true,
                         },
                         general: {
-                            expanded: expandedToBe.expanded.join(","),
+                            expanded: expandedToBe.expanded.join("*|*"),
                             selectAll: true,
                         },
                     };
@@ -1859,13 +1859,13 @@ describe("HierachySlicer data interactions =>", () => {
                             const expanded: string[] = (<string>(visualProperties &&
                                 visualProperties.merge &&
                                 visualProperties.merge[0] &&
-                                visualProperties.merge[0].properties["expanded"])).split(",");
+                                visualProperties.merge[0].properties["expanded"])).split("*|*");
 
                             expect(expanded).toEqual(expandedToBe.expanded);
 
                             dataViewTest.metadata.objects = {
                                 general: {
-                                    expanded: expandedToBe.expanded.join(","),
+                                    expanded: expandedToBe.expanded.join("*|*"),
                                 },
                             };
 
@@ -1924,7 +1924,7 @@ describe("HierachySlicer data interactions =>", () => {
                                 hideMembers,
                             },
                             general: {
-                                expanded: expandedToBe.expanded.join(","),
+                                expanded: expandedToBe.expanded.join("*|*"),
                             },
                         };
 
@@ -1994,7 +1994,7 @@ describe("HierachySlicer data interactions =>", () => {
                             selectAll: true,
                         },
                         general: {
-                            expanded: expandedToBe.expanded.join(","),
+                            expanded: expandedToBe.expanded.join("*|*"),
                         },
                     };
 
@@ -2041,7 +2041,7 @@ describe("HierachySlicer data interactions =>", () => {
                                     selectAll: true,
                                 },
                                 general: {
-                                    expanded: expandedToBe.expanded.join(","),
+                                    expanded: expandedToBe.expanded.join("*|*"),
                                     selectAll: true,
                                 },
                             };
@@ -2134,7 +2134,7 @@ describe("HierachySlicer data interactions =>", () => {
                                 hideMembers,
                             },
                             general: {
-                                expanded: expandedToBe.expanded.join(","),
+                                expanded: expandedToBe.expanded.join("*|*"),
                                 filter: {
                                     whereItems: selectedTest.whereCondition,
                                 },

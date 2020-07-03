@@ -506,7 +506,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             .map(d => d.ownId)
             .map(e => e.join("~|~"))
             .map(e => "|~" + e + "~|")
-            .join(",");
+            .join("*|*");
 
         const instance: VisualObjectInstance = {
             objectName: "general",

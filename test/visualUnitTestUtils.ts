@@ -91,8 +91,8 @@ export function testparseOwnId() {
 
 export function testparseExpand() {
     describe("Unit test parseOwnId()", () => {
-        it("Parse '|~2013~|~Qtr 1~|,|~2014~|'", done => {
-            const input: string = "|~2013~|~Qtr 1~|,|~2014~|";
+        it("Parse '|~2013~|~Qtr 1~|*|*|~2014~|'", done => {
+            const input: string = "|~2013~|~Qtr 1~|*|*|~2014~|";
             const expectedResult: string[][] = [["2013", "Qtr 1"], ["2014"]];
             const result: string[][] = parseExpand(input);
             expect(result).toEqual(expectedResult);
@@ -110,6 +110,22 @@ export function testparseExpand() {
         it("Parse empty string ''", done => {
             const input: string = "";
             const expectedResult: string[][] = [];
+            const result: string[][] = parseExpand(input);
+            expect(result).toEqual(expectedResult);
+            done();
+        });
+
+        it("Parse '|~Last name, Name~|'", done => {
+            const input: string = "|~Last name, Name~|";
+            const expectedResult: string[][] = [["Last name, Name"]];
+            const result: string[][] = parseExpand(input);
+            expect(result).toEqual(expectedResult);
+            done();
+        });
+
+        it("Parse '|~Last name, Name~|*|*|~Last name 2, Name 2~|'", done => {
+            const input: string = "|~Last name, Name~|*|*|~Last name 2, Name 2~|";
+            const expectedResult: string[][] = [["Last name, Name"], ["Last name 2, Name 2"]];
             const result: string[][] = parseExpand(input);
             expect(result).toEqual(expectedResult);
             done();
