@@ -67,7 +67,7 @@ describe("HierachySlicer default rendering =>", () => {
 
     beforeEach(() => {
         vBuilder = new visualBuilder(1000, 500);
-        vBuilder.element.find(".slicerContainer").addClass("hasSelection"); // Select visual
+        $($(vBuilder.element)).find(".slicerContainer").addClass("hasSelection"); // Select visual
         defaultSettings = new HierarchySlicerSettings();
         testData = new HierarchyDataSet1();
     });
@@ -77,11 +77,11 @@ describe("HierachySlicer default rendering =>", () => {
             vBuilder.updateRenderTimeout(
                 [],
                 () => {
-                    expect(vBuilder.element.find("svg").length).toBe(1); // Watermark is a SVG drawing
+                    expect($(vBuilder.element).find("svg").length).toBe(1); // Watermark is a SVG drawing
 
-                    expect(vBuilder.element.find("svg").find("rect").length).toBe(22); // rect in Watermark
+                    expect($(vBuilder.element).find("svg").find("rect").length).toBe(22); // rect in Watermark
 
-                    expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(0); // No row items
+                    expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(0); // No row items
 
                     done();
                 },
@@ -96,7 +96,7 @@ describe("HierachySlicer default rendering =>", () => {
                 () => {
                     const rowLength: number = testData.getItemCount(1); // Collapse all
 
-                    expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(rowLength);
+                    expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(rowLength);
 
                     const slicerBodyHeightToBe =
                     vBuilder.viewport.height -
@@ -106,11 +106,11 @@ describe("HierachySlicer default rendering =>", () => {
                         }) -
                         defaultSettings.header.borderBottomWidth;
 
-                    expect(vBuilder.element.find(".slicerBody")[0]).toHaveCss({
+                    expect($(vBuilder.element).find(".slicerBody")[0]).toHaveCss({
                         height: `${slicerBodyHeightToBe.toString()}px`,
                     });
 
-                    expect(vBuilder.element.find(".slicerBody").attr("width")).toBe(
+                    expect($(vBuilder.element).find(".slicerBody").attr("width")).toBe(
                         vBuilder.viewport.width.toString()
                     );
 
@@ -125,7 +125,7 @@ describe("HierachySlicer default rendering =>", () => {
             vBuilder.updateRenderTimeout(
                 dataViewTest,
                 () => {
-                    const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                    const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                     itemContainers.forEach((itemContainer: any) => {
                         expect(itemContainer.children.length).toBe(2);
@@ -190,7 +190,7 @@ describe("HierachySlicer default rendering =>", () => {
                 dataViewTest,
                 () => {
                     testData.getItemLabels().forEach((label, index) => {
-                        const item = vBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                        const item = $(vBuilder.element).find(".slicerItemContainer").find(".slicerText")[index];
 
                         expect(item).toHaveText(label);
                     });
@@ -208,7 +208,7 @@ describe("HierachySlicer data interactions =>", () => {
 
     beforeEach(() => {
         vBuilder = new visualBuilder(1000, 500);
-        vBuilder.element.find(".slicerContainer").addClass("hasSelection"); // Select visual
+        $(vBuilder.element).find(".slicerContainer").addClass("hasSelection"); // Select visual
         defaultSettings = new HierarchySlicerSettings();
     });
 
@@ -271,7 +271,7 @@ describe("HierachySlicer data interactions =>", () => {
                             }) -
                             defaultSettings.header.borderBottomWidth -
                             2;
-                        const slicerBodyHeightStyle = (<HTMLElement>vBuilder.element.find(".slicerBody")[0])
+                        const slicerBodyHeightStyle = (<HTMLElement>$(vBuilder.element).find(".slicerBody")[0])
                             .style.height;
 
                         expect(slicerBodyHeightStyle).toBe(`${slicerBodyHeightToBe.toString()}px`);
@@ -297,7 +297,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const searchInput = vBuilder.element.find(".searchInput");
+                            const searchInput = $(vBuilder.element).find(".searchInput");
                             searchInput.val(searchTest.searchString);
                             searchInput[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
 
@@ -307,11 +307,11 @@ describe("HierachySlicer data interactions =>", () => {
                             vBuilder.updateRenderTimeout(
                                 dataViewTest,
                                 () => {
-                                    expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                    expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                                         searchTest.results
                                     );
 
-                                    const item = vBuilder.element
+                                    const item = $(vBuilder.element)
                                         .find(selector)
                                         .toArray()
                                         .filter(
@@ -324,7 +324,7 @@ describe("HierachySlicer data interactions =>", () => {
                                     vBuilder.updateRenderTimeout(
                                         dataViewTest,
                                         () => {
-                                            const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>vBuilder.element
+                                            const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>$(vBuilder.element)
                                                 .find(".visibleGroup")
                                                 .children(".row")
                                                 .find(".slicerCheckbox")
@@ -370,7 +370,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const searchInput = vBuilder.element.find(".searchInput");
+                            const searchInput = $(vBuilder.element).find(".searchInput");
                             searchInput.val(searchTest.searchString);
                             searchInput[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
 
@@ -380,7 +380,7 @@ describe("HierachySlicer data interactions =>", () => {
                             vBuilder.updateRenderTimeout(
                                 dataViewTest,
                                 () => {
-                                    expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                    expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                                         searchTest.results + 1
                                     );
 
@@ -408,7 +408,7 @@ describe("HierachySlicer data interactions =>", () => {
                         vBuilder.updateRenderTimeout(
                             dataViewTest,
                             () => {
-                                expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                                     expandedTest.count
                                 );
 
@@ -435,7 +435,7 @@ describe("HierachySlicer data interactions =>", () => {
                         vBuilder.updateRenderTimeout(
                             dataViewTest,
                             () => {
-                                expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                                     expandedTest.count + 1
                                 );
 
@@ -464,7 +464,7 @@ describe("HierachySlicer data interactions =>", () => {
                         vBuilder.updateRenderTimeout(
                             dataViewTest,
                             () => {
-                                expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                                     expandedTest.count + expandedTest.hideMembersOffset[hideMember]
                                 );
                                 done();
@@ -495,7 +495,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                        expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                             testValue.count + testValue.hideMembersOffset[1]
                         );
                         done();
@@ -524,7 +524,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                        expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                             testValue.count + testValue.hideMembersOffset[0]
                         );
                         done();
@@ -551,7 +551,7 @@ describe("HierachySlicer data interactions =>", () => {
                     dataViewTest,
                     () => {
                         testData.getItemLabels(true, emptyLeafLabel).forEach((label, index) => {
-                            const item = vBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                            const item = $(vBuilder.element).find(".slicerItemContainer").find(".slicerText")[index];
                             expect(item).toHaveText(label);
                             expect(item).not.toHaveText("(Blank)");
                         });
@@ -580,7 +580,7 @@ describe("HierachySlicer data interactions =>", () => {
                     dataViewTest,
                     () => {
                         testData.getItemLabels(false, emptyLeafLabel).forEach((label, index) => {
-                            const item = vBuilder.element.find(".slicerItemContainer").find(".slicerText")[index];
+                            const item = $(vBuilder.element).find(".slicerItemContainer").find(".slicerText")[index];
                             expect(item).toHaveText(label);
                         });
 
@@ -607,7 +607,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const slicerContainer = vBuilder.element.find(".slicerContainer");
+                        const slicerContainer = $(vBuilder.element).find(".slicerContainer");
 
                         expect(slicerContainer).not.toHaveClass("isMultiSelectEnabled");
 
@@ -635,7 +635,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const slicerContainer = vBuilder.element.find(".slicerContainer");
+                        const slicerContainer = $(vBuilder.element).find(".slicerContainer");
 
                         expect(slicerContainer).toHaveClass("isMultiSelectEnabled");
 
@@ -663,7 +663,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const slicerContainer = vBuilder.element.find(".slicerContainer");
+                        const slicerContainer = $(vBuilder.element).find(".slicerContainer");
 
                         expect(slicerContainer).not.toHaveClass("isMultiSelectEnabled");
 
@@ -687,7 +687,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const selectAllLabelItem = vBuilder.element
+                        const selectAllLabelItem = $(vBuilder.element)
                             .find(".slicerItemContainer")
                             .find(".slicerText")[0];
 
@@ -714,7 +714,7 @@ describe("HierachySlicer data interactions =>", () => {
                     () => {
                         const slicerBodyHeightToBe =
                             vBuilder.viewport.height - defaultSettings.header.borderBottomWidth;
-                        const slicerBodyHeightStyle = (<HTMLElement>vBuilder.element.find(".slicerBody")[0])
+                        const slicerBodyHeightStyle = (<HTMLElement>$(vBuilder.element).find(".slicerBody")[0])
                             .style.height;
 
                         expect(slicerBodyHeightStyle).toBe(`${slicerBodyHeightToBe.toString()}px`);
@@ -735,7 +735,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = vBuilder.element.find(".headerText")[0];
+                        const headerTextStyle = $(vBuilder.element).find(".headerText")[0];
 
                         expect(headerTextStyle).toContainText(testData.columnLabels[0]);
 
@@ -757,7 +757,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = vBuilder.element.find(".headerText")[0];
+                        const headerTextStyle = $(vBuilder.element).find(".headerText")[0];
 
                         expect(headerTextStyle).toContainText(title);
 
@@ -778,7 +778,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = vBuilder.element.find(".headerText")[0];
+                        const headerTextStyle = $(vBuilder.element).find(".headerText")[0];
 
                         expect(headerTextStyle).toContainText(`${testData.columnLabels[0]}: All`);
 
@@ -808,14 +808,14 @@ describe("HierachySlicer data interactions =>", () => {
             //     vBuilder.updateRenderTimeout(
             //         dataViewTest,
             //         () => {
-            //             const selectedItem = vBuilder.element.find(selector)[0];
+            //             const selectedItem = $(vBuilder.element).find(selector)[0];
             //             selectedItem.click();
 
             //             vBuilder.updateRenderTimeout(
             //                 dataViewTest,
             //                 () => {
-            //                     const firstItemLabel = vBuilder.element.find(".slicerText")[0].innerText;
-            //                     const headerTextStyle = vBuilder.element.find(".headerText")[0].innerText;
+            //                     const firstItemLabel = $(vBuilder.element).find(".slicerText")[0].innerText;
+            //                     const headerTextStyle = $(vBuilder.element).find(".headerText")[0].innerText;
 
             //                     expect(headerTextStyle).toBe(`${testData.columnLabels[0]}: ${firstItemLabel}`);
 
@@ -849,7 +849,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                            const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                             expect(headerTextStyle.borderWidth).toBe(borderStyle.result);
 
@@ -872,7 +872,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                        const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                         expect(headerTextStyle.color).toBe(hexToRgb(fontColor));
 
@@ -894,7 +894,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerItems = vBuilder.element.find(".headerText").toArray();
+                        const headerItems = $(vBuilder.element).find(".headerText").toArray();
 
                         headerItems.forEach((headerItem: HTMLElement) => {
                             expect(headerItem.style.backgroundColor).toBe(hexToRgb(background));
@@ -917,7 +917,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                        const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                         expect(headerTextStyle.fontSize).toBe(fontSizeString(textSize));
 
@@ -938,7 +938,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                        const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                         expect(headerTextStyle.fontFamily).toBe(fontFamilyString(fontFamily));
 
@@ -959,7 +959,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                        const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                         expect(headerTextStyle.fontStyle).toBe(fontStyleString(fontStyle));
 
@@ -980,7 +980,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                        const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                         expect(headerTextStyle.fontWeight).toBe(fontWeight.toString());
 
@@ -1003,7 +1003,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const itemContainerChild = itemContainer.lastChild;
@@ -1033,13 +1033,13 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any, index: number) => {
                             let itemContainerChild = itemContainer.lastChild;
                             // Mouseover event
                             itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
-                            itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                            itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                 .lastChild;
 
                             let labelStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.childNodes[1]))
@@ -1048,7 +1048,7 @@ describe("HierachySlicer data interactions =>", () => {
 
                             // Mouseout event
                             itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseout"));
-                            itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                            itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                 .lastChild;
 
                             labelStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.childNodes[1]))
@@ -1073,7 +1073,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             if (testData.columnNames.length > 1) {
@@ -1111,7 +1111,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const itemContainerChild = itemContainer.lastChild;
@@ -1142,14 +1142,14 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any, index: number) => {
                             if (testData.columnNames.length > 1) {
                                 let itemExpander = itemContainer.firstChild;
                                 // Mouseover event
                                 itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
-                                itemExpander = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                itemExpander = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                     .firstChild;
 
                                 // Expanded icon styling
@@ -1159,7 +1159,7 @@ describe("HierachySlicer data interactions =>", () => {
 
                                 // Mouseout event
                                 itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseout"));
-                                itemExpander = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                itemExpander = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                     .firstChild;
                                 // Expanded icon styling
                                 itemExpanderStyle = (<HTMLElement>(itemExpander && itemExpander.firstChild)).style;
@@ -1169,7 +1169,7 @@ describe("HierachySlicer data interactions =>", () => {
                             let itemContainerChild = itemContainer.lastChild;
                             // Mouseover event
                             itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
-                            itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                            itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                 .lastChild;
 
                             // Checkbox styling
@@ -1180,7 +1180,7 @@ describe("HierachySlicer data interactions =>", () => {
 
                             // Mouseout event
                             itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseout"));
-                            itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                            itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                 .lastChild;
 
                             // Checkbox styling
@@ -1207,14 +1207,14 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any, index: number) => {
                             if (testData.columnNames.length > 1) {
                                 let itemExpander = itemContainer.firstChild;
                                 itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
 
-                                itemExpander = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                                itemExpander = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                     .firstChild;
 
                                 // Expanded icon styling
@@ -1226,7 +1226,7 @@ describe("HierachySlicer data interactions =>", () => {
                             let itemContainerChild = itemContainer.lastChild;
                             itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
 
-                            itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index]
+                            itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index]
                                 .lastChild;
 
                             // // Checkbox styling
@@ -1264,7 +1264,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const itemContainerChild = itemContainer.lastChild;
@@ -1300,7 +1300,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const containerStyle = (<HTMLElement>itemContainer).style;
@@ -1324,7 +1324,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             if (testData.columnNames.length > 1) {
@@ -1374,7 +1374,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const itemContainerChild = itemContainer.lastChild;
@@ -1401,7 +1401,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const itemContainerChild = itemContainer.lastChild;
@@ -1428,7 +1428,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             const itemContainerChild = itemContainer.lastChild;
@@ -1460,7 +1460,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const searchHeader = vBuilder.element.find(".searchHeader")[0];
+                        const searchHeader = $(vBuilder.element).find(".searchHeader")[0];
 
                         const inputStyle = (<HTMLElement>searchHeader.children[1]).style;
                         expect(inputStyle.color).toBe(hexToRgb(fontColor));
@@ -1485,7 +1485,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const searchHeader = vBuilder.element.find(".searchHeader")[0];
+                        const searchHeader = $(vBuilder.element).find(".searchHeader")[0];
 
                         const icons = $(searchHeader)
                             .find(".icon")
@@ -1515,7 +1515,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const searchHeader = vBuilder.element.find(".searchHeader")[0];
+                        const searchHeader = $(vBuilder.element).find(".searchHeader")[0];
 
                         const inputStyle = (<HTMLElement>searchHeader.children[1]).style;
                         expect(inputStyle.backgroundColor).toBe(hexToRgb(background));
@@ -1540,7 +1540,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const searchHeader = vBuilder.element.find(".searchHeader");
+                        const searchHeader = $(vBuilder.element).find(".searchHeader");
 
                         const icons = $(searchHeader)
                             .find(".icon")
@@ -1579,7 +1579,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                        const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                         itemContainers.forEach((itemContainer: any) => {
                             if (testData.columnNames.length > 1) {
@@ -1624,7 +1624,7 @@ describe("HierachySlicer data interactions =>", () => {
                 vBuilder.updateRenderTimeout(
                     dataViewTest,
                     () => {
-                        const headerTitle = vBuilder.element.find(".headerText");
+                        const headerTitle = $(vBuilder.element).find(".headerText");
                         headerTitle.click();
                         headerTitle.click(); // 'Fake' double click as implementation is needed due different behavior for mobile
 
@@ -1652,7 +1652,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const expandAllButton = vBuilder.element.find(".slicerHeader").find(".expand");
+                            const expandAllButton = $(vBuilder.element).find(".slicerHeader").find(".expand");
 
                             if (testData.columnNames.length > 1) {
                                 expandAllButton.click();
@@ -1674,7 +1674,7 @@ describe("HierachySlicer data interactions =>", () => {
                                     dataViewTest,
                                     () => {
                                         expect(
-                                            vBuilder.element.find(".visibleGroup").children(".row").length
+                                            $(vBuilder.element).find(".visibleGroup").children(".row").length
                                         ).toBe(expandedToBe.length);
                                         done();
                                     },
@@ -1696,7 +1696,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const collapseAllButton = vBuilder.element.find(".slicerHeader").find(".collapse");
+                            const collapseAllButton = $(vBuilder.element).find(".slicerHeader").find(".collapse");
 
                             if (testData.columnNames.length > 1) {
                                 collapseAllButton.click();
@@ -1705,7 +1705,7 @@ describe("HierachySlicer data interactions =>", () => {
                                     dataViewTest,
                                     () => {
                                         expect(
-                                            vBuilder.element.find(".visibleGroup").children(".row").length
+                                            $(vBuilder.element).find(".visibleGroup").children(".row").length
                                         ).toBe(collapseLength);
                                         done();
                                     },
@@ -1728,8 +1728,8 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const expandAllButton = vBuilder.element.find(".slicerHeader").find(".expand");
-                            const collapseAllButton = vBuilder.element.find(".slicerHeader").find(".collapse");
+                            const expandAllButton = $(vBuilder.element).find(".slicerHeader").find(".expand");
+                            const collapseAllButton = $(vBuilder.element).find(".slicerHeader").find(".collapse");
 
                             if (testData.columnNames.length > 1) {
                                 // Click 'Expand All'
@@ -1752,7 +1752,7 @@ describe("HierachySlicer data interactions =>", () => {
                                     dataViewTest,
                                     () => {
                                         expect(
-                                            vBuilder.element.find(".visibleGroup").children(".row").length
+                                            $(vBuilder.element).find(".visibleGroup").children(".row").length
                                         ).toBe(expandedToBe.length);
 
                                         // Click 'Collapse All'
@@ -1768,7 +1768,7 @@ describe("HierachySlicer data interactions =>", () => {
                                             dataViewTest,
                                             () => {
                                                 expect(
-                                                    vBuilder.element.find(".visibleGroup").children(".row").length
+                                                    $(vBuilder.element).find(".visibleGroup").children(".row").length
                                                 ).toBe(collapseLength);
                                                 done();
                                             },
@@ -1793,7 +1793,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const clearAllButton = vBuilder.element.find(".slicerHeader").find(".clear");
+                            const clearAllButton = $(vBuilder.element).find(".slicerHeader").find(".clear");
 
                             clearAllButton.click();
 
@@ -1821,7 +1821,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const clearAllButton = vBuilder.element.find(".slicerHeader").find(".clear");
+                            const clearAllButton = $(vBuilder.element).find(".slicerHeader").find(".clear");
 
                             clearAllButton.click();
 
@@ -1853,7 +1853,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const firstExpander: HTMLElement = <HTMLElement>vBuilder.element.find(selector)[0];
+                            const firstExpander: HTMLElement = <HTMLElement>$(vBuilder.element).find(selector)[0];
                             firstExpander.click();
                             const visualProperties = vBuilder.properties[0];
                             const expanded: string[] = (<string>(visualProperties &&
@@ -1872,12 +1872,12 @@ describe("HierachySlicer data interactions =>", () => {
                             vBuilder.updateRenderTimeout(
                                 dataViewTest,
                                 () => {
-                                    expect(vBuilder.element.find(".visibleGroup").children(".row").length).toBe(
+                                    expect($(vBuilder.element).find(".visibleGroup").children(".row").length).toBe(
                                         expandedToBe.count
                                     );
 
                                     const firstExpander: HTMLElement = <HTMLElement>(
-                                        vBuilder.element.find(selector)[0]
+                                        $(vBuilder.element).find(selector)[0]
                                     );
                                     firstExpander.click();
 
@@ -1891,7 +1891,7 @@ describe("HierachySlicer data interactions =>", () => {
                                         dataViewTest,
                                         () => {
                                             expect(
-                                                vBuilder.element.find(".visibleGroup").children(".row").length
+                                                $(vBuilder.element).find(".visibleGroup").children(".row").length
                                             ).toBe(collapseLength);
                                             done();
                                         },
@@ -1933,7 +1933,7 @@ describe("HierachySlicer data interactions =>", () => {
                             () => {
                                 selectedTest.clickedDataPoints.forEach(dataPoint => {
                                     const selectedItem: HTMLElement = <HTMLElement>(
-                                        vBuilder.element.find(selector)[dataPoint]
+                                        $(vBuilder.element).find(selector)[dataPoint]
                                     );
                                     selectedItem.click();
                                 });
@@ -1943,7 +1943,7 @@ describe("HierachySlicer data interactions =>", () => {
                                 expect(filter.target).toEqual(selectedTest.target);
                                 expect(filter.values).toEqual(selectedTest.values);
 
-                                const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>vBuilder.element
+                                const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>$(vBuilder.element)
                                     .find(".visibleGroup")
                                     .children(".row")
                                     .find(".slicerCheckbox")
@@ -2001,7 +2001,7 @@ describe("HierachySlicer data interactions =>", () => {
                     vBuilder.updateRenderTimeout(
                         dataViewTest,
                         () => {
-                            const selectedItem: HTMLElement = <HTMLElement>vBuilder.element.find(selector)[0];
+                            const selectedItem: HTMLElement = <HTMLElement>$(vBuilder.element).find(selector)[0];
                             selectedItem.click();
                             const visualProperties = vBuilder.properties[0];
                             const selectedAll =
@@ -2013,7 +2013,7 @@ describe("HierachySlicer data interactions =>", () => {
                             expect(selectedAll).toBe(true);
 
                             // Check render selection before visual callback
-                            const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>vBuilder.element
+                            const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>$(vBuilder.element)
                                 .find(".visibleGroup")
                                 .children(".row")
                                 .find(".slicerCheckbox")
@@ -2050,7 +2050,7 @@ describe("HierachySlicer data interactions =>", () => {
                             vBuilder.updateRenderTimeout(
                                 dataViewTest,
                                 () => {
-                                    const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>vBuilder.element
+                                    const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>$(vBuilder.element)
                                         .find(".visibleGroup")
                                         .children(".row")
                                         .find(".slicerCheckbox")
@@ -2144,7 +2144,7 @@ describe("HierachySlicer data interactions =>", () => {
                         vBuilder.updateRenderTimeoutWithCustomFilter(
                             dataViewTest,
                             () => {
-                                const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>vBuilder.element
+                                const itemCheckBoxes: HTMLElement[] = <HTMLElement[]>$(vBuilder.element)
                                     .find(".visibleGroup")
                                     .children(".row")
                                     .find(".slicerCheckbox")
@@ -2198,7 +2198,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
 
     beforeEach(() => {
         vBuilder = new visualBuilder(1000, 500);
-        vBuilder.element.find(".slicerContainer").addClass("hasSelection"); // Select visual
+        $(vBuilder.element).find(".slicerContainer").addClass("hasSelection"); // Select visual
         defaultSettings = new HierarchySlicerSettings();
 
         testData = new HierarchyDataSet1();
@@ -2221,7 +2221,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                 expect(headerTextStyle.color).toBe(hexToRgb(highConstrastForegroundColor));
 
@@ -2243,7 +2243,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const headerTextStyle = (<HTMLElement>vBuilder.element.find(".headerText")[0]).style;
+                const headerTextStyle = (<HTMLElement>$(vBuilder.element).find(".headerText")[0]).style;
 
                 expect(headerTextStyle.backgroundColor).toBe(hexToRgb(highConstrastBackgroundColor));
 
@@ -2264,7 +2264,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                 itemContainers.forEach((itemContainer: any) => {
                     if (testData.columnNames.length > 1) {
@@ -2307,14 +2307,14 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                 itemContainers.forEach((itemContainer: any, index: number) => {
                     if (testData.columnNames.length > 1) {
                         let itemExpander = itemContainer.firstChild;
                         // Mouseover event
                         itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
-                        itemExpander = vBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                        itemExpander = $(vBuilder.element).find(".slicerItemContainer").toArray()[index].firstChild;
 
                         // Expanded icon styling
                         let itemExpanderStyle = (<HTMLElement>(itemExpander && itemExpander.firstChild)).style;
@@ -2322,7 +2322,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
 
                         // Mouseout event
                         itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseout"));
-                        itemExpander = vBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                        itemExpander = $(vBuilder.element).find(".slicerItemContainer").toArray()[index].firstChild;
                         // Expanded icon styling
                         itemExpanderStyle = (<HTMLElement>(itemExpander && itemExpander.firstChild)).style;
                         expect(itemExpanderStyle.fill).toBe(hexToRgb(highConstrastForegroundColor));
@@ -2331,7 +2331,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
                     let itemContainerChild = itemContainer.lastChild;
                     // Mouseover event
                     itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
-                    itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                    itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index].lastChild;
 
                     // Checkbox styling
                     let checkboxStyle = (<HTMLElement>(itemContainerChild &&
@@ -2345,7 +2345,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
 
                     // Mouseout event
                     itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseout"));
-                    itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                    itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index].lastChild;
 
                     // Checkbox styling
                     checkboxStyle = (<HTMLElement>(itemContainerChild &&
@@ -2375,14 +2375,14 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                 itemContainers.forEach((itemContainer: any, index: number) => {
                     if (testData.columnNames.length > 1) {
                         let itemExpander = itemContainer.firstChild;
                         itemExpander && itemExpander.dispatchEvent(new MouseEvent("mouseover"));
 
-                        itemExpander = vBuilder.element.find(".slicerItemContainer").toArray()[index].firstChild;
+                        itemExpander = $(vBuilder.element).find(".slicerItemContainer").toArray()[index].firstChild;
 
                         // Expanded icon styling
                         const itemExpanderStyle = (<HTMLElement>(itemExpander && itemExpander.firstChild)).style;
@@ -2392,7 +2392,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
                     let itemContainerChild = itemContainer.lastChild;
                     itemContainerChild && itemContainerChild.dispatchEvent(new MouseEvent("mouseover"));
 
-                    itemContainerChild = vBuilder.element.find(".slicerItemContainer").toArray()[index].lastChild;
+                    itemContainerChild = $(vBuilder.element).find(".slicerItemContainer").toArray()[index].lastChild;
 
                     // Checkbox styling
                     const checkboxStyle = (<HTMLElement>(itemContainerChild &&
@@ -2428,7 +2428,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                 itemContainers.forEach((itemContainer: any) => {
                     const itemContainerChild = itemContainer.lastChild;
@@ -2464,7 +2464,7 @@ describe("HierarchySlicer in high constrast mode =>", () => {
         vBuilder.updateRenderTimeout(
             dataViewTest,
             () => {
-                const itemContainers = vBuilder.element.find(".slicerItemContainer").toArray();
+                const itemContainers = $(vBuilder.element).find(".slicerItemContainer").toArray();
 
                 itemContainers.forEach((itemContainer: any) => {
                     const containerStyle = (<HTMLElement>itemContainer).style;
