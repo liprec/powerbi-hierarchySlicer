@@ -199,19 +199,21 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 () => this.addSpinner(expanders, index),
                 this.settings.general.spinnerDelay
             );
+            this.ctrlPressed = (<MouseEvent>event).ctrlKey || (<MouseEvent>event).metaKey;
             const siblings = selectionDataPoints.filter(dataPoint => isEqual(dataPoint.parentId, d.parentId));
-            if (
+            const samelevelSelect = selectionDataPoints.filter(dataPoint => dataPoint.level === d.level && dataPoint.selected === true);
+            if ((
                 siblings.length > 1 &&
                 siblings.length === siblings.filter(sibling => sibling.selected && !sibling.partialSelected).length &&
-                (this.settings.selection.singleSelect || !(<MouseEvent>event).ctrlKey) &&
+                (this.settings.selection.singleSelect || !this.ctrlPressed) &&
                 !(!this.settings.selection.singleSelect && !this.settings.selection.ctrlSelect)
-            ) {
+            ) || (!this.settings.selection.singleSelect && this.settings.selection.ctrlSelect && !this.ctrlPressed && samelevelSelect.length > 1)) {
                 selected = true;
             }
             selectionDataPoints = selectionDataPoints.filter(d => d.ownId !== ["selectAll"]);
             const singleSelect =
                 this.settings.selection.singleSelect ||
-                (this.settings.selection.ctrlSelect && !(<MouseEvent>event).ctrlKey);
+                (this.settings.selection.ctrlSelect && !this.ctrlPressed);
             if (singleSelect) {
                 // single select value -> start with empty selection tree
                 selectionDataPoints.forEach(dp => {
@@ -264,7 +266,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             // Get highest selected level in common for all datapoints
             filterLevel = getCommonLevel(selectionDataPoints);
 
-            this.ctrlPressed = (<MouseEvent>event).ctrlKey;
+            
             this.renderSelection(true);
             this.persistSelectAll(selectionDataPoints.filter(d => d.selected).length === selectionDataPoints.length);
             this.filterInstance.push(applyFilter(this.hostServices, this.fullTree, this.columnFilters, filterLevel));
