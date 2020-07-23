@@ -857,6 +857,9 @@ export class HierarchySlicer implements IVisual {
     public onRecalcItemHeigths(rowSelection: Selection<any, any, any, any>) {
         const data = this.data;
         const mobileScale = this.settings.mobile.zoomed ? 1 + this.settings.mobile.enLarge / 100 : 1;
+        const scrollbarMargin = this.treeView.isScrollbarVisible() ? 10 : 0;
+        const expanderMargin = data.levels === 0 ? 0 : mobileScale * this.settings.items.textSizeZoomed;
+        const iconSize = PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed);
         rowSelection
             .selectAll(HierarchySlicer.Tooltip.selectorName)
             .style(
@@ -865,20 +868,20 @@ export class HierarchySlicer implements IVisual {
                     ? "hidden"
                     : "visible"
             )
-            .style("padding-right", this.treeView.isScrollbarVisible() ? "10px" : "0px");
+            .style("padding-right", `${scrollbarMargin}px`);
         rowSelection
             .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
             .style("max-height", `${this.treeView.getRealRowHeight()}px`)
             .style(
                 "width",
-                (d: IHierarchySlicerDataPoint) => data.levels === 0 ? `` : `calc(100vw - ${(d.level + 1) * mobileScale * this.settings.items.textSizeZoomed}px)`
+                (d: IHierarchySlicerDataPoint) => `calc(100vw - ${(d.level + 1) * expanderMargin}px)`
             );
         rowSelection
             .selectAll(HierarchySlicer.LabelText.selectorName)
             .style("width", (d: IHierarchySlicerDataPoint) =>
-                `calc(((100vw - ${(d.level + 1) * mobileScale * this.settings.items.textSizeZoomed}px) - 
-                ${Math.ceil(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed)) + (this.treeView.isScrollbarVisible() ? 10 : 0)}px - 
-                ${PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed) + 5}px`);
+                `calc(((100vw - ${(d.level + 1) * expanderMargin}px) - 
+                ${this.settings.tooltipSettings.icon === TooltipIcon.None ? 0 : Math.ceil(iconSize) + scrollbarMargin}px - 
+                ${iconSize + 5}px`);
     }
 
     public getTextProperties(fontFamily: string, textSize: number): TextProperties {
