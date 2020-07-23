@@ -38,6 +38,7 @@ import { IHierarchySlicerDataPoint, IHierarchySlicerTreeView, IHierarchySlicerTr
 
 import IViewport = powerbi.IViewport;
 import translateWithPixels = manipulation.translateWithPixels;
+import { isFirefox } from './utils';
 
 export module HierarchySlicerTreeViewFactory {
     export function createListView(options: IHierarchySlicerTreeViewOptions): IHierarchySlicerTreeView {
@@ -126,8 +127,9 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     }
 
     public isScrollbarVisible(): boolean {
-        // return this.scrollBar.getScrollbarSize() !== 0;
-        return this._totalRows > this.getVisibleRows();
+        const bodyHeight = (<HTMLElement>this.options.baseContainer.node()).offsetHeight;
+        const scrollHeight =(<HTMLElement>this.scrollContainer.node()).offsetHeight;
+        return bodyHeight < scrollHeight;
     }
 
     public data(
@@ -191,16 +193,22 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         const visibleRows = this.getVisibleRows();
         const scrollPosition = scrollTop === 0 ? 0 : Math.floor(scrollTop / rowHeight);
         const transformAttr = translateWithPixels(0, scrollPosition * rowHeight);
-        visibleGroupContainer
-            // order matters for proper overriding
-            .style("transform", d => transformAttr)
-            .style("-webkit-transform", transformAttr);
+
+        if (!isFirefox()) {
+            visibleGroupContainer
+                // order matters for proper overriding
+                .style("transform", d => transformAttr)
+                .style("-webkit-transform", transformAttr);
+        }
         const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 1)),
             position1 = position0 + visibleRows + 10;
 
         this.performScrollToFrame(position0, position1, totalElements, visibleRows, loadMoreData);
 
         this.storeRowHeight();
+
+        const rowUpdateSelection = visibleGroupContainer.selectAll(".row:not(.transitioning)");
+        rowUpdateSelection.call(d => this.options.recalc(d));
     }
 
     private performScrollToFrame(
@@ -220,7 +228,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .enter()
             .append("div")
             .classed("row", true)
-            .style("max-height", `${this.getRealRowHeight()}px`)
+            // .style("max-height", `${this.getRealRowHeight()}px`)
             .call(d => options.enter(d));
         rowSelection.order();
         const rowUpdateSelection = visibleGroupContainer.selectAll(".row:not(.transitioning)");
@@ -249,7 +257,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
         const viewportRowCount = containerHeight / rowHeight;
         if (this.options.scrollEnabled) {
-            return Math.min(Math.ceil(viewportRowCount) + 1, this._totalRows) || minimumVisibleRows;
+            return Math.min(Math.ceil(viewportRowCount), this._totalRows) || minimumVisibleRows;
         }
 
         return Math.min(Math.floor(viewportRowCount), this._totalRows) || minimumVisibleRows;
@@ -260,16 +268,9 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             return (<HTMLElement>this).textContent !== "";
         });
         if (!rows.empty()) {
-            const firstRow = rows.node();
+            const firstRow = rows.selectAll(".slicerText").node();
 
-            // If the container (child) has margins amd the row (parent) doesn"t, the child"s margins will collapse into the parent.
-            // outerHeight doesn"t report the correct height for the parent in this case, but it does measure the child properly.
-            // Fix for #7497261 Measures both and take the max to work around this issue.
-
-            const rowHeight = Math.max(
-                HierarchySlicerTreeView.outerHeight(<HTMLElement>firstRow),
-                HierarchySlicerTreeView.outerHeight(<HTMLHtmlElement>(<HTMLHtmlElement>firstRow).firstChild)
-            );
+            const rowHeight = HierarchySlicerTreeView.outerHeight(<HTMLElement>firstRow);
 
             this.rowHeight(rowHeight);
         }
@@ -279,7 +280,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         let height = el.offsetHeight;
         const style: CSSStyleDeclaration = getComputedStyle(el);
 
-        height += parseInt(<string>style.marginTop) + parseInt(<string>style.marginBottom);
+        // height += parseInt(<string>style.marginTop) + parseInt(<string>style.marginBottom);
         return height;
     }
 }

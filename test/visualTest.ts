@@ -141,7 +141,7 @@ describe("HierachySlicer default rendering =>", () => {
                         }
 
                         const itemContainerChild = itemContainer.lastChild;
-                        expect(itemContainerChild && itemContainerChild.childNodes.length).toBe(3);
+                        expect(itemContainerChild && itemContainerChild.childNodes.length).toBe(4);
 
                         // Checkbox styling
                         const checkboxStyle = (<HTMLElement>(itemContainerChild &&
@@ -166,7 +166,7 @@ describe("HierachySlicer default rendering =>", () => {
                         expect(labelStyle.fontSize).toBe(fontSizeString(defaultSettings.items.textSize));
 
                         // Tooltip icon styling
-                        const tooltipStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.lastChild))
+                        const tooltipStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.childNodes[2]))
                             .style;
                         expect(tooltipStyle.fill).toBe(hexToRgb(defaultSettings.tooltipSettings.color));
                         expect(tooltipStyle.stroke).toBe(hexToRgb(defaultSettings.tooltipSettings.color));
@@ -1117,7 +1117,7 @@ describe("HierachySlicer data interactions =>", () => {
                             const itemContainerChild = itemContainer.lastChild;
 
                             // Tooltip icon styling
-                            const tooltipStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.lastChild))
+                            const tooltipStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.childNodes[2]))
                                 .style;
                             expect(tooltipStyle.fill).toBe(hexToRgb(tooltipIconColor));
                             expect(tooltipStyle.stroke).toBe(hexToRgb(tooltipIconColor));
@@ -1462,7 +1462,7 @@ describe("HierachySlicer data interactions =>", () => {
                     () => {
                         const searchHeader = $(vBuilder.element).find(".searchHeader")[0];
 
-                        const inputStyle = (<HTMLElement>searchHeader.children[1]).style;
+                        const inputStyle = (<HTMLElement>searchHeader.childNodes[1]).style;
                         expect(inputStyle.color).toBe(hexToRgb(fontColor));
 
                         done();
@@ -1517,7 +1517,7 @@ describe("HierachySlicer data interactions =>", () => {
                     () => {
                         const searchHeader = $(vBuilder.element).find(".searchHeader")[0];
 
-                        const inputStyle = (<HTMLElement>searchHeader.children[1]).style;
+                        const inputStyle = (<HTMLElement>searchHeader.childNodes[1]).style;
                         expect(inputStyle.backgroundColor).toBe(hexToRgb(background));
 
                         done();
@@ -1555,7 +1555,7 @@ describe("HierachySlicer data interactions =>", () => {
                             );
                         });
 
-                        const inputStyle = (<HTMLElement>searchHeader[0].children[1]).style;
+                        const inputStyle = (<HTMLElement>searchHeader[0].childNodes[1]).style;
                         expect(inputStyle.fontSize).toBe(fontSizeString(textSize));
 
                         done();
@@ -1607,7 +1607,7 @@ describe("HierachySlicer data interactions =>", () => {
                             );
 
                             // // Span (label) styling
-                            const labelStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.lastChild))
+                            const labelStyle = (<HTMLElement>(itemContainerChild && itemContainerChild.childNodes[1]))
                                 .style;
                             expect(labelStyle.fontSize).toBe(fontSizeString(textSize));
                         });
