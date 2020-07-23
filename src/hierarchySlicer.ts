@@ -558,28 +558,26 @@ export class HierarchySlicer implements IVisual {
                     })
             );
 
-        if (!checkMobile(window.clientInformation.userAgent)) {
-            this.tooltipServiceWrapper.addTooltip(
-                this.slicerBody.selectAll(HierarchySlicer.Tooltip.selectorName),
-                (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
-                    const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
-                    return <VisualTooltipDataItem[]>(
-                        (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.tooltip)
-                    );
-                },
-                (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
-                    const builder = this.hostServices.createSelectionIdBuilder();
-                    const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
-                    (<CustomVisualOpaqueIdentity[]>(d3ParentElement &&
-                        d3ParentElement.__data__ &&
-                        d3ParentElement.__data__
-                            .nodeIdentity))?.forEach((identity, level) =>
-                        builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
-                    );
-                    return builder.createSelectionId();
-                }
-            );
-        }
+        this.tooltipServiceWrapper.addTooltip(
+            this.slicerBody.selectAll(HierarchySlicer.Tooltip.selectorName),
+            (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
+                const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
+                return <VisualTooltipDataItem[]>(
+                    (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.tooltip)
+                );
+            },
+            (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
+                const builder = this.hostServices.createSelectionIdBuilder();
+                const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
+                (<CustomVisualOpaqueIdentity[]>(d3ParentElement &&
+                    d3ParentElement.__data__ &&
+                    d3ParentElement.__data__
+                        .nodeIdentity))?.forEach((identity, level) =>
+                    builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
+                );
+                return builder.createSelectionId();
+            }
+        );
         timer();
     }
 
@@ -784,8 +782,7 @@ export class HierarchySlicer implements IVisual {
                     .selectAll(HierarchySlicer.Tooltip.selectorName)
                     .style(
                         "visibility",
-                        this.settings.tooltipSettings.icon === TooltipIcon.None ||
-                            checkMobile(window.clientInformation.userAgent)
+                        this.settings.tooltipSettings.icon === TooltipIcon.None
                             ? "hidden"
                             : "visible"
                     )
