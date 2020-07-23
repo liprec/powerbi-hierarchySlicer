@@ -9,7 +9,7 @@
         "supportUrl": "https://azurebi-docs.jppp.org/powerbi-visuals/index.html",
         "gitHubUrl": "https://github.com/liprec/powerbi-hierarchySlicer"
     },
-    "apiVersion": "2.6.0",
+    "apiVersion": "3.2.0",
     "author": {
         "name": "Jan Pieter Posthuma",
         "email": "mail@jppp.org"
