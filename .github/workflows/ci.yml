@@ -57,7 +57,7 @@ jobs:
       - name: rename pbiviz file
         run: |
           cp $oldfile $newfile
-        with:
+        env:
           oldfile: ./dist/HierarchySlicer1458836712039.${{ steps.extract_version.outputs.version }}.pbiviz
           newfile: ./dist/HierarchySlicer-${{ steps.extract_version.outputs.version }}.pbiviz
       - name: release to github
