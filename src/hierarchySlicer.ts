@@ -136,7 +136,6 @@ export class HierarchySlicer implements IVisual {
     private landingPage: Selection<any, any, any, any>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
     private searchFilter: SearchFilter = SearchFilter.Wildcard;
-    private tooltipTimeoutId: number | undefined;
 
     public static DefaultFontFamily: string = "Segoe UI, Tahoma, Verdana, Geneva, sans-serif";
     public static DefaultFontSizeInPt: number = 11;
@@ -207,6 +206,10 @@ export class HierarchySlicer implements IVisual {
             this.onUpdateSelection(rowSelection, this.interactivityService);
         };
 
+        let rowRecalc = (rowSelection: Selection<any, any, any, any>) => {
+            this.onRecalcItemHeigths(rowSelection);
+        };
+
         let rowExit = (rowSelection: Selection<any, any, any, any>) => {
             rowSelection.remove();
         };
@@ -218,9 +221,11 @@ export class HierarchySlicer implements IVisual {
         const moreData = false; // (this.dataView.metadata.segment) ? true : false;
 
         const treeViewOptions: IHierarchySlicerTreeViewOptions = {
-            rowHeight: this.getRowHeight(),
+            // rowHeight: this.getRowHeight(),
+            rowHeight: this.rowHeight,
             enter: rowEnter,
             exit: rowExit,
+            recalc: rowRecalc,
             update: rowUpdate,
             loadMoreData: onLoadMoreData,
             moreData: moreData,
@@ -394,7 +399,8 @@ export class HierarchySlicer implements IVisual {
 
         this.rowHeight = this.treeView.getRealRowHeight();
         this.treeView
-            .rowHeight(this.getRowHeight())
+            // .rowHeight(this.getRowHeight())
+            .rowHeight(this.rowHeight)
             .data(
                 this.data.dataPoints.filter((d: IHierarchySlicerDataPoint) => !d.isHidden), // Expand/Collapse
                 (d: IHierarchySlicerDataPoint) => d.ownId,
@@ -483,6 +489,7 @@ export class HierarchySlicer implements IVisual {
         this.slicerBody.style("height", `${slicerViewport.height}px`).style("width", "100%");
     }
 
+    // tslint:disable-next-line: max-func-body-length
     private onEnterSelection(rowSelection: Selection<any, any, any, any>): void {
         if (!this.settings) return;
         let timer = PerfTimer.START(TraceEvents.enterSelection, this.settings && this.settings.general.telemetry);
@@ -556,30 +563,32 @@ export class HierarchySlicer implements IVisual {
                             .classed("icon", true)
                             .classed("icon-right", true);
                     })
+                    .each(function(d) {
+                        select(this)
+                            .append("div"); // dummy placeholder needed for the scrollbar
+                    })
             );
 
-        if (!checkMobile(window.clientInformation.userAgent)) {
-            this.tooltipServiceWrapper.addTooltip(
-                this.slicerBody.selectAll(HierarchySlicer.Tooltip.selectorName),
-                (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
-                    const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
-                    return <VisualTooltipDataItem[]>(
-                        (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.tooltip)
-                    );
-                },
-                (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
-                    const builder = this.hostServices.createSelectionIdBuilder();
-                    const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
-                    (<CustomVisualOpaqueIdentity[]>(d3ParentElement &&
-                        d3ParentElement.__data__ &&
-                        d3ParentElement.__data__
-                            .nodeIdentity))?.forEach((identity, level) =>
-                        builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
-                    );
-                    return builder.createSelectionId();
-                }
-            );
-        }
+        this.tooltipServiceWrapper.addTooltip(
+            this.slicerBody.selectAll(HierarchySlicer.Tooltip.selectorName),
+            (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
+                const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
+                return <VisualTooltipDataItem[]>(
+                    (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.tooltip)
+                );
+            },
+            (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
+                const builder = this.hostServices.createSelectionIdBuilder();
+                const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
+                (<CustomVisualOpaqueIdentity[]>(d3ParentElement &&
+                    d3ParentElement.__data__ &&
+                    d3ParentElement.__data__
+                        .nodeIdentity))?.forEach((identity, level) =>
+                    builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
+                );
+                return builder.createSelectionId();
+            }
+        );
         timer();
     }
 
@@ -674,6 +683,14 @@ export class HierarchySlicer implements IVisual {
                 .style("margin-left", () => (data.levels === 0 ? "-4px" : null))
                 .attr("aria-expanded", (d: IHierarchySlicerDataPoint) => d.isExpand);
 
+            rowSelection
+                .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
+                .style("max-height", `${this.treeView.getRealRowHeight()}px`)
+                .style(
+                    "width",
+                    (d: IHierarchySlicerDataPoint) => data.levels === 0 ? `` : `calc(100vw - ${(d.level + 1) * mobileScale * this.settings.items.textSizeZoomed}px)`
+                );
+
             // Item Expander
             rowSelection
                 .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
@@ -754,7 +771,7 @@ export class HierarchySlicer implements IVisual {
                             return "italic";
                     }
                     return "normal";
-                });
+                })
 
             // Item Tooltip Icon
             rowSelection
@@ -762,6 +779,14 @@ export class HierarchySlicer implements IVisual {
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
                 .style("fill", this.settings.tooltipSettings.color)
                 .style("stroke", this.settings.tooltipSettings.color)
+                .style(
+                    "height",
+                    PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
+                )
+                .style(
+                    "width",
+                    PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
+                )
                 .style("visibility", "hidden")
                 .html(() => {
                     switch (this.settings.tooltipSettings.icon) {
@@ -776,22 +801,6 @@ export class HierarchySlicer implements IVisual {
                             return Icons.info;
                     }
                 });
-
-            // setTimeout as render is part of a setTimeout function
-            if (this.tooltipTimeoutId) window.clearTimeout(this.tooltipTimeoutId);
-            this.tooltipTimeoutId = window.setTimeout(() => {
-                rowSelection
-                    .selectAll(HierarchySlicer.Tooltip.selectorName)
-                    .style(
-                        "visibility",
-                        this.settings.tooltipSettings.icon === TooltipIcon.None ||
-                            checkMobile(window.clientInformation.userAgent)
-                            ? "hidden"
-                            : "visible"
-                    )
-                    .style("margin-right", this.treeView.isScrollbarVisible() ? "100vw" : "0px");
-                this.tooltipTimeoutId = undefined;
-            }, 100);
 
             if (interactivityService && this.slicerBody) {
                 const body = this.slicerBody.attr("width", this.viewport.width);
@@ -845,6 +854,36 @@ export class HierarchySlicer implements IVisual {
         timer();
     }
 
+    public onRecalcItemHeigths(rowSelection: Selection<any, any, any, any>) {
+        const data = this.data;
+        const mobileScale = this.settings.mobile.zoomed ? 1 + this.settings.mobile.enLarge / 100 : 1;
+        const scrollbarMargin = this.treeView.isScrollbarVisible() ? 10 : 0;
+        const expanderMargin = data.levels === 0 ? 0 : mobileScale * this.settings.items.textSizeZoomed;
+        const iconSize = PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed);
+        rowSelection
+            .selectAll(HierarchySlicer.Tooltip.selectorName)
+            .style(
+                "visibility",
+                this.settings.tooltipSettings.icon === TooltipIcon.None
+                    ? "hidden"
+                    : "visible"
+            )
+            .style("padding-right", `${scrollbarMargin}px`);
+        rowSelection
+            .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
+            .style("max-height", `${this.treeView.getRealRowHeight()}px`)
+            .style(
+                "width",
+                (d: IHierarchySlicerDataPoint) => `calc(100vw - ${(d.level + 1) * expanderMargin}px)`
+            );
+        rowSelection
+            .selectAll(HierarchySlicer.LabelText.selectorName)
+            .style("width", (d: IHierarchySlicerDataPoint) =>
+                `calc(((100vw - ${(d.level + 1) * expanderMargin}px) - 
+                ${this.settings.tooltipSettings.icon === TooltipIcon.None ? 0 : Math.ceil(iconSize) + scrollbarMargin}px - 
+                ${iconSize + 5}px`);
+    }
+
     public getTextProperties(fontFamily: string, textSize: number): TextProperties {
         return <TextProperties>{
             fontFamily: fontFamily,
@@ -868,13 +907,13 @@ export class HierarchySlicer implements IVisual {
         );
     }
 
-    private getRowHeight(): number {
-        return (
-            textMeasurementService.estimateSvgTextHeight(
-                this.getTextProperties(this.settings.items.fontFamily, this.settings.items.textSizeZoomed)
-            )
-        );
-    }
+    // private getRowHeight(): number {
+    //     return (
+    //         textMeasurementService.estimateSvgTextHeight(
+    //             this.getTextProperties(this.settings.items.fontFamily, this.settings.items.textSizeZoomed)
+    //         )
+    //     );
+    // }
 
     private getBodyViewport(currentViewport: IViewport): IViewport {
         let settings = this.settings;

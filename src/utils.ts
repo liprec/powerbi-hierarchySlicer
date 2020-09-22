@@ -342,3 +342,8 @@ export function persistFilter(
         action
     );
 }
+
+export function isFirefox() {
+    const el: any = Element.prototype;
+    return !!el.mozMatchesSelector;
+}
