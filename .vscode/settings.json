@@ -1,53 +1,47 @@
 {
-  "editor.tabSize": 4,
-  "editor.insertSpaces": true,
-  "files.eol": "\n",
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/node_modules/**": true,
-    ".tmp": true
-  },
-  "files.exclude": {
-    ".tmp": true
-  },
-  "search.exclude": {
-    ".tmp": true
-  },
-  "json.schemas": [
-    {
-      "fileMatch": [
-        "/pbiviz.json"
-      ],
-      "url": "./node_modules/powerbi-visuals-api/schema.pbiviz.json"
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "redhat.vscode-yaml"
     },
-    {
-      "fileMatch": [
-        "/capabilities.json"
-      ],
-      "url": "./node_modules/powerbi-visuals-api/schema.capabilities.json"
+    "files.eol": "\n",
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/node_modules/**": true,
+        ".tmp": true
     },
-    {
-      "fileMatch": [
-        "/dependencies.json"
-      ],
-      "url": "./node_modules/powerbi-visuals-api/schema.dependencies.json"
-    }
-  ],
-  "cSpell.words": [
-    "tooltips"
-  ],
-  "workbench.colorCustomizations": {
-    "titleBar.activeBackground": "#f2c811",
-    "titleBar.inactiveBackground": "#f2c81199",
-    "titleBar.activeForeground": "#15202b",
-    "titleBar.inactiveForeground": "#15202b99",
-    "statusBar.background": "#f2c811",
-    "statusBarItem.hoverBackground": "#c5a20b",
-    "statusBar.foreground": "#15202b",
-    "statusBar.border": "#f2c811",
-    "titleBar.border": "#f2c811"
-  },
-  "peacock.color": "#f2c811",
-  "peacock.affectActivityBar": false,
-  "editor.formatOnSave": true
+    "files.exclude": {
+        ".tmp": true
+    },
+    "search.exclude": {
+        ".tmp": true
+    },
+    "json.schemas": [
+        {
+            "fileMatch": ["/pbiviz.json"],
+            "url": "./node_modules/powerbi-visuals-api/schema.pbiviz.json"
+        },
+        {
+            "fileMatch": ["/capabilities.json"],
+            "url": "./node_modules/powerbi-visuals-api/schema.capabilities.json"
+        },
+        {
+            "fileMatch": ["/dependencies.json"],
+            "url": "./node_modules/powerbi-visuals-api/schema.dependencies.json"
+        }
+    ],
+    "cSpell.words": ["tooltips"],
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#f2c811",
+        "titleBar.inactiveBackground": "#f2c81199",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveForeground": "#15202b99",
+        "statusBar.background": "#f2c811",
+        "statusBarItem.hoverBackground": "#c5a20b",
+        "statusBar.foreground": "#15202b"
+    },
+    "peacock.color": "#f2c811",
+    "peacock.affectActivityBar": false
 }
