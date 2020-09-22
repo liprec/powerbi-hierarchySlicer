@@ -43,7 +43,7 @@ import { isArray } from "lodash-es";
 
 import { HierarchySlicer } from "../src/hierarchySlicer";
 
-export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
+export class visualBuilder extends VisualBuilderBase<HierarchySlicer> {
     public properties: VisualObjectInstancesToPersist[] = [];
     public filter: IFilter | IFilter[];
     public filterAction: FilterAction;
@@ -72,11 +72,11 @@ export class HierarchySlicerBuilder extends VisualBuilderBase<HierarchySlicer> {
     }
 
     public update(dataView: DataView[] | DataView, jsonFilters?: IFilter[]): void {
-        this.visual.update({
+        this.visual.update(<VisualUpdateOptions>{
             dataViews: isArray(dataView) ? dataView : [dataView],
             viewport: this.viewport,
             jsonFilters: jsonFilters,
-        } as VisualUpdateOptions);
+        });
     }
 
     public updateRenderTimeoutWithCustomFilter(

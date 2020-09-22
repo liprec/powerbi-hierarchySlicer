@@ -52,7 +52,7 @@ import {
     IHierarchySlicerTreeViewOptions,
     IHierarchySlicerBehaviorOptions,
 } from "./interfaces";
-import { HierarchySlicerSettings } from "./settings";
+import { HierarchySlicerSettings } from "./hierarchySlicerSettings";
 import { HierarchySlicerWebBehavior } from "./hierarchySlicerWebBehavior";
 import { HierarchySlicerTreeViewFactory } from "./hierarchySlicerTreeView";
 import {
@@ -81,6 +81,7 @@ import { Graphics } from "./graphics";
 import DataView = powerbi.DataView;
 import IViewport = powerbi.IViewport;
 import IFilter = powerbi.IFilter;
+import IVisualEventService = powerbi.extensibility.IVisualEventService;
 import DataViewMatrix = powerbi.DataViewMatrix;
 import VisualUpdateType = powerbi.VisualUpdateType;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
@@ -124,6 +125,7 @@ export class HierarchySlicer implements IVisual {
     private data: IHierarchySlicerData;
     private treeView: IHierarchySlicerTreeView;
     private rowHeight: number;
+    private events: IVisualEventService;
     private isInFocus: boolean;
     private slicerContainer: Selection<any, any, any, any>;
     private slicerHeaderContainer: Selection<any, any, any, any>;
@@ -134,7 +136,6 @@ export class HierarchySlicer implements IVisual {
     private landingPage: Selection<any, any, any, any>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
     private searchFilter: SearchFilter = SearchFilter.Wildcard;
-    private tooltipTimeoutId: number | undefined;
 
     public static DefaultFontFamily: string = "Segoe UI, Tahoma, Verdana, Geneva, sans-serif";
     public static DefaultFontSizeInPt: number = 11;
@@ -170,6 +171,8 @@ export class HierarchySlicer implements IVisual {
 
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
+
+        this.events = options.host.eventService;
     }
 
     private init(options: VisualUpdateOptions): void {
@@ -203,6 +206,10 @@ export class HierarchySlicer implements IVisual {
             this.onUpdateSelection(rowSelection, this.interactivityService);
         };
 
+        let rowRecalc = (rowSelection: Selection<any, any, any, any>) => {
+            this.onRecalcItemHeigths(rowSelection);
+        };
+
         let rowExit = (rowSelection: Selection<any, any, any, any>) => {
             rowSelection.remove();
         };
@@ -214,9 +221,11 @@ export class HierarchySlicer implements IVisual {
         const moreData = false; // (this.dataView.metadata.segment) ? true : false;
 
         const treeViewOptions: IHierarchySlicerTreeViewOptions = {
-            rowHeight: this.getRowHeight(),
+            // rowHeight: this.getRowHeight(),
+            rowHeight: this.rowHeight,
             enter: rowEnter,
             exit: rowExit,
+            recalc: rowRecalc,
             update: rowUpdate,
             loadMoreData: onLoadMoreData,
             moreData: moreData,
@@ -264,7 +273,8 @@ export class HierarchySlicer implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        let timer = PerfTimer.start(TraceEvents.update, this.settings && this.settings.general.telemetry);
+        let timer = PerfTimer.START(TraceEvents.update, this.settings && this.settings.general.telemetry);
+        this.events.renderingStarted(options);
         this.handleLandingPage(options);
         if (!options || !options.dataViews || !options.dataViews[0] || !options.viewport) {
             timer();
@@ -276,7 +286,7 @@ export class HierarchySlicer implements IVisual {
         this.isInFocus = false;
         let searchText: string | undefined;
         if (this.searchInput && settings.general.selfFilterEnabled) {
-            searchText = (this.searchInput.node() as HTMLInputElement).value;
+            searchText = (<HTMLInputElement>this.searchInput.node()).value;
             if (!searchText || searchText.length < 3) searchText = undefined;
         } else {
             searchText = undefined;
@@ -310,6 +320,7 @@ export class HierarchySlicer implements IVisual {
         this.viewport = options.viewport;
 
         this.updateInternal(resetScrollbarPosition, updateType, searchText);
+        this.events.renderingFinished(options);
         timer();
     }
 
@@ -318,7 +329,7 @@ export class HierarchySlicer implements IVisual {
         this.updateSlicerBodyDimensions();
         switch (updateType) {
             case UpdateType.Bookmark:
-                PerfTimer.logMsg("HierarchySlicer: Bookmark update", this.settings && this.settings.general.telemetry);
+                PerfTimer.LOGMSG("HierarchySlicer: Bookmark update", this.settings && this.settings.general.telemetry);
                 processJsonFilters(
                     this.jsonFilters,
                     this.data.dataPoints,
@@ -335,7 +346,7 @@ export class HierarchySlicer implements IVisual {
                 }
                 break;
             case UpdateType.Refresh:
-                PerfTimer.logMsg("HierarchySlicer: Refresh update", this.settings && this.settings.general.telemetry);
+                PerfTimer.LOGMSG("HierarchySlicer: Refresh update", this.settings && this.settings.general.telemetry);
                 if (searchText) {
                     processSearch(
                         this.data.dataPoints,
@@ -356,7 +367,7 @@ export class HierarchySlicer implements IVisual {
                 break;
             case UpdateType.Reload:
             default:
-                PerfTimer.logMsg("HierarchySlicer: Reload update", this.settings && this.settings.general.telemetry);
+                PerfTimer.LOGMSG("HierarchySlicer: Reload update", this.settings && this.settings.general.telemetry);
                 this.treeView.empty();
                 const data: IHierarchySlicerData | undefined = converter(
                     this.dataView,
@@ -388,7 +399,8 @@ export class HierarchySlicer implements IVisual {
 
         this.rowHeight = this.treeView.getRealRowHeight();
         this.treeView
-            .rowHeight(this.getRowHeight())
+            // .rowHeight(this.getRowHeight())
+            .rowHeight(this.rowHeight)
             .data(
                 this.data.dataPoints.filter((d: IHierarchySlicerDataPoint) => !d.isHidden), // Expand/Collapse
                 (d: IHierarchySlicerDataPoint) => d.ownId,
@@ -477,9 +489,10 @@ export class HierarchySlicer implements IVisual {
         this.slicerBody.style("height", `${slicerViewport.height}px`).style("width", "100%");
     }
 
+    // tslint:disable-next-line: max-func-body-length
     private onEnterSelection(rowSelection: Selection<any, any, any, any>): void {
         if (!this.settings) return;
-        let timer = PerfTimer.start(TraceEvents.enterSelection, this.settings && this.settings.general.telemetry);
+        let timer = PerfTimer.START(TraceEvents.enterSelection, this.settings && this.settings.general.telemetry);
         // Item Container
         const treeItemElementParent: Selection<any, any, any, any> = rowSelection
             .selectAll(HierarchySlicer.ItemContainer.selectorName)
@@ -550,30 +563,32 @@ export class HierarchySlicer implements IVisual {
                             .classed("icon", true)
                             .classed("icon-right", true);
                     })
+                    .each(function(d) {
+                        select(this)
+                            .append("div"); // dummy placeholder needed for the scrollbar
+                    })
             );
 
-        if (!checkMobile(window.clientInformation.userAgent)) {
-            this.tooltipServiceWrapper.addTooltip(
-                this.slicerBody.selectAll(HierarchySlicer.Tooltip.selectorName),
-                (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
-                    const d3ParentElement = (tooltipEvent.context && tooltipEvent.context.parentNode) as any;
-                    return <VisualTooltipDataItem[]>(
-                        (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.tooltip)
-                    );
-                },
-                (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
-                    const builder = this.hostServices.createSelectionIdBuilder();
-                    const d3ParentElement = (tooltipEvent.context && tooltipEvent.context.parentNode) as any;
-                    ((d3ParentElement &&
-                        d3ParentElement.__data__ &&
-                        d3ParentElement.__data__
-                            .nodeIdentity) as CustomVisualOpaqueIdentity[])?.forEach((identity, level) =>
-                        builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
-                    );
-                    return builder.createSelectionId();
-                }
-            );
-        }
+        this.tooltipServiceWrapper.addTooltip(
+            this.slicerBody.selectAll(HierarchySlicer.Tooltip.selectorName),
+            (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
+                const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
+                return <VisualTooltipDataItem[]>(
+                    (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.tooltip)
+                );
+            },
+            (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
+                const builder = this.hostServices.createSelectionIdBuilder();
+                const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
+                (<CustomVisualOpaqueIdentity[]>(d3ParentElement &&
+                    d3ParentElement.__data__ &&
+                    d3ParentElement.__data__
+                        .nodeIdentity))?.forEach((identity, level) =>
+                    builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
+                );
+                return builder.createSelectionId();
+            }
+        );
         timer();
     }
 
@@ -601,11 +616,12 @@ export class HierarchySlicer implements IVisual {
         return fullTitle;
     }
 
+    // tslint:disable-next-line: max-func-body-length
     private onUpdateSelection(
         rowSelection: Selection<any, any, any, any>,
         interactivityService: IInteractivityService<IHierarchySlicerDataPoint>
     ): void {
-        let timer = PerfTimer.start(TraceEvents.updateSelection, this.settings && this.settings.general.telemetry);
+        let timer = PerfTimer.START(TraceEvents.updateSelection, this.settings && this.settings.general.telemetry);
         const data = this.data;
         const mobileScale = this.settings.mobile.zoomed ? 1 + this.settings.mobile.enLarge / 100 : 1;
         if (data) {
@@ -666,6 +682,14 @@ export class HierarchySlicer implements IVisual {
                 )
                 .style("margin-left", () => (data.levels === 0 ? "-4px" : null))
                 .attr("aria-expanded", (d: IHierarchySlicerDataPoint) => d.isExpand);
+
+            rowSelection
+                .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
+                .style("max-height", `${this.treeView.getRealRowHeight()}px`)
+                .style(
+                    "width",
+                    (d: IHierarchySlicerDataPoint) => data.levels === 0 ? `` : `calc(100vw - ${(d.level + 1) * mobileScale * this.settings.items.textSizeZoomed}px)`
+                );
 
             // Item Expander
             rowSelection
@@ -747,7 +771,7 @@ export class HierarchySlicer implements IVisual {
                             return "italic";
                     }
                     return "normal";
-                });
+                })
 
             // Item Tooltip Icon
             rowSelection
@@ -755,6 +779,14 @@ export class HierarchySlicer implements IVisual {
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
                 .style("fill", this.settings.tooltipSettings.color)
                 .style("stroke", this.settings.tooltipSettings.color)
+                .style(
+                    "height",
+                    PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
+                )
+                .style(
+                    "width",
+                    PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
+                )
                 .style("visibility", "hidden")
                 .html(() => {
                     switch (this.settings.tooltipSettings.icon) {
@@ -769,22 +801,6 @@ export class HierarchySlicer implements IVisual {
                             return Icons.info;
                     }
                 });
-
-            // setTimeout as render is part of a setTimeout function
-            if (this.tooltipTimeoutId) window.clearTimeout(this.tooltipTimeoutId);
-            this.tooltipTimeoutId = window.setTimeout(() => {
-                rowSelection
-                    .selectAll(HierarchySlicer.Tooltip.selectorName)
-                    .style(
-                        "visibility",
-                        this.settings.tooltipSettings.icon === TooltipIcon.None ||
-                            checkMobile(window.clientInformation.userAgent)
-                            ? "hidden"
-                            : "visible"
-                    )
-                    .style("margin-right", this.treeView.isScrollbarVisible() ? "100vw" : "0px");
-                this.tooltipTimeoutId = undefined;
-            }, 100);
 
             if (interactivityService && this.slicerBody) {
                 const body = this.slicerBody.attr("width", this.viewport.width);
@@ -838,7 +854,37 @@ export class HierarchySlicer implements IVisual {
         timer();
     }
 
-    public static getTextProperties(fontFamily: string, textSize: number): TextProperties {
+    public onRecalcItemHeigths(rowSelection: Selection<any, any, any, any>) {
+        const data = this.data;
+        const mobileScale = this.settings.mobile.zoomed ? 1 + this.settings.mobile.enLarge / 100 : 1;
+        const scrollbarMargin = this.treeView.isScrollbarVisible() ? 10 : 0;
+        const expanderMargin = data.levels === 0 ? 0 : mobileScale * this.settings.items.textSizeZoomed;
+        const iconSize = PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed);
+        rowSelection
+            .selectAll(HierarchySlicer.Tooltip.selectorName)
+            .style(
+                "visibility",
+                this.settings.tooltipSettings.icon === TooltipIcon.None
+                    ? "hidden"
+                    : "visible"
+            )
+            .style("padding-right", `${scrollbarMargin}px`);
+        rowSelection
+            .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
+            .style("max-height", `${this.treeView.getRealRowHeight()}px`)
+            .style(
+                "width",
+                (d: IHierarchySlicerDataPoint) => `calc(100vw - ${(d.level + 1) * expanderMargin}px)`
+            );
+        rowSelection
+            .selectAll(HierarchySlicer.LabelText.selectorName)
+            .style("width", (d: IHierarchySlicerDataPoint) =>
+                `calc(((100vw - ${(d.level + 1) * expanderMargin}px) - 
+                ${this.settings.tooltipSettings.icon === TooltipIcon.None ? 0 : Math.ceil(iconSize) + scrollbarMargin}px - 
+                ${iconSize + 5}px`);
+    }
+
+    public getTextProperties(fontFamily: string, textSize: number): TextProperties {
         return <TextProperties>{
             fontFamily: fontFamily,
             fontSize: `${textSize}pt`,
@@ -848,7 +894,7 @@ export class HierarchySlicer implements IVisual {
     private getHeaderHeight(): number {
         const searchHeight: number = this.settings.general.selfFilterEnabled
             ? textMeasurementService.estimateSvgTextHeight(
-                  HierarchySlicer.getTextProperties(
+                  this.getTextProperties(
                       this.settings.search.fontFamily,
                       this.settings.search.textSizeZoomed
                   )
@@ -856,19 +902,18 @@ export class HierarchySlicer implements IVisual {
             : 0;
         return (
             textMeasurementService.estimateSvgTextHeight(
-                HierarchySlicer.getTextProperties(this.settings.header.fontFamily, this.settings.header.textSizeZoomed)
+                this.getTextProperties(this.settings.header.fontFamily, this.settings.header.textSizeZoomed)
             ) + searchHeight
         );
     }
 
-    private getRowHeight(): number {
-        return (
-            this.rowHeight ||
-            textMeasurementService.estimateSvgTextHeight(
-                HierarchySlicer.getTextProperties(this.settings.items.fontFamily, this.settings.items.textSizeZoomed)
-            )
-        );
-    }
+    // private getRowHeight(): number {
+    //     return (
+    //         textMeasurementService.estimateSvgTextHeight(
+    //             this.getTextProperties(this.settings.items.fontFamily, this.settings.items.textSizeZoomed)
+    //         )
+    //     );
+    // }
 
     private getBodyViewport(currentViewport: IViewport): IViewport {
         let settings = this.settings;
@@ -909,6 +954,7 @@ export class HierarchySlicer implements IVisual {
         }
     }
 
+    // tslint:disable-next-line: max-func-body-length
     private createSearchHeader(container: Selection<any, any, any, any>): void {
         this.searchHeader = container
             .append("div")
@@ -1172,18 +1218,18 @@ export class HierarchySlicer implements IVisual {
         instanceEnumeration: VisualObjectInstanceEnumeration,
         instance: VisualObjectInstance
     ): void {
-        if ((instanceEnumeration as VisualObjectInstanceEnumerationObject).instances) {
-            (instanceEnumeration as VisualObjectInstanceEnumerationObject).instances.push(instance);
+        if ((<VisualObjectInstanceEnumerationObject>instanceEnumeration).instances) {
+            (<VisualObjectInstanceEnumerationObject>instanceEnumeration).instances.push(instance);
         } else {
-            (instanceEnumeration as VisualObjectInstance[]).push(instance);
+            (<VisualObjectInstance[]>instanceEnumeration).push(instance);
         }
     }
 
     public removeEnumerateObject(instanceEnumeration: VisualObjectInstanceEnumeration, objectName: string): void {
-        if ((instanceEnumeration as VisualObjectInstanceEnumerationObject).instances) {
-            delete (instanceEnumeration as VisualObjectInstanceEnumerationObject).instances[0].properties[objectName];
+        if ((<VisualObjectInstanceEnumerationObject>instanceEnumeration).instances) {
+            delete (<VisualObjectInstanceEnumerationObject>instanceEnumeration).instances[0].properties[objectName];
         } else {
-            delete (instanceEnumeration as VisualObjectInstance[])[0].properties[objectName];
+            delete (<VisualObjectInstance[]>instanceEnumeration)[0].properties[objectName];
         }
     }
 

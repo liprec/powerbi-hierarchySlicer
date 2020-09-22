@@ -31,7 +31,7 @@ import { interactivityBaseService, interactivitySelectionService } from "powerbi
 import { IFilterTarget } from "powerbi-models";
 import { Selection } from "d3-selection";
 
-import * as settings from "./settings";
+import * as settings from "./hierarchySlicerSettings";
 
 import IViewport = powerbi.IViewport;
 import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
@@ -96,6 +96,7 @@ export interface IHierarchySlicerTreeViewOptions {
     enter: (selection: Selection<any, any, any, any>) => void;
     exit: (selection: Selection<any, any, any, any>) => void;
     update: (selection: Selection<any, any, any, any>) => void;
+    recalc: (selection: Selection<any, any, any, any>) => void;
     loadMoreData: () => void;
     baseContainer: Selection<any, any, any, any>;
     moreData: boolean;

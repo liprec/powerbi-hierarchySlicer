@@ -45,7 +45,7 @@ import ValueType = valueType.ValueType;
 
 // powerbi.extensibility.utils.formatting
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
-import ValueFormat = valueFormatter.format;
+import format = valueFormatter.format;
 
 export interface FullExpanded {
     expanded: string[];
@@ -114,24 +114,24 @@ export abstract class HierarchyData extends TestDataViewBuilder {
         const convertedValue = this.convertRawValue(this.tableValues[row][col], this.columnTypes[col]);
         if (convertedValue === null) return "(Blank)";
         if (!this.columnTypes[col].text) return convertedValue;
-        return ValueFormat(convertedValue, this.columnFormat[col]);
+        return format(convertedValue, this.columnFormat[col]);
     }
 
     public getRawValue(row: number, col: number): string | number | boolean | null {
         const convertedValue = this.convertRawValue(this.tableValues[row][col], this.columnTypes[col]);
         if (convertedValue === null) return this.columnTypes[col].text ? "" : null;
         if (!this.columnTypes[col].text) return convertedValue;
-        return ValueFormat(convertedValue, this.columnFormat[col]);
+        return format(convertedValue, this.columnFormat[col]);
     }
 
     public convertRawValue(rawValue: PrimitiveValue, dataType: ValueTypeDescriptor, full: boolean = false): any {
         // if (rawValue === null) return null;
         if (dataType.dateTime && full) {
-            return new Date(rawValue as Date);
+            return new Date(<Date>rawValue);
         } else if (dataType.numeric) {
-            return rawValue as number;
+            return <number>rawValue;
         } else {
-            return rawValue as string;
+            return <string>rawValue;
         }
     }
 
@@ -143,7 +143,7 @@ export abstract class HierarchyData extends TestDataViewBuilder {
                 const formatValue =
                     rawValue === null || (emptyString && rawValue === "")
                         ? label || "(Blank)"
-                        : ValueFormat(rawValue, this.columnFormat[index]);
+                        : format(rawValue, this.columnFormat[index]);
                 return formatValue === "" ? String.fromCharCode(160) : formatValue;
             });
     }

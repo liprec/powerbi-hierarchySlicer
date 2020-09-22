@@ -370,6 +370,10 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   color: transparent;
 }
 
+.slicerItemContainer {
+  width: 100vw;
+}
+
 .slicerContainer .slicerItemContainer {
   margin: 0;
   padding: 2px 0 0 0;
@@ -381,7 +385,7 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
   justify-content: space-between;
   overflow: hidden;
   -webkit-align-items: center;
-  width: 100%;
+  //width: 100%;
   outline: 0;
 }
 
@@ -457,8 +461,8 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
 
 .slicerContainer .slicerCheckbox {
   cursor: pointer;
-  vertical-align: middle;
-  align-self: center;
+  // vertical-align: middle;
+  // align-self: center;
   margin: 0px 4px 0px 0px;
   // margin-left: 0px !important;
   // margin-right: 4px !important;
@@ -521,9 +525,9 @@ textarea {
   -webkit-flex: 1 0 0px;
 }
 
-.slicerContainer .slicerItemContainer * {
-  vertical-align: bottom;
-}
+// .slicerContainer .slicerItemContainer * {
+//   vertical-align: bottom;
+// }
 
 .icon {
   float: right;
@@ -589,7 +593,7 @@ textarea {
   transition-duration: 300ms;
 }
 
-.slicerItemContainerExpander svg {
+.slicerItemContainer svg {
   vertical-align: sub !important;
 }
 
@@ -601,6 +605,10 @@ textarea {
   font-family: PowrMDL2;
   font-style: normal;
   vertical-align: middle;
+}
+
+.slicerTooltip {
+  display: block;
 }
 
 /* Adjustments */
@@ -618,8 +626,8 @@ textarea {
 }
 
 .slicerItemContainerChild {
-  width: 100%;
-  display: block !important;
+  // width: 100%;
+  // display: block !important;
 }
 
 .reportContainerContent i {
@@ -716,6 +724,10 @@ textarea {
   visibility: visible; 
   max-width: 100%; /* Not required for horizontal scroll to trigger */
   max-height: 100%; /* Needed for vertical scroll to trigger */
+}
+
+.simplebar-content-wrapper {
+  width: 110%;
 }
 
 .simplebar-placeholder {
