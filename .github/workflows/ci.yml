@@ -25,11 +25,6 @@ jobs:
           npm test
         env:
           CI: true
-      - name: npm lint
-        run: |
-          npm run lint
-        env:
-          CI: true
       - name: code coverage results
         uses: actions/upload-artifact@v2
         with:
