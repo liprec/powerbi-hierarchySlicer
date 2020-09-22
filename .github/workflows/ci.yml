@@ -77,6 +77,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist
+          asset_path: ./dist/HierarchySlicer-${{ steps.extract_version.outputs.version }}.pbiviz
           asset_name: HierarchySlicer-${{ steps.extract_version.outputs.version }}.pbiviz
           asset_content_type: application/zip
