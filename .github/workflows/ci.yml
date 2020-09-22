@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [certification]
 
 jobs:
   test:
@@ -33,6 +33,7 @@ jobs:
   build:
     name: buid, package and release
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.base_ref == 'certification'}}
     needs: [test]
     steps:
       - uses: actions/checkout@v2
