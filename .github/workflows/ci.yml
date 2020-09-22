@@ -48,7 +48,7 @@ jobs:
       - name: extract package.json version
         id: extract_version
         run: |
-          ver=require('./pbiviz.json').visual.version;echo "::set-output name=version::$ver"
+          node -e "const v = require('./pbiviz.json').visual.version;console.log('::set-output name=version::' + v);"
       - name: rename pbiviz file
         run: |
           cp $oldfile $newfile
