@@ -38,7 +38,7 @@ import { IHierarchySlicerDataPoint, IHierarchySlicerTreeView, IHierarchySlicerTr
 
 import IViewport = powerbi.IViewport;
 import translateWithPixels = manipulation.translateWithPixels;
-import { isFirefox } from './utils';
+import { isFirefox } from "./utils";
 
 export module HierarchySlicerTreeViewFactory {
     export function createListView(options: IHierarchySlicerTreeViewOptions): IHierarchySlicerTreeView {
@@ -128,7 +128,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
     public isScrollbarVisible(): boolean {
         const bodyHeight = (<HTMLElement>this.options.baseContainer.node()).offsetHeight;
-        const scrollHeight =(<HTMLElement>this.scrollContainer.node()).offsetHeight;
+        const scrollHeight = (<HTMLElement>this.scrollContainer.node()).offsetHeight;
         return bodyHeight < scrollHeight;
     }
 
@@ -192,7 +192,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     ) {
         const visibleRows = this.getVisibleRows();
         const scrollPosition = scrollTop === 0 ? 0 : Math.floor(scrollTop / rowHeight);
-        const transformAttr = translateWithPixels(0, scrollPosition * rowHeight);
+        const transformAttr = translateWithPixels(0, scrollPosition * (rowHeight - 1));
 
         if (!isFirefox()) {
             visibleGroupContainer
