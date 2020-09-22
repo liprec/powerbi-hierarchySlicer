@@ -93,7 +93,7 @@ export function converter(
             value: [settings.selection.selectAllLabel],
             label: settings.selection.selectAllLabel,
             tooltip: [{ displayName: settings.selection.selectAllLabel, value: "" }],
-            level: 0,
+            level: -1,
             selectable: true,
             partialSelected: false,
             isLeaf: true,
