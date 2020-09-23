@@ -1,8 +1,13 @@
 # Power BI HierachySlicer
 
-[![Build Status](https://dev.azure.com/datascenarios/GitHub%20Projects/_apis/build/status/powerbi-hierarchySlicer?branchName=master)](https://dev.azure.com/datascenarios/GitHub%20Projects/_build/latest?definitionId=13&branchName=master)
-
 Home for my Power BI Custom Visual: HierarchySlicer
+
+## Build status
+
+| Branch        | status                                                                                                                           |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Main          | ![Build and test](https://github.com/liprec/powerbi-hierarchySlicer/workflows/Build%20and%20test/badge.svg?branch=main)          |
+| Certification | ![Build and test](https://github.com/liprec/powerbi-hierarchySlicer/workflows/Build%20and%20test/badge.svg?branch=certification) |
 
 ## Support
 
