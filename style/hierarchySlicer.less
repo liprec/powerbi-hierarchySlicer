@@ -617,8 +617,23 @@ textarea {
     display: inline-block !important;
 }
 
+.searchTypes {
+    margin: 0px;
+    padding: 0px;
+}
+
 .searchType {
-    margin: 0px 1px 0px 1px;
+    margin: 1px 0px;
+    padding: 2px 1px;
+}
+
+.searchType.selected {
+    border: 1px solid currentColor;
+    padding: 1px;
+}
+
+.searchType.hidden {
+    display: none;
 }
 
 .reportContainerContent i {

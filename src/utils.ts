@@ -44,6 +44,7 @@ import DataViewMetadataColumn = powerbi.DataViewMetadataColumn;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ValueType = valueType.ValueType;
+import { SearchFilter } from "./enums";
 
 enum SQExprKind {
     ColumnRef = 2,
@@ -124,12 +125,12 @@ export function getHierarchyColumns(
 }
 
 export function parseExpand(expand: string): string[][] {
-    let expanded: string[]
-    if (expand === "") return [];   
+    let expanded: string[];
+    if (expand === "") return [];
     if (expand.endsWith("~|")) {
-        expanded = expand.split("*|*") // New ids
+        expanded = expand.split("*|*"); // New ids
     } else {
-        expanded = expand.split(",") // Old ids
+        expanded = expand.split(","); // Old ids
     }
     return expanded.map(e => parseOwnId(e));
 }
@@ -151,8 +152,22 @@ export function parseOldOwnId(ownId: string): string[] {
     return parts.map(part => part.split("-")[0]);
 }
 
-export function wildcardFilter(value: string, rule: string) {
-    return new RegExp("^" + rule.split("*").join(".*") + "$").test(value);
+export function wildcardFilter(value: string, rule: string, filter: SearchFilter) {
+    let escapeRegExp = (test: string) => {
+        return test.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    };
+    const escapeRule = escapeRegExp(rule);
+    switch (filter) {
+        case SearchFilter.Exact:
+            return value === rule;
+        case SearchFilter.Start:
+            return value.match(new RegExp(`^${escapeRule}`));
+        case SearchFilter.End:
+            return value.match(new RegExp(`${escapeRule}$`));
+        case SearchFilter.Wildcard:
+        default:
+            return value.match(new RegExp(escapeRule));
+    }
 }
 
 export function extractFilterColumnTarget(
@@ -161,8 +176,8 @@ export function extractFilterColumnTarget(
     // take an expression from source or column metadata
     let expr: any =
         categoryColumn && (<any>categoryColumn).source && (<any>categoryColumn).source.expr
-            ? ((<any>categoryColumn).source.expr)
-            : ((<any>categoryColumn).expr);
+            ? (<any>categoryColumn).source.expr
+            : (<any>categoryColumn).expr;
 
     // take table name from source.entity if column definition is simple
     let filterTargetTable: string = expr && expr.source && expr.source.entity ? expr.source.entity : null;

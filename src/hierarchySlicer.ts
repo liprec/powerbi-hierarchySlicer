@@ -108,6 +108,7 @@ import createClassAndSelector = CssConstants.createClassAndSelector;
 const Icons = Graphics.Icons;
 
 import "../style/hierarchySlicer.less";
+import { threadId } from "worker_threads";
 
 export class HierarchySlicer implements IVisual {
     private root: HTMLElement;
@@ -264,7 +265,7 @@ export class HierarchySlicer implements IVisual {
         this.slicerHeader = this.slicerHeaderContainer.append("div").classed(HierarchySlicer.Header.className, true);
 
         this.slicerHeader
-            .selectAll(HierarchySlicer.Icon.className)
+            .selectAll(HierarchySlicer.Icon.selectorName)
             .data(headerButtonData)
             .enter()
             .append("div")
@@ -1040,90 +1041,82 @@ export class HierarchySlicer implements IVisual {
             });
 
         // Search type: WIP
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.wildcard)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.Wildcard;
-        //     });
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.exact)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.Exact;
-        //     });
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.start)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.Start;
-        //     });
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.end)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.End;
-        //     });
+        const searchButtonData = [
+            {
+                title: "End",
+                icon: (e: HTMLElement) => Graphics.END(e),
+                filterType: SearchFilter.End,
+            },
+            {
+                title: "Start",
+                icon: (e: HTMLElement) => Graphics.START(e),
+                filterType: SearchFilter.Start,
+            },
+            {
+                title: "Exact",
+                icon: (e: HTMLElement) => Graphics.EXACT(e),
+                filterType: SearchFilter.Exact,
+            },
+            {
+                title: "Wildcard",
+                icon: (e: HTMLElement) => Graphics.WILDCARD(e),
+                filterType: SearchFilter.Wildcard,
+            },
+        ];
+
+        const searchTypes = this.searchHeader.append("div").classed("searchTypes", true);
+        searchTypes
+            .on("mouseover", () => {
+                this.searchHeader.selectAll(".searchType").classed("hidden", false);
+            })
+            .on("mouseout", d => {
+                this.searchHeader
+                    .selectAll(".searchType")
+                    .classed("hidden", (d: any) => d.filterType !== this.searchFilter);
+            });
+
+        searchTypes
+            .selectAll(".searchType")
+            .data(searchButtonData)
+            .enter()
+            .append("div")
+            .classed(HierarchySlicer.Icon.className, true)
+            .classed("searchType", true)
+            .classed("selected", d => d.filterType === this.searchFilter)
+            .classed("hidden", d => d.filterType !== this.searchFilter)
+            .attr("title", d => `${d.title}${d.filterType === this.searchFilter ? " (selected)" : ""}`)
+            .style("fill", this.settings.search.iconColor)
+            .style(
+                "width",
+                PixelConverter.toString(
+                    Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
+                )
+            )
+            .style(
+                "height",
+                PixelConverter.toString(
+                    Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
+                )
+            )
+            .each(function(d) {
+                const e = <HTMLElement>this;
+                Graphics.EMPTYROOT(e);
+                d.icon(e);
+            })
+            .on("click", d => {
+                this.searchFilter = d.filterType;
+                this.hostServices.persistProperties({
+                    merge: [
+                        {
+                            objectName: "general",
+                            selector: Selector,
+                            properties: {
+                                counter: counter++,
+                            },
+                        },
+                    ],
+                });
+            });
     }
 
     private updateSearchHeader(): void {
@@ -1167,6 +1160,10 @@ export class HierarchySlicer implements IVisual {
                 .style("font-size", `${this.settings.search.textSizeZoomed}pt`)
                 .style("background-color", this.settings.search.background)
                 .style("font-family", this.settings.search.fontFamily);
+            const searchTypeIcons = this.searchHeader.selectAll(".searchType");
+            searchTypeIcons
+                .classed("selected", (d: any) => d.filterType === this.searchFilter)
+                .attr("title", (d: any) => `${d.title}${d.filterType === this.searchFilter ? " (selected)" : ""}`);
         }
     }
 
