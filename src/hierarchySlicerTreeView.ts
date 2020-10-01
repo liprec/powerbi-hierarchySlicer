@@ -55,7 +55,6 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private visibleGroupContainer: Selection<any, any, any, any>;
     private scrollContainer: Selection<any, any, any, any>;
     private scrollbarInner: Selection<any, any, any, any>;
-    private renderTimeoutId: number | undefined;
     private scrollBar: any;
     private mouseClick: boolean = false;
 
@@ -161,12 +160,9 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     }
 
     public render(): void {
-        if (this.renderTimeoutId) window.clearTimeout(this.renderTimeoutId);
-        this.renderTimeoutId = window.setTimeout(() => {
-            // this.getRowHeight().then((rowHeight: number) => this.renderImpl(rowHeight));
+        requestAnimationFrame(() => {
             this.renderImpl(this.options.rowHeight);
-            this.renderTimeoutId = undefined;
-        }, 100);
+        });
     }
 
     private renderImpl(rowHeight: number) {

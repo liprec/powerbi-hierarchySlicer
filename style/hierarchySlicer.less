@@ -12,12 +12,6 @@
     height: 20px;
 }
 
-.pbi-spinner-large {
-    background-position: 0 0;
-    width: 32px;
-    height: 32px;
-}
-
 .powerbi-spinner.dotsLoader .spinner {
     width: 100%;
     height: 30px;
@@ -168,10 +162,8 @@
 
 .powerbi-spinner:not(.dotsLoader) {
     display: inline-block;
-    width: 20px;
+    width: 50%;
     height: 20px;
-    text-align: initial !important;
-    vertical-align: middle;
 }
 
 .powerbi-spinner:not(.dotsLoader) .spinner {
@@ -184,62 +176,6 @@
     left: 50%;
     margin-top: -10px;
     margin-left: -10px;
-}
-
-.powerbi-spinner:not(.dotsLoader).xlarge {
-    width: 48px;
-    height: 48px;
-}
-
-.powerbi-spinner:not(.dotsLoader).xlarge .spinner {
-    transform: scale(0.85714286);
-}
-
-.powerbi-spinner:not(.dotsLoader).xlarge.centered {
-    margin-top: -24px;
-    margin-left: -24px;
-}
-
-.powerbi-spinner:not(.dotsLoader).large {
-    width: 32px;
-    height: 32px;
-}
-
-.powerbi-spinner:not(.dotsLoader).large .spinner {
-    transform: scale(0.57142857);
-}
-
-.powerbi-spinner:not(.dotsLoader).large.centered {
-    margin-top: -16px;
-    margin-left: -16px;
-}
-
-.powerbi-spinner:not(.dotsLoader).small {
-    width: 20px;
-    height: 20px;
-}
-
-.powerbi-spinner:not(.dotsLoader).small .spinner {
-    transform: scale(0.35714286);
-}
-
-.powerbi-spinner:not(.dotsLoader).small.centered {
-    margin-top: -10px;
-    margin-left: -10px;
-}
-
-.powerbi-spinner:not(.dotsLoader).xsmall {
-    width: 16px;
-    height: 16px;
-}
-
-.powerbi-spinner:not(.dotsLoader).xsmall .spinner {
-    transform: scale(0.28571429);
-}
-
-.powerbi-spinner:not(.dotsLoader).xsmall.centered {
-    margin-top: -8px;
-    margin-left: -8px;
 }
 
 .powerbi-spinner:not(.dotsLoader) .spinner {
@@ -385,7 +321,6 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
     justify-content: space-between;
     overflow: hidden;
     -webkit-align-items: center;
-    //width: 100%;
     outline: 0;
 }
 
@@ -420,7 +355,6 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
     display: block;
     margin: 20% 0 0 20%;
     background-color: currentColor; // #c8c8c8;
-    // box-shadow: 0px 0px 2px #c8c8c8;
     border: none;
     border-radius: inherit;
 }
@@ -433,7 +367,6 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
     display: block;
     margin: 20% 0 0 20%;
     background-color: currentColor; // #c8c8c8;
-    // box-shadow: 0px 0px 2px #c8c8c8;
     border: none;
     border-radius: inherit;
 }
@@ -459,11 +392,7 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
 
 .slicerContainer .slicerCheckbox {
     cursor: pointer;
-    // vertical-align: middle;
-    // align-self: center;
     margin: 0px 4px 0px 0px;
-    // margin-left: 0px !important;
-    // margin-right: 4px !important;
     flex: 0 0 auto;
     -webkit-flex: 0 0 auto;
     display: inline-block;
@@ -474,9 +403,6 @@ html[dir="rtl"] .powerbi-spinner:not(.dotsLoader) .spinner {
     width: 9px;
     height: 9px;
     border: 2px solid #c8c8c8;
-    // box-shadow: inset 0px 0px 1px #c8c8c8;
-    // margin-left: 0px !important;
-    // margin-right: 4px !important;
 }
 
 .explorationContainer input {
@@ -522,10 +448,6 @@ textarea {
     flex: 1 0 0px;
     -webkit-flex: 1 0 0px;
 }
-
-// .slicerContainer .slicerItemContainer * {
-//   vertical-align: bottom;
-// }
 
 .icon {
     float: right;
@@ -593,9 +515,18 @@ textarea {
     vertical-align: sub !important;
 }
 
-// .slicerItemContainerExpander .spinner-icon {
-//   display: block !important;
-// }
+.spinner-icon {
+    float: right;
+    cursor: pointer;
+    display: flex;
+    width: 12px;
+    height: 12px;
+    font-style: normal;
+    align-items: flex-end;
+    padding: 0;
+    background-color: inherit;
+    border-style: none;
+}
 
 .spinner-icon::before {
     font-family: PowrMDL2;
@@ -642,8 +573,6 @@ textarea {
 }
 
 .powerbi-spinner {
-    margin-left: -4px;
-    margin-right: 0px;
     content: normal;
 }
 
@@ -795,7 +724,6 @@ textarea {
 .simplebar-scrollbar:before {
     position: absolute;
     content: "";
-    // background: black;
     background: currentColor;
     border-radius: 7px;
     left: 0;

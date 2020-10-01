@@ -717,7 +717,7 @@ export class HierarchySlicer implements IVisual {
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
                 .style("display", (d: IHierarchySlicerDataPoint) => (d.isLeaf || data.levels === 0 ? "none" : null))
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
-                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / 2.5))
+                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed * 0.4))
                 .style(
                     "width",
                     PixelConverter.toString(
@@ -747,7 +747,7 @@ export class HierarchySlicer implements IVisual {
                 .selectAll(".spinner-icon")
                 .style("display", "none")
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
-                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / 2.5))
+                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed * 0.3))
                 .style(
                     "width",
                     PixelConverter.toString(
