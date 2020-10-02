@@ -345,10 +345,8 @@ export function processSearch(
         d.isExpand = addSelection && d.selected ? d.isExpand : false;
     });
     dataPoints.forEach((d: IHierarchySlicerDataPoint) => {
-        if (
-            wildcardFilter(d.ownId[d.level].toLowerCase(), searchString, searchFilter) ||
-            isEqual(d.ownId, ["selectAll"])
-        ) {
+        if (d.ownId[0] === "selectAll") return;
+        if (wildcardFilter(d.ownId[d.level].toLowerCase(), searchString, searchFilter)) {
             d.isHidden = false;
             d.parentId.forEach((p, i) => {
                 const parentId = d.parentId.slice(0, i + 1);

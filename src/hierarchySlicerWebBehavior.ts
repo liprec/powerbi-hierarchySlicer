@@ -266,6 +266,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             this.persistSelectAll(selectionDataPoints.filter(d => d.selected).length === selectionDataPoints.length);
             this.filterInstance.push(applyFilter(this.hostServices, this.fullTree, this.columnFilters, filterLevel));
             this.spinnerTimeoutId = undefined;
+            this.removeSpinners();
         });
 
         // HEADER EVENTS
@@ -331,6 +332,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     private addSpinner(expanders: Selection<any, any, any, any>, index: number) {
+        if (this.levels === 0) return; // No spinner for single level slicer
         const currentExpander = expanders.filter((expander, i) => index === i);
         const currentExpanderHtml = <HTMLElement>currentExpander.node();
         const size = Math.min(currentExpanderHtml.clientHeight, currentExpanderHtml.clientWidth);
@@ -353,7 +355,8 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     public removeSpinners() {
         this.spinnerTimeoutId = undefined;
         if (!this.expanders) return;
-        this.expanders.selectAll(".icon").style("display", "inline");
+        // Show expander for multi level slicer
+        if (this.levels > 0) this.expanders.selectAll(".icon").style("display", "inline");
         this.expanders.select(".spinner-icon").style("display", "none");
     }
 

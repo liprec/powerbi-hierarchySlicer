@@ -715,7 +715,9 @@ export class HierarchySlicer implements IVisual {
                 .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
                 .selectAll(".icon")
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
-                .style("display", (d: IHierarchySlicerDataPoint) => (d.isLeaf || data.levels === 0 ? "none" : null))
+                .style("display", (d: IHierarchySlicerDataPoint) =>
+                    (d.isLeaf && d.ownId[0] !== "selectAll") || data.levels === 0 ? "none" : null
+                )
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
                 .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed * 0.4))
                 .style(
@@ -734,6 +736,7 @@ export class HierarchySlicer implements IVisual {
                 .each(function(d: IHierarchySlicerDataPoint) {
                     const e = <HTMLElement>this;
                     Graphics.EMPTYROOT(e);
+                    if (d.ownId[0] === "selectAll") return;
                     if (d.isExpand) {
                         Graphics.EXPAND(e);
                     } else {
@@ -986,6 +989,7 @@ export class HierarchySlicer implements IVisual {
             .attr("title", "Search")
             .classed(HierarchySlicer.Icon.className, true)
             .classed("search", true)
+            .classed("icon-left", true)
             .style("fill", this.settings.search.iconColor)
             .style(
                 "width",
@@ -1026,6 +1030,7 @@ export class HierarchySlicer implements IVisual {
             .style("font-family", this.settings.search.fontFamily)
             .style("color", this.settings.search.fontColor)
             .style("background-color", this.settings.search.background)
+            .style("width", "0px")
             .on("input", () => {
                 this.hostServices.persistProperties({
                     merge: [
