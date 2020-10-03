@@ -27,20 +27,20 @@
 
 "use strict";
 
+exports.__esModule = true;
+
 const webpackConfig = require("./test.webpack.config.js");
 const tsconfig = require("./test.tsconfig.json");
-const path = require('path');
-
+const path = require("path");
 const testRecursivePath = "test/visualTest.ts";
 const srcOriginalRecursivePath = "src/**/*.ts";
 const coverageFolder = "coverage";
 
 process.env.CHROME_BIN = require("puppeteer").executablePath();
 
-import { Config, ConfigOptions } from "karma";
-
-module.exports = (config: Config) => {
-    config.set(<ConfigOptions>{
+module.exports = function (config) {
+    let files = undefined;
+    config.set({
         browserNoActivityTimeout: 100000,
         browsers: ["ChromeHeadless"],
         colors: true,
@@ -59,21 +59,21 @@ module.exports = (config: Config) => {
             dir: path.join(__dirname, coverageFolder),
             reporters: [
                 // reporters not supporting the `file` property
-                { type: 'html', subdir: 'html-report' },
-                { type: 'lcov', subdir: 'lcov' },
+                { type: "html", subdir: "html-report" },
+                { type: "lcov", subdir: "lcov" },
                 // reporters supporting the `file` property, use `subdir` to directly
                 // output them in the `dir` directory
-                { type: 'cobertura', subdir: '.', file: 'cobertura-coverage.xml' },
-                { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
-                { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+                { type: "cobertura", subdir: ".", file: "cobertura-coverage.xml" },
+                { type: "lcovonly", subdir: ".", file: "report-lcovonly.txt" },
+                { type: "text-summary", subdir: ".", file: "text-summary.txt" },
             ]
         },
         coverageIstanbulReporter: {
             reports: ["html", "lcovonly", "text-summary", "cobertura"],
             dir: path.join(__dirname, coverageFolder),
-            'report-config': {
+            "report-config": {
                 html: {
-                    subdir: 'html-report'
+                    subdir: "html-report"
                 }
             },
             combineBrowserReports: true,
@@ -101,15 +101,17 @@ module.exports = (config: Config) => {
                 served: true
             },
             {
-                pattern: './capabilities.json',
+                pattern: "./capabilities.json",
                 watched: false,
                 served: true,
                 included: false
             }
         ],
-        preprocessors: {
-            [testRecursivePath]: ["webpack", "coverage"]
-        },
+        preprocessors: (
+            files = {},
+            files[testRecursivePath] = ["webpack", "coverage"],
+            files
+        ),
         typescriptPreprocessor: {
             options: tsconfig.compilerOptions
         },
