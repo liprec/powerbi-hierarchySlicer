@@ -78,18 +78,19 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .attr("role", "tree")
             .classed("visibleGroup", true);
 
-        this.scrollBar = new simplebar(<HTMLElement>this.scrollbarInner.node(), { autoHide: false });
-        this.scrollBar.getScrollElement().addEventListener("scroll", () => {
-            this.renderImpl(this.options.rowHeight);
+        this.scrollBar = new simplebar(<HTMLElement>this.scrollbarInner.node(), {
+            autoHide: false,
+            scrollbarMinSize: 5,
         });
+        this.scrollBar.getScrollElement().addEventListener("scroll", () => this.render());
 
-        document.addEventListener("mouseleave", event => {
+        document.addEventListener("mouseleave", (event) => {
             if (event.buttons === 1) {
                 this.mouseClick = true;
             }
         });
 
-        document.addEventListener("mouseenter", event => {
+        document.addEventListener("mouseenter", (event) => {
             if (this.mouseClick && event.buttons === 0) {
                 const newEvent = document.createEvent("MouseEvent");
                 newEvent.initEvent("mouseup", false, true);
@@ -188,15 +189,15 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     ) {
         const visibleRows = this.getVisibleRows();
         const scrollPosition = scrollTop === 0 ? 0 : Math.floor(scrollTop / rowHeight);
-        const transformAttr = translateWithPixels(0, scrollPosition * (rowHeight - 1));
+        const transformAttr = translateWithPixels(0, scrollPosition * rowHeight);
 
         if (!isFirefox()) {
             visibleGroupContainer
                 // order matters for proper overriding
-                .style("transform", d => transformAttr)
+                .style("transform", (d) => transformAttr)
                 .style("-webkit-transform", transformAttr);
         }
-        const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 1)),
+        const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 2)),
             position1 = position0 + visibleRows + 10;
 
         this.performScrollToFrame(position0, position1, totalElements, visibleRows, loadMoreData);
@@ -204,7 +205,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         this.storeRowHeight();
 
         const rowUpdateSelection = visibleGroupContainer.selectAll(".row:not(.transitioning)");
-        rowUpdateSelection.call(d => this.options.recalc(d));
+        rowUpdateSelection.call((d) => this.options.recalc(d));
     }
 
     private performScrollToFrame(
@@ -225,13 +226,13 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .append("div")
             .classed("row", true)
             // .style("max-height", `${this.getRealRowHeight()}px`)
-            .call(d => options.enter(d));
+            .call((d) => options.enter(d));
         rowSelection.order();
         const rowUpdateSelection = visibleGroupContainer.selectAll(".row:not(.transitioning)");
-        rowUpdateSelection.call(d => options.update(d));
+        rowUpdateSelection.call((d) => options.update(d));
         rowSelection
             .exit()
-            .call(d => options.exit(d))
+            .call((d) => options.exit(d))
             .remove();
         if (loadMoreData) options.loadMoreData(); // && visibleRows !== totalRows && position1 >= totalRows * HierarchySlicerTreeView.loadMoreDataThreshold)
     }
@@ -260,7 +261,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     }
 
     private storeRowHeight() {
-        let rows = this.visibleGroupContainer.selectAll(".row").filter(function() {
+        let rows = this.visibleGroupContainer.selectAll(".row").filter(function () {
             return (<HTMLElement>this).textContent !== "";
         });
         if (!rows.empty()) {
