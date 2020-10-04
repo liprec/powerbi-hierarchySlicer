@@ -101,13 +101,7 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
         expanders.on("click", (d: IHierarchySlicerDataPoint, index: number) => {
             d.isExpand = !d.isExpand;
-            if (this.spinnerTimeoutId) {
-                window.clearTimeout(this.spinnerTimeoutId);
-            }
-            this.spinnerTimeoutId = window.setTimeout(
-                () => this.addSpinner(expanders, index),
-                this.settings.general.spinnerDelay
-            );
+            this.delayFunction(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             this.persistExpand();
         });
 
@@ -194,26 +188,28 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
                 }
                 return;
             }
-            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
-            this.spinnerTimeoutId = window.setTimeout(
-                () => this.addSpinner(expanders, index),
-                this.settings.general.spinnerDelay
-            );
+            this.delayFunction(() => this.addSpinner(expanders, index), this.settings.general.spinnerDelay);
             this.ctrlPressed = (<MouseEvent>event).ctrlKey || (<MouseEvent>event).metaKey;
             const siblings = selectionDataPoints.filter(dataPoint => isEqual(dataPoint.parentId, d.parentId));
-            const samelevelSelect = selectionDataPoints.filter(dataPoint => dataPoint.level === d.level && dataPoint.selected === true);
-            if ((
-                siblings.length > 1 &&
-                siblings.length === siblings.filter(sibling => sibling.selected && !sibling.partialSelected).length &&
-                (this.settings.selection.singleSelect || !this.ctrlPressed) &&
-                !(!this.settings.selection.singleSelect && !this.settings.selection.ctrlSelect)
-            ) || (!this.settings.selection.singleSelect && this.settings.selection.ctrlSelect && !this.ctrlPressed && samelevelSelect.length > 1)) {
+            const samelevelSelect = selectionDataPoints.filter(
+                dataPoint => dataPoint.level === d.level && dataPoint.selected === true
+            );
+            if (
+                (siblings.length > 1 &&
+                    siblings.length ===
+                        siblings.filter(sibling => sibling.selected && !sibling.partialSelected).length &&
+                    (this.settings.selection.singleSelect || !this.ctrlPressed) &&
+                    !(!this.settings.selection.singleSelect && !this.settings.selection.ctrlSelect)) ||
+                (!this.settings.selection.singleSelect &&
+                    this.settings.selection.ctrlSelect &&
+                    !this.ctrlPressed &&
+                    samelevelSelect.length > 1)
+            ) {
                 selected = true;
             }
             selectionDataPoints = selectionDataPoints.filter(d => d.ownId !== ["selectAll"]);
             const singleSelect =
-                this.settings.selection.singleSelect ||
-                (this.settings.selection.ctrlSelect && !this.ctrlPressed);
+                this.settings.selection.singleSelect || (this.settings.selection.ctrlSelect && !this.ctrlPressed);
             if (singleSelect) {
                 // single select value -> start with empty selection tree
                 selectionDataPoints.forEach(dp => {
@@ -266,11 +262,11 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
             // Get highest selected level in common for all datapoints
             filterLevel = getCommonLevel(selectionDataPoints);
 
-            
             this.renderSelection(true);
             this.persistSelectAll(selectionDataPoints.filter(d => d.selected).length === selectionDataPoints.length);
             this.filterInstance.push(applyFilter(this.hostServices, this.fullTree, this.columnFilters, filterLevel));
-            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
+            this.spinnerTimeoutId = undefined;
+            this.removeSpinners();
         });
 
         // HEADER EVENTS
@@ -292,24 +288,20 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
 
         slicerClear.on("click", (d: IHierarchySlicerDataPoint) => {
             if (this.dataPoints.filter(d => d.selected).length === 0) return;
-            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
-            this.spinnerTimeoutId = window.setTimeout(
-                () => this.addSpinner(expanders, 0),
-                this.settings.general.spinnerDelay
-            );
+            this.delayFunction(() => this.addSpinner(expanders, 0), this.settings.general.spinnerDelay);
             this.fullTree.forEach((dataPoint: IHierarchySlicerDataPoint) => {
                 dataPoint.selected = false;
                 dataPoint.partialSelected = false;
             });
             this.persistSelectAll(false);
             persistFilter(this.hostServices, []);
-            if (this.spinnerTimeoutId) window.clearTimeout(this.spinnerTimeoutId);
+            this.spinnerTimeoutId = undefined;
         });
 
         slicerHeaderText.on("click", d => {
             if (!doubleTap) {
                 doubleTap = true;
-                setTimeout(() => () => (doubleTap = false), 300);
+                this.delayFunction(() => (doubleTap = false), 300);
                 return false;
             }
             event.preventDefault();
@@ -319,20 +311,38 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
         });
     }
 
+    private delayFunction(callback: () => void, delay: number): void {
+        let start: number;
+        this.spinnerTimeoutId = undefined;
+        let delayFn = (timer: number) => {
+            if (!start) {
+                start = timer;
+                this.spinnerTimeoutId = 1;
+            }
+            if (!this.spinnerTimeoutId) return;
+            const elapsed = timer - start;
+            if (elapsed > delay) {
+                this.spinnerTimeoutId = undefined;
+                callback();
+            } else {
+                requestAnimationFrame(delayFn);
+            }
+        };
+        requestAnimationFrame(delayFn);
+    }
+
     private addSpinner(expanders: Selection<any, any, any, any>, index: number) {
+        if (this.levels === 0) return; // No spinner for single level slicer
         const currentExpander = expanders.filter((expander, i) => index === i);
         const currentExpanderHtml = <HTMLElement>currentExpander.node();
         const size = Math.min(currentExpanderHtml.clientHeight, currentExpanderHtml.clientWidth);
-        const scale = size / 25.0;
+        const scale = size / 20.0;
         currentExpander.select(".icon").style("display", "none");
         const container = currentExpander.select(".spinner-icon").style("display", "inline");
         const spinner = container
             .append("div")
             .classed("powerbi-spinner", true)
-            .style("transform", `scale(${scale})`)
-            .style("margin-left", "0")
-            .style("vertical-align", "middle")
-            .style("line-height", `${currentExpanderHtml.clientHeight}px`)
+            .style("transform", `translateX(30%) scale(${scale})`)
             .attr("ng-if", "viewModel.showProgressBar")
             .attr("delay", "100")
             .append("div")
@@ -343,12 +353,11 @@ export class HierarchySlicerWebBehavior implements IInteractiveBehavior {
     }
 
     public removeSpinners() {
-        if (this.spinnerTimeoutId) {
-            window.clearTimeout(this.spinnerTimeoutId);
-            this.spinnerTimeoutId = undefined;
-            this.expanders.selectAll(".icon").style("display", "inline");
-            this.expanders.select(".spinner-icon").style("display", "none");
-        }
+        this.spinnerTimeoutId = undefined;
+        if (!this.expanders) return;
+        // Show expander for multi level slicer
+        if (this.levels > 0) this.expanders.selectAll(".icon").style("display", "inline");
+        this.expanders.select(".spinner-icon").style("display", "none");
     }
 
     private renderMouseover(): void {

@@ -1,0 +1,83 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [certification]
+
+jobs:
+  test:
+    name: test on node ${{ matrix.node-version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [12]
+    steps:
+      - uses: actions/checkout@v2
+      - name: use node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm test
+        run: |
+          npm test
+        env:
+          CI: true
+      - name: code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: coverage/
+  build:
+    name: buid, package and release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.base_ref == 'certification'}}
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v2
+      - name: use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: npm run package
+        run: |
+          npm run package
+        env:
+          CI: true
+      - name: extract package.json version
+        id: extract_version
+        run: |
+          node -e "const v = require('./pbiviz.json').visual.version;console.log('::set-output name=version::' + v);"
+      - name: rename pbiviz file
+        run: |
+          cp $oldfile $newfile
+        env:
+          oldfile: ./dist/HierarchySlicer1458836712039.${{ steps.extract_version.outputs.version }}.pbiviz
+          newfile: ./dist/HierarchySlicer-${{ steps.extract_version.outputs.version }}.pbiviz
+      - name: release to github
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_version.outputs.version }}
+          release_name: Version ${{ steps.extract_version.outputs.version }}
+          draft: true
+          prerelease: true
+          body: |
+            # Power BI HierarchySlicer
+            Create a hierarchy of different fields and use it as a slicer with Power BI.
+
+            ## Availability
+            The final version is available at AppSource : https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380821
+      - name: upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/HierarchySlicer-${{ steps.extract_version.outputs.version }}.pbiviz
+          asset_name: HierarchySlicer-${{ steps.extract_version.outputs.version }}.pbiviz
+          asset_content_type: application/zip

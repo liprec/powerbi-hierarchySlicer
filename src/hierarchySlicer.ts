@@ -108,6 +108,7 @@ import createClassAndSelector = CssConstants.createClassAndSelector;
 const Icons = Graphics.Icons;
 
 import "../style/hierarchySlicer.less";
+import { threadId } from "worker_threads";
 
 export class HierarchySlicer implements IVisual {
     private root: HTMLElement;
@@ -239,9 +240,24 @@ export class HierarchySlicer implements IVisual {
 
     private renderHeader(rootContainer: Selection<any, any, any, any>): void {
         const headerButtonData = [
-            { title: "Clear", class: HierarchySlicer.Clear.className, icon: Icons.clearAll, level: 0 },
-            { title: "Expand all", class: HierarchySlicer.Expand.className, icon: Icons.expandAll, level: 1 },
-            { title: "Collapse all", class: HierarchySlicer.Collapse.className, icon: Icons.collapseAll, level: 1 },
+            {
+                title: "Clear",
+                class: HierarchySlicer.Clear.className,
+                icon: (e: HTMLElement) => Graphics.CLEARALL(e),
+                level: 0,
+            },
+            {
+                title: "Expand all",
+                class: HierarchySlicer.Expand.className,
+                icon: (e: HTMLElement) => Graphics.EXPANDALL(e),
+                level: 1,
+            },
+            {
+                title: "Collapse all",
+                class: HierarchySlicer.Collapse.className,
+                icon: (e: HTMLElement) => Graphics.COLLAPSEALL(e),
+                level: 1,
+            },
         ];
         this.slicerHeaderContainer = rootContainer
             .append("div")
@@ -249,7 +265,7 @@ export class HierarchySlicer implements IVisual {
         this.slicerHeader = this.slicerHeaderContainer.append("div").classed(HierarchySlicer.Header.className, true);
 
         this.slicerHeader
-            .selectAll(HierarchySlicer.Icon.className)
+            .selectAll(HierarchySlicer.Icon.selectorName)
             .data(headerButtonData)
             .enter()
             .append("div")
@@ -257,9 +273,10 @@ export class HierarchySlicer implements IVisual {
             .classed("hiddenicon", !this.settings.mobile.zoomed)
             .attr("title", d => d.title)
             .each(function(d) {
-                this.classList.add(d.class);
-            }) // funcion due to this.classList
-            .html(d => d.icon);
+                const e: HTMLElement = <HTMLElement>this;
+                e.classList.add(d.class);
+                d.icon(e);
+            });
 
         this.slicerHeader.append("div").classed(HierarchySlicer.HeaderText.className, true);
 
@@ -564,8 +581,7 @@ export class HierarchySlicer implements IVisual {
                             .classed("icon-right", true);
                     })
                     .each(function(d) {
-                        select(this)
-                            .append("div"); // dummy placeholder needed for the scrollbar
+                        select(this).append("div"); // dummy placeholder needed for the scrollbar
                     })
             );
 
@@ -580,10 +596,9 @@ export class HierarchySlicer implements IVisual {
             (tooltipEvent: TooltipEventArgs<IHierarchySlicerDataPoint>) => {
                 const builder = this.hostServices.createSelectionIdBuilder();
                 const d3ParentElement = <any>(tooltipEvent.context && tooltipEvent.context.parentNode);
-                (<CustomVisualOpaqueIdentity[]>(d3ParentElement &&
-                    d3ParentElement.__data__ &&
-                    d3ParentElement.__data__
-                        .nodeIdentity))?.forEach((identity, level) =>
+                (<CustomVisualOpaqueIdentity[]>(
+                    (d3ParentElement && d3ParentElement.__data__ && d3ParentElement.__data__.nodeIdentity)
+                ))?.forEach((identity, level) =>
                     builder.withMatrixNode({ level, identity }, (<DataViewMatrix>this.dataView.matrix).rows.levels)
                 );
                 return builder.createSelectionId();
@@ -622,6 +637,7 @@ export class HierarchySlicer implements IVisual {
         interactivityService: IInteractivityService<IHierarchySlicerDataPoint>
     ): void {
         let timer = PerfTimer.START(TraceEvents.updateSelection, this.settings && this.settings.general.telemetry);
+        const _this = this;
         const data = this.data;
         const mobileScale = this.settings.mobile.zoomed ? 1 + this.settings.mobile.enLarge / 100 : 1;
         if (data) {
@@ -680,15 +696,18 @@ export class HierarchySlicer implements IVisual {
                     "padding-left",
                     (d: IHierarchySlicerDataPoint) => `${d.level * mobileScale * this.settings.items.textSizeZoomed}px`
                 )
-                .style("margin-left", () => (data.levels === 0 ? "-4px" : null))
+                // .style("margin-left", () =>
+                //     data.levels === 0 ? -0.75 * this.settings.items.textSizeZoomed + "px" : null
+                // )
                 .attr("aria-expanded", (d: IHierarchySlicerDataPoint) => d.isExpand);
 
             rowSelection
                 .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
                 .style("max-height", `${this.treeView.getRealRowHeight()}px`)
-                .style(
-                    "width",
-                    (d: IHierarchySlicerDataPoint) => data.levels === 0 ? `` : `calc(100vw - ${(d.level + 1) * mobileScale * this.settings.items.textSizeZoomed}px)`
+                .style("width", (d: IHierarchySlicerDataPoint) =>
+                    data.levels === 0
+                        ? ``
+                        : `calc(100vw - ${(d.level + 1) * mobileScale * this.settings.items.textSizeZoomed}px)`
                 );
 
             // Item Expander
@@ -696,11 +715,11 @@ export class HierarchySlicer implements IVisual {
                 .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
                 .selectAll(".icon")
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
-                .style("visibility", (d: IHierarchySlicerDataPoint) =>
-                    d.isLeaf || data.levels === 0 ? "hidden" : "visible"
+                .style("display", (d: IHierarchySlicerDataPoint) =>
+                    (d.isLeaf && d.ownId[0] !== "selectAll") || data.levels === 0 ? "none" : null
                 )
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
-                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / 2.5))
+                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed * 0.4))
                 .style(
                     "width",
                     PixelConverter.toString(
@@ -714,7 +733,16 @@ export class HierarchySlicer implements IVisual {
                     )
                 )
                 .style("fill", this.settings.items.checkBoxColor)
-                .html((d: IHierarchySlicerDataPoint) => (d.isExpand ? Icons.expand : Icons.collapse));
+                .each(function(d: IHierarchySlicerDataPoint) {
+                    const e = <HTMLElement>this;
+                    Graphics.EMPTYROOT(e);
+                    if (d.ownId[0] === "selectAll") return;
+                    if (d.isExpand) {
+                        Graphics.EXPAND(e);
+                    } else {
+                        Graphics.COLLAPSE(e);
+                    }
+                });
 
             // Item Spinner
             rowSelection
@@ -722,7 +750,7 @@ export class HierarchySlicer implements IVisual {
                 .selectAll(".spinner-icon")
                 .style("display", "none")
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
-                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed / 2.5))
+                .style("margin-left", PixelConverter.toString(-this.settings.items.textSizeZoomed * 0.3))
                 .style(
                     "width",
                     PixelConverter.toString(
@@ -734,8 +762,7 @@ export class HierarchySlicer implements IVisual {
                     PixelConverter.toString(
                         Math.ceil(1.35 * PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
                     )
-                )
-                .html("");
+                );
 
             // Item Checkbox
             rowSelection
@@ -771,9 +798,10 @@ export class HierarchySlicer implements IVisual {
                             return "italic";
                     }
                     return "normal";
-                })
+                });
 
             // Item Tooltip Icon
+            //const tooltipIcons =
             rowSelection
                 .selectAll(HierarchySlicer.Tooltip.selectorName)
                 .style("font-size", `${this.settings.items.textSizeZoomed}pt`)
@@ -788,17 +816,19 @@ export class HierarchySlicer implements IVisual {
                     PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
                 )
                 .style("visibility", "hidden")
-                .html(() => {
-                    switch (this.settings.tooltipSettings.icon) {
+                .each(function() {
+                    const e: HTMLElement = <HTMLElement>this;
+                    Graphics.EMPTYROOT(e);
+                    switch (_this.settings.tooltipSettings.icon) {
                         case TooltipIcon.Triangle:
-                            return Icons.triangle;
+                            Graphics.TRIANGLE(e);
                         case TooltipIcon.HorizontalDots:
-                            return Icons.horizontaldots;
+                            Graphics.HORIZONTALDOTS(e);
                         case TooltipIcon.VerticalDots:
-                            return Icons.verticaldots;
+                            Graphics.VERTICALDOTS(e);
                         case TooltipIcon.Info:
                         default:
-                            return Icons.info;
+                            Graphics.INFO(e);
                     }
                 });
 
@@ -862,26 +892,21 @@ export class HierarchySlicer implements IVisual {
         const iconSize = PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed);
         rowSelection
             .selectAll(HierarchySlicer.Tooltip.selectorName)
-            .style(
-                "visibility",
-                this.settings.tooltipSettings.icon === TooltipIcon.None
-                    ? "hidden"
-                    : "visible"
-            )
+            .style("visibility", this.settings.tooltipSettings.icon === TooltipIcon.None ? "hidden" : "visible")
             .style("padding-right", `${scrollbarMargin}px`);
         rowSelection
             .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
             .style("max-height", `${this.treeView.getRealRowHeight()}px`)
-            .style(
-                "width",
-                (d: IHierarchySlicerDataPoint) => `calc(100vw - ${(d.level + 1) * expanderMargin}px)`
-            );
-        rowSelection
-            .selectAll(HierarchySlicer.LabelText.selectorName)
-            .style("width", (d: IHierarchySlicerDataPoint) =>
+            .style("width", (d: IHierarchySlicerDataPoint) => `calc(100vw - ${(d.level + 1) * expanderMargin}px)`);
+        rowSelection.selectAll(HierarchySlicer.LabelText.selectorName).style(
+            "width",
+            (d: IHierarchySlicerDataPoint) =>
                 `calc(((100vw - ${(d.level + 1) * expanderMargin}px) - 
-                ${this.settings.tooltipSettings.icon === TooltipIcon.None ? 0 : Math.ceil(iconSize) + scrollbarMargin}px - 
-                ${iconSize + 5}px`);
+                ${
+                    this.settings.tooltipSettings.icon === TooltipIcon.None ? 0 : Math.ceil(iconSize) + scrollbarMargin
+                }px - 
+                ${iconSize + 5}px`
+        );
     }
 
     public getTextProperties(fontFamily: string, textSize: number): TextProperties {
@@ -894,10 +919,7 @@ export class HierarchySlicer implements IVisual {
     private getHeaderHeight(): number {
         const searchHeight: number = this.settings.general.selfFilterEnabled
             ? textMeasurementService.estimateSvgTextHeight(
-                  this.getTextProperties(
-                      this.settings.search.fontFamily,
-                      this.settings.search.textSizeZoomed
-                  )
+                  this.getTextProperties(this.settings.search.fontFamily, this.settings.search.textSizeZoomed)
               ) + 2
             : 0;
         return (
@@ -967,6 +989,7 @@ export class HierarchySlicer implements IVisual {
             .attr("title", "Search")
             .classed(HierarchySlicer.Icon.className, true)
             .classed("search", true)
+            .classed("icon-left", true)
             .style("fill", this.settings.search.iconColor)
             .style(
                 "width",
@@ -980,7 +1003,10 @@ export class HierarchySlicer implements IVisual {
                     Math.ceil(0.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
                 )
             )
-            .html(Icons.search)
+            .each(function() {
+                const e = <HTMLElement>this;
+                Graphics.SEARCH(e);
+            })
             .on("click", () => {
                 this.hostServices.persistProperties({
                     merge: [
@@ -1004,6 +1030,7 @@ export class HierarchySlicer implements IVisual {
             .style("font-family", this.settings.search.fontFamily)
             .style("color", this.settings.search.fontColor)
             .style("background-color", this.settings.search.background)
+            .style("width", "0px")
             .on("input", () => {
                 this.hostServices.persistProperties({
                     merge: [
@@ -1018,91 +1045,83 @@ export class HierarchySlicer implements IVisual {
                 });
             });
 
-        // Serach type: WIP
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.wildcard)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.Wildcard;
-        //     });
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.exact)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.Exact;
-        //     });
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.start)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.Start;
-        //     });
-        // this.searchHeader
-        //     .append("div")
-        //     .classed(HierarchySlicer.Icon.className, true)
-        //     .classed("searchType", true)
-        //     .style("fill", this.settings.search.iconColor)
-        //     .style(
-        //         "width",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .style(
-        //         "height",
-        //         PixelConverter.toString(
-        //             Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
-        //         )
-        //     )
-        //     .html(Icons.end)
-        //     .on("click", () => {
-        //         this.searchFilter = SearchFilter.End;
-        //     });
+        // Search type: WIP
+        const searchButtonData = [
+            {
+                title: "End",
+                icon: (e: HTMLElement) => Graphics.END(e),
+                filterType: SearchFilter.End,
+            },
+            {
+                title: "Start",
+                icon: (e: HTMLElement) => Graphics.START(e),
+                filterType: SearchFilter.Start,
+            },
+            {
+                title: "Exact",
+                icon: (e: HTMLElement) => Graphics.EXACT(e),
+                filterType: SearchFilter.Exact,
+            },
+            {
+                title: "Wildcard",
+                icon: (e: HTMLElement) => Graphics.WILDCARD(e),
+                filterType: SearchFilter.Wildcard,
+            },
+        ];
+
+        const searchTypes = this.searchHeader.append("div").classed("searchTypes", true);
+        searchTypes
+            .on("mouseover", () => {
+                this.searchHeader.selectAll(".searchType").classed("hidden", false);
+            })
+            .on("mouseout", d => {
+                this.searchHeader
+                    .selectAll(".searchType")
+                    .classed("hidden", (d: any) => d.filterType !== this.searchFilter);
+            });
+
+        searchTypes
+            .selectAll(".searchType")
+            .data(searchButtonData)
+            .enter()
+            .append("div")
+            .classed(HierarchySlicer.Icon.className, true)
+            .classed("searchType", true)
+            .classed("selected", d => d.filterType === this.searchFilter)
+            .classed("hidden", d => d.filterType !== this.searchFilter)
+            .attr("title", d => `${d.title}${d.filterType === this.searchFilter ? " (selected)" : ""}`)
+            .style("fill", this.settings.search.iconColor)
+            .style(
+                "width",
+                PixelConverter.toString(
+                    Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
+                )
+            )
+            .style(
+                "height",
+                PixelConverter.toString(
+                    Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
+                )
+            )
+            .each(function(d) {
+                const e = <HTMLElement>this;
+                Graphics.EMPTYROOT(e);
+                d.icon(e);
+            })
+            .on("click", d => {
+                this.searchFilter = d.filterType;
+                this.hostServices.persistProperties({
+                    merge: [
+                        {
+                            objectName: "general",
+                            selector: Selector,
+                            properties: {
+                                counter: counter++,
+                            },
+                        },
+                    ],
+                });
+            });
     }
 
     private updateSearchHeader(): void {
@@ -1146,6 +1165,10 @@ export class HierarchySlicer implements IVisual {
                 .style("font-size", `${this.settings.search.textSizeZoomed}pt`)
                 .style("background-color", this.settings.search.background)
                 .style("font-family", this.settings.search.fontFamily);
+            const searchTypeIcons = this.searchHeader.selectAll(".searchType");
+            searchTypeIcons
+                .classed("selected", (d: any) => d.filterType === this.searchFilter)
+                .attr("title", (d: any) => `${d.title}${d.filterType === this.searchFilter ? " (selected)" : ""}`);
         }
     }
 
@@ -1166,7 +1189,7 @@ export class HierarchySlicer implements IVisual {
     private createLandingPage(): Element {
         const div = document.createElement("div");
         div.classList.add("watermark");
-        div.innerHTML = Icons.watermark; // tslint:disable-line: no-inner-html
+        Graphics.WATERMARK(div);
         return div;
     }
 

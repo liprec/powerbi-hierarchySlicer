@@ -38,7 +38,7 @@ import { IHierarchySlicerDataPoint, IHierarchySlicerTreeView, IHierarchySlicerTr
 
 import IViewport = powerbi.IViewport;
 import translateWithPixels = manipulation.translateWithPixels;
-import { isFirefox } from './utils';
+import { isFirefox } from "./utils";
 
 export module HierarchySlicerTreeViewFactory {
     export function createListView(options: IHierarchySlicerTreeViewOptions): IHierarchySlicerTreeView {
@@ -55,7 +55,6 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     private visibleGroupContainer: Selection<any, any, any, any>;
     private scrollContainer: Selection<any, any, any, any>;
     private scrollbarInner: Selection<any, any, any, any>;
-    private renderTimeoutId: number | undefined;
     private scrollBar: any;
     private mouseClick: boolean = false;
 
@@ -79,18 +78,19 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .attr("role", "tree")
             .classed("visibleGroup", true);
 
-        this.scrollBar = new simplebar(<HTMLElement>this.scrollbarInner.node(), { autoHide: false });
-        this.scrollBar.getScrollElement().addEventListener("scroll", () => {
-            this.renderImpl(this.options.rowHeight);
+        this.scrollBar = new simplebar(<HTMLElement>this.scrollbarInner.node(), {
+            autoHide: false,
+            scrollbarMinSize: 5,
         });
+        this.scrollBar.getScrollElement().addEventListener("scroll", () => this.render());
 
-        document.addEventListener("mouseleave", event => {
+        document.addEventListener("mouseleave", (event) => {
             if (event.buttons === 1) {
                 this.mouseClick = true;
             }
         });
 
-        document.addEventListener("mouseenter", event => {
+        document.addEventListener("mouseenter", (event) => {
             if (this.mouseClick && event.buttons === 0) {
                 const newEvent = document.createEvent("MouseEvent");
                 newEvent.initEvent("mouseup", false, true);
@@ -128,7 +128,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
 
     public isScrollbarVisible(): boolean {
         const bodyHeight = (<HTMLElement>this.options.baseContainer.node()).offsetHeight;
-        const scrollHeight =(<HTMLElement>this.scrollContainer.node()).offsetHeight;
+        const scrollHeight = (<HTMLElement>this.scrollContainer.node()).offsetHeight;
         return bodyHeight < scrollHeight;
     }
 
@@ -161,12 +161,9 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     }
 
     public render(): void {
-        if (this.renderTimeoutId) window.clearTimeout(this.renderTimeoutId);
-        this.renderTimeoutId = window.setTimeout(() => {
-            // this.getRowHeight().then((rowHeight: number) => this.renderImpl(rowHeight));
+        requestAnimationFrame(() => {
             this.renderImpl(this.options.rowHeight);
-            this.renderTimeoutId = undefined;
-        }, 100);
+        });
     }
 
     private renderImpl(rowHeight: number) {
@@ -197,10 +194,10 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         if (!isFirefox()) {
             visibleGroupContainer
                 // order matters for proper overriding
-                .style("transform", d => transformAttr)
+                .style("transform", (d) => transformAttr)
                 .style("-webkit-transform", transformAttr);
         }
-        const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 1)),
+        const position0 = Math.max(0, Math.min(scrollPosition, totalElements - visibleRows + 2)),
             position1 = position0 + visibleRows + 10;
 
         this.performScrollToFrame(position0, position1, totalElements, visibleRows, loadMoreData);
@@ -208,7 +205,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
         this.storeRowHeight();
 
         const rowUpdateSelection = visibleGroupContainer.selectAll(".row:not(.transitioning)");
-        rowUpdateSelection.call(d => this.options.recalc(d));
+        rowUpdateSelection.call((d) => this.options.recalc(d));
     }
 
     private performScrollToFrame(
@@ -229,13 +226,13 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
             .append("div")
             .classed("row", true)
             // .style("max-height", `${this.getRealRowHeight()}px`)
-            .call(d => options.enter(d));
+            .call((d) => options.enter(d));
         rowSelection.order();
         const rowUpdateSelection = visibleGroupContainer.selectAll(".row:not(.transitioning)");
-        rowUpdateSelection.call(d => options.update(d));
+        rowUpdateSelection.call((d) => options.update(d));
         rowSelection
             .exit()
-            .call(d => options.exit(d))
+            .call((d) => options.exit(d))
             .remove();
         if (loadMoreData) options.loadMoreData(); // && visibleRows !== totalRows && position1 >= totalRows * HierarchySlicerTreeView.loadMoreDataThreshold)
     }
@@ -264,7 +261,7 @@ export class HierarchySlicerTreeView implements IHierarchySlicerTreeView {
     }
 
     private storeRowHeight() {
-        let rows = this.visibleGroupContainer.selectAll(".row").filter(function() {
+        let rows = this.visibleGroupContainer.selectAll(".row").filter(function () {
             return (<HTMLElement>this).textContent !== "";
         });
         if (!rows.empty()) {
