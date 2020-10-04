@@ -3,8 +3,6 @@ name: Build and test
 on:
   push:
     branches: [main, certification]
-  pull_request:
-    branches: [certification]
 
 jobs:
   test:
@@ -33,7 +31,7 @@ jobs:
   build:
     name: buid, package and release
     runs-on: ubuntu-latest
-    if: ${{ github.base_ref == 'certification' }}
+    if: ${{ github.ref == 'certification' }}
     needs: [test]
     steps:
       - uses: actions/checkout@v2
