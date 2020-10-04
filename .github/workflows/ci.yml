@@ -69,7 +69,7 @@ jobs:
             Create a hierarchy of different fields and use it as a slicer with Power BI.
 
             ## Availability
-            The final version is available at AppSource : https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380821
+            The final version is available at AppSource: https://appsource.microsoft.com/en-us/product/power-bi-visuals/WA104380820
       - name: upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
