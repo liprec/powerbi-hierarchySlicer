@@ -38,7 +38,7 @@ import {
     TooltipEventArgs,
 } from "powerbi-visuals-utils-tooltiputils"; // tslint:disable-line: prettier
 import { Selector } from "powerbi-models";
-import { select, Selection } from "d3-selection";
+import { select, Selection, event as d3event } from "d3-selection";
 
 import { isEqual, update } from "lodash-es";
 
@@ -97,6 +97,7 @@ import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import CustomVisualOpaqueIdentity = powerbi.visuals.CustomVisualOpaqueIdentity;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import IInteractivityService = interactivityBaseService.IInteractivityService;
 import createInteractivitySelectionService = interactivitySelectionService.createInteractivitySelectionService;
 import PixelConverter = pixelConverter;
@@ -135,6 +136,7 @@ export class HierarchySlicer implements IVisual {
     private slicerBodySpinner: Selection<any, any, any, any>;
     private isLandingPageOn: boolean;
     private landingPage: Selection<any, any, any, any>;
+    private selectionManager: ISelectionManager;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
     private searchFilter: SearchFilter = SearchFilter.Wildcard;
 
@@ -169,7 +171,7 @@ export class HierarchySlicer implements IVisual {
         this.behavior = new HierarchySlicerWebBehavior();
         this.interactivityService = createInteractivitySelectionService(options.host);
         this.tooltipServiceWrapper = createTooltipServiceWrapper(this.hostServices.tooltipService, this.root);
-
+        this.selectionManager = options.host.createSelectionManager();
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
 
@@ -179,13 +181,22 @@ export class HierarchySlicer implements IVisual {
     private init(options: VisualUpdateOptions): void {
         this.viewport = options.viewport;
 
-        this.slicerContainer = select(this.root)
-            .append("div")
-            .classed(HierarchySlicer.Container.className, true);
+        this.slicerContainer = select(this.root).append("div").classed(HierarchySlicer.Container.className, true);
 
         // a11y support: WIP
         // this.slicerContainer.on("keypress", (e) => {
         // });
+        this.slicerContainer.on("contextmenu", () => {
+            const mouseEvent: MouseEvent = <MouseEvent>d3event;
+            this.selectionManager.showContextMenu(
+                {},
+                {
+                    x: mouseEvent.clientX,
+                    y: mouseEvent.clientY,
+                }
+            );
+            mouseEvent.preventDefault();
+        });
         this.renderHeader(this.slicerContainer);
 
         const bodyViewPort = this.getBodyViewport(this.viewport);
@@ -271,8 +282,8 @@ export class HierarchySlicer implements IVisual {
             .append("div")
             .classed(HierarchySlicer.Icon.className, true)
             .classed("hiddenicon", !this.settings.mobile.zoomed)
-            .attr("title", d => d.title)
-            .each(function(d) {
+            .attr("title", (d) => d.title)
+            .each(function (d) {
                 const e: HTMLElement = <HTMLElement>this;
                 e.classList.add(d.class);
                 d.icon(e);
@@ -514,7 +525,7 @@ export class HierarchySlicer implements IVisual {
         const treeItemElementParent: Selection<any, any, any, any> = rowSelection
             .selectAll(HierarchySlicer.ItemContainer.selectorName)
             .data((d: IHierarchySlicerDataPoint) => [d])
-            .join(enter =>
+            .join((enter) =>
                 enter
                     .append("li")
                     .attr("role", "treeitem")
@@ -526,18 +537,18 @@ export class HierarchySlicer implements IVisual {
         treeItemElementParent
             .selectAll(HierarchySlicer.ItemContainerExpander.selectorName)
             .data((d: IHierarchySlicerDataPoint) => [d])
-            .join(enter =>
+            .join((enter) =>
                 enter
                     .insert("div", ":first-child")
                     .classed(HierarchySlicer.ItemContainerExpander.className, true)
-                    .each(function(d) {
+                    .each(function (d) {
                         select(this)
                             .append("div")
                             .classed("icon", true)
                             .classed("icon-left", true)
                             .style("display", "visible");
                     })
-                    .each(function(d) {
+                    .each(function (d) {
                         select(this)
                             .insert("div") // Spinner location
                             .classed("spinner-icon", true)
@@ -549,38 +560,32 @@ export class HierarchySlicer implements IVisual {
         treeItemElementParent
             .selectAll(HierarchySlicer.ItemContainerChild.selectorName)
             .data((d: IHierarchySlicerDataPoint) => [d])
-            .join(enter =>
+            .join((enter) =>
                 enter
                     .append("div")
                     .classed(HierarchySlicer.ItemContainerChild.className, true)
-                    .each(function(d) {
+                    .each(function (d) {
                         select(this)
                             .append("div")
                             .classed(HierarchySlicer.Input.className, true)
-                            .each(function(d) {
-                                select(this)
-                                    .append("input")
-                                    .attr("type", "checkbox");
+                            .each(function (d) {
+                                select(this).append("input").attr("type", "checkbox");
                             })
-                            .each(function(d) {
-                                select(this)
-                                    .append("span")
-                                    .classed(HierarchySlicer.Checkbox.className, true);
+                            .each(function (d) {
+                                select(this).append("span").classed(HierarchySlicer.Checkbox.className, true);
                             });
                     })
-                    .each(function(d) {
-                        select(this)
-                            .append("span")
-                            .classed(HierarchySlicer.LabelText.className, true);
+                    .each(function (d) {
+                        select(this).append("span").classed(HierarchySlicer.LabelText.className, true);
                     })
-                    .each(function(d) {
+                    .each(function (d) {
                         select(this)
                             .append("div")
                             .classed(HierarchySlicer.Tooltip.className, true)
                             .classed("icon", true)
                             .classed("icon-right", true);
                     })
-                    .each(function(d) {
+                    .each(function (d) {
                         select(this).append("div"); // dummy placeholder needed for the scrollbar
                     })
             );
@@ -613,7 +618,7 @@ export class HierarchySlicer implements IVisual {
             let statement = ": ";
             let len = this.data.dataPoints.length;
             let selected = this.data.dataPoints
-                .filter(d => d.selected && !d.partialSelected)
+                .filter((d) => d.selected && !d.partialSelected)
                 .sort((d1, d2) => d1.level - d2.level);
             if (selected.length === 0 || selected.length === len) {
                 statement += "All";
@@ -733,7 +738,7 @@ export class HierarchySlicer implements IVisual {
                     )
                 )
                 .style("fill", this.settings.items.checkBoxColor)
-                .each(function(d: IHierarchySlicerDataPoint) {
+                .each(function (d: IHierarchySlicerDataPoint) {
                     const e = <HTMLElement>this;
                     Graphics.EMPTYROOT(e);
                     if (d.ownId[0] === "selectAll") return;
@@ -816,7 +821,7 @@ export class HierarchySlicer implements IVisual {
                     PixelConverter.toString(PixelConverter.fromPointToPixel(this.settings.items.textSizeZoomed))
                 )
                 .style("visibility", "hidden")
-                .each(function() {
+                .each(function () {
                     const e: HTMLElement = <HTMLElement>this;
                     Graphics.EMPTYROOT(e);
                     switch (_this.settings.tooltipSettings.icon) {
@@ -1003,7 +1008,7 @@ export class HierarchySlicer implements IVisual {
                     Math.ceil(0.95 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
                 )
             )
-            .each(function() {
+            .each(function () {
                 const e = <HTMLElement>this;
                 Graphics.SEARCH(e);
             })
@@ -1074,7 +1079,7 @@ export class HierarchySlicer implements IVisual {
             .on("mouseover", () => {
                 this.searchHeader.selectAll(".searchType").classed("hidden", false);
             })
-            .on("mouseout", d => {
+            .on("mouseout", (d) => {
                 this.searchHeader
                     .selectAll(".searchType")
                     .classed("hidden", (d: any) => d.filterType !== this.searchFilter);
@@ -1087,9 +1092,9 @@ export class HierarchySlicer implements IVisual {
             .append("div")
             .classed(HierarchySlicer.Icon.className, true)
             .classed("searchType", true)
-            .classed("selected", d => d.filterType === this.searchFilter)
-            .classed("hidden", d => d.filterType !== this.searchFilter)
-            .attr("title", d => `${d.title}${d.filterType === this.searchFilter ? " (selected)" : ""}`)
+            .classed("selected", (d) => d.filterType === this.searchFilter)
+            .classed("hidden", (d) => d.filterType !== this.searchFilter)
+            .attr("title", (d) => `${d.title}${d.filterType === this.searchFilter ? " (selected)" : ""}`)
             .style("fill", this.settings.search.iconColor)
             .style(
                 "width",
@@ -1103,12 +1108,12 @@ export class HierarchySlicer implements IVisual {
                     Math.ceil(0.5 * PixelConverter.fromPointToPixel(this.settings.search.textSizeZoomed))
                 )
             )
-            .each(function(d) {
+            .each(function (d) {
                 const e = <HTMLElement>this;
                 Graphics.EMPTYROOT(e);
                 d.icon(e);
             })
-            .on("click", d => {
+            .on("click", (d) => {
                 this.searchFilter = d.filterType;
                 this.hostServices.persistProperties({
                     merge: [
