@@ -170,7 +170,12 @@ export class HierarchySlicer implements IVisual {
 
         this.behavior = new HierarchySlicerWebBehavior();
         this.interactivityService = createInteractivitySelectionService(options.host);
-        this.tooltipServiceWrapper = createTooltipServiceWrapper(this.hostServices.tooltipService, this.root);
+        this.tooltipServiceWrapper = createTooltipServiceWrapper(
+            this.hostServices.tooltipService,
+            this.root,
+            1000,
+            () => d3event
+        );
         this.selectionManager = options.host.createSelectionManager();
         this.colorPalette = options.host.colorPalette;
         this.isHighContrast = this.colorPalette.isHighContrast;
@@ -827,13 +832,17 @@ export class HierarchySlicer implements IVisual {
                     switch (_this.settings.tooltipSettings.icon) {
                         case TooltipIcon.Triangle:
                             Graphics.TRIANGLE(e);
+                            break;
                         case TooltipIcon.HorizontalDots:
                             Graphics.HORIZONTALDOTS(e);
+                            break;
                         case TooltipIcon.VerticalDots:
                             Graphics.VERTICALDOTS(e);
+                            break;
                         case TooltipIcon.Info:
                         default:
                             Graphics.INFO(e);
+                            break;
                     }
                 });
 
