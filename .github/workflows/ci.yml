@@ -3,6 +3,8 @@ name: Build and test
 on:
   push:
     branches: [main, certification]
+  pull_request:
+    branches: [main]
 
 jobs:
   test:
