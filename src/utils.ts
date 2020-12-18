@@ -185,9 +185,10 @@ export function extractFilterColumnTarget(
     // take expr.ref as column name if column definition is simple
     let filterTargetColumn: string = expr && expr.ref ? expr.ref : null;
 
+    let kind: SQExprKind = expr && (expr.kind || expr._kind);
     // special cases
     // when data structure is hierarchical
-    if (expr && expr.kind === SQExprKind.HierarchyLevel) {
+    if (kind === SQExprKind.HierarchyLevel) {
         let hierarchy: string = expr.arg.hierarchy;
         filterTargetColumn = expr.level;
         let hierarchyLevel: string = expr.level;
@@ -197,7 +198,9 @@ export function extractFilterColumnTarget(
         // For it, Power BI creates a virtual table and gives it generated name as... 'LocalDateTable_bcfa94c1-7c12-4317-9a5f-204f8a9724ca'
         // Visuals have to use a virtual table name as a target of JSON to filter date hierarchy properly
         filterTargetTable = expr.arg && expr.arg.arg && expr.arg.arg.entity;
-        if (expr.arg && expr.arg.kind === SQExprKind.Hierarchy) {
+
+        let argKind: SQExprKind = expr.arg && (expr.arg.kind || expr.arg._kind);
+        if (argKind === SQExprKind.Hierarchy) {
             if ((<any>categoryColumn).identityExprs && (<any>categoryColumn).identityExprs.length) {
                 const identityExprs = (<any>categoryColumn).identityExprs[
                     (<any>categoryColumn).identityExprs.length - 1
